@@ -66,7 +66,7 @@ mod testing {
 
     #[test]
     fn test_median_normalization() {
-        (0..100).for_each(|_| {
+        (0..1000).for_each(|_| {
             let matrix = Array2::random((10, 4), Uniform::new(0., 10.));
             let norm = median_ratio_normalization(&matrix);
 

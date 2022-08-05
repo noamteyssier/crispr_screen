@@ -26,7 +26,7 @@ mod testing {
 
     #[test]
     fn test_median_normalization() {
-        (0..100).for_each(|_| {
+        (0..1000).for_each(|_| {
             let matrix = Array2::random((10, 4), Uniform::new(0, 5)).mapv(|x| f64::from(x));
             let norm = total_normalization(&matrix);
 
@@ -36,7 +36,7 @@ mod testing {
             
             // the largest sample must be scaled down
             let largest_sample = sample_sums.argmax().unwrap();
-            assert!(normed_sums[largest_sample] < sample_sums[largest_sample]);
+            assert!(normed_sums[largest_sample] <= sample_sums[largest_sample]);
 
             // the smallest sample must be scaled up
             let smallest_sample = sample_sums.argmin().unwrap();
