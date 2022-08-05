@@ -1,4 +1,4 @@
-use std::ops::Div;
+use std::ops::{Div, Mul};
 use ndarray::{Axis, Array2, ArrayView1, Array1};
 use ndarray_stats::SummaryStatisticsExt;
 
@@ -42,7 +42,7 @@ pub fn median_ratio_normalization(
     let transformed_matrix = matrix.t().div(gmeans).reversed_axes();
     let sample_scalars = transformed_matrix
         .map_axis(Axis(0), |axis| 1. / median(&axis));
-    matrix.div(sample_scalars)
+    matrix.mul(sample_scalars)
 }
 
 
