@@ -28,8 +28,11 @@ pub fn mageck(
         Normalization::MedianRatio => median_ratio_normalization(&count_matrix),
         Normalization::Total => total_normalization(&count_matrix)
     };
+
     // Mean-Variance Modeling
+
     // sgRNA Ranking (Enrichment)
+    
     // Gene Ranking (Aggregation)
     Ok(())
 }

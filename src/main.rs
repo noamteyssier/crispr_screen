@@ -14,13 +14,21 @@ fn load_dataframe(path: &str) -> Result<DataFrame, PolarsError>
 
 fn main() {
     let path = "EXP114.results.tab";
-    let frame = load_dataframe(path).unwrap();
     let labels_controls = vec!["EXP114_LOW".to_string()];
     let labels_treatments = vec!["EXP114_HIGH".to_string()];
+    let norm_option = "median";
+
+    let norm_method = match norm_option {
+        "median" => Normalization::MedianRatio,
+        "total" => Normalization::Total,
+        _ => panic!("Unexpected normalization method provided: {}", norm_option)
+    };
+
+    let frame = load_dataframe(path).unwrap();
     mageck(
         &frame,
         &labels_controls,
         &labels_treatments,
-        Normalization::MedianRatio
+        norm_method
     ).unwrap();
 }

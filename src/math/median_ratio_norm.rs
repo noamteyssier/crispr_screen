@@ -2,6 +2,7 @@ use std::ops::Div;
 use ndarray::{Axis, Array2, ArrayView1, Array1};
 use ndarray_stats::SummaryStatisticsExt;
 
+/// Calculates the median of a provided ndarray
 fn median(
     array: &ArrayView1<f64>) -> f64
 {
