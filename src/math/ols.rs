@@ -14,8 +14,7 @@ impl OLS {
     /// https://en.wikipedia.org/wiki/Simple_linear_regression
     pub fn fit(
         x: &Array1<f64>,
-        y: &Array1<f64>
-        ) -> Self 
+        y: &Array1<f64>) -> Self 
     {
         assert_eq!(x.len(), y.len(), "Provided vectors are of unequal size");
         let n = x.len() as f64;
@@ -39,14 +38,30 @@ impl OLS {
         Self { alpha, beta }
     }
 
+    /// Predicts the independent variables provided some array of dependent variables
+    #[allow(dead_code)]
     pub fn predict(&self, x: &Array1<f64>) -> Array1<f64>
     {
         self.alpha + (self.beta * x)
     }
 
+    /// Calculate the residuals of the model provided the inputs
+    #[allow(dead_code)]
     pub fn residuals(&self, x: &Array1<f64>, y: &Array1<f64>) -> Array1<f64>
     {
         y - self.predict(x)
+    }
+
+    /// Return Fit Intercept
+    pub fn alpha(&self) -> f64
+    {
+        self.alpha
+    }
+
+    /// Return Fit Coefficient
+    pub fn beta(&self) -> f64
+    {
+        self.beta
     }
 }
 
@@ -61,8 +76,8 @@ mod testing {
 
     #[test]
     pub fn test_ols() {
-        let x = Array1::range(0., 1000., 1.);
-        let y = &x * Array1::random(1000, Uniform::new(0., 50.));
+        let x = Array1::range(0., 100., 1.);
+        let y = &x * Array1::random(100, Uniform::new(0., 50.));
         let ols = OLS::fit(&x, &y);
         let res = ols.residuals(&x, &y);
 
