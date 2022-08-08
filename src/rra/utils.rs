@@ -1,8 +1,8 @@
-use hashbrown::HashMap;
+use hashbrown::{HashSet, HashMap};
 use ndarray::Array1;
 
 /// Converts a vector of strings to an integer representation
-fn encode_index(genes: &Vec<String>) -> Vec<usize>
+pub fn encode_index(genes: &Vec<String>) -> Vec<usize>
 {
     let mut total = 0usize;
     let mut map = HashMap::with_capacity(genes.len());
@@ -23,7 +23,7 @@ fn encode_index(genes: &Vec<String>) -> Vec<usize>
 }
 
 /// return the indices to sort a provided array of floats
-fn argsort(array: &Array1<f64>) -> Vec<usize>
+pub fn argsort(array: &Array1<f64>) -> Vec<usize>
 {
     let mut order = Array1::range(0., array.len() as f64, 1.)
         .iter()
@@ -36,7 +36,7 @@ fn argsort(array: &Array1<f64>) -> Vec<usize>
 }
 
 /// return the normalized ranks of an array in place
-fn normed_ranks(array: &Array1<f64>) -> Array1<f64>
+pub fn normed_ranks(array: &Array1<f64>) -> Array1<f64>
 {
     argsort(array)
         .iter()
@@ -45,18 +45,26 @@ fn normed_ranks(array: &Array1<f64>) -> Array1<f64>
         .collect()
 }
 
-
-pub fn alpha_rra(
-    pvalues: &Array1<f64>,
-    genes: &Vec<String>) 
-{
-    let encode = encode_index(genes);
-
+/// returns a vector of unique group sizes within the gene sets
+pub fn group_sizes(array: &Vec<usize>) -> Vec<usize> {
+    
+    let size_map = array
+        .iter()
+        .fold(HashMap::new(), |mut map, x| {
+            *map.entry(*x).or_insert(0) += 1usize;
+            map
+        });
+    size_map
+        .values()
+        .fold(HashSet::new(), |mut set, x| {set.insert(*x); set})
+        .iter()
+        .map(|x| *x)
+        .collect()
 }
 
 #[cfg(test)]
 mod testing {
-    use super::{encode_index, argsort, normed_ranks};
+    use super::{encode_index, argsort, normed_ranks, group_sizes};
     use ndarray::array;
 
     #[test]
@@ -82,5 +90,16 @@ mod testing {
         let truth = (array![2., 1., 0., 3.] + 1.) / 4.;
         let nranks = normed_ranks(&floats);
         assert_eq!(nranks, truth);
+    }
+
+    #[test]
+    fn test_group_sizes() {
+        let groups = vec![0, 0, 1, 1, 1, 2];
+        let truth = vec![2, 3, 1];
+        let sizes = group_sizes(&groups);
+        truth
+            .iter()
+            .for_each(|x| assert!(sizes.contains(x)));
+        assert_eq!(sizes.len(), 3);
     }
 }
