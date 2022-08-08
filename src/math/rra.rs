@@ -1,6 +1,7 @@
 use hashbrown::HashMap;
 use ndarray::Array1;
 
+/// Converts a vector of strings to an integer representation
 fn encode_index(genes: &Vec<String>) -> Vec<usize>
 {
     let mut total = 0usize;
@@ -21,6 +22,7 @@ fn encode_index(genes: &Vec<String>) -> Vec<usize>
     encoding
 }
 
+/// return the indices to sort a provided array of floats
 fn argsort(array: &Array1<f64>) -> Vec<usize>
 {
     let mut order = Array1::range(0., array.len() as f64, 1.)
@@ -33,6 +35,7 @@ fn argsort(array: &Array1<f64>) -> Vec<usize>
     order
 }
 
+/// return the normalized ranks of an array in place
 fn normed_ranks(array: &Array1<f64>) -> Array1<f64>
 {
     argsort(array)
