@@ -2,7 +2,8 @@ use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
 mod math;
 mod utils;
 mod differential_expression;
-use differential_expression::{mageck, Normalization};
+use differential_expression::mageck;
+use utils::Normalization;
 
 fn load_dataframe(path: &str) -> Result<DataFrame, PolarsError>
 {

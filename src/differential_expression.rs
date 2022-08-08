@@ -1,46 +1,12 @@
 use anyhow::Result;
 use std::fs::File;
-use ndarray::{s, Array2, Axis, Array1};
+use ndarray::s;
 use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
-use crate::{
-    utils::{parse_to_string_vec, parse_to_ndarray}, 
-    math::{median_ratio_normalization, total_normalization, LoggedOLS}
+use crate::utils::{
+    parse_to_string_vec, parse_to_ndarray, 
+    model_mean_variance, enrichment_testing,
+    normalize_counts, Normalization
 };
-
-pub enum Normalization {
-    MedianRatio,
-    Total
-}
-
-/// Normalize read counts using the provided method
-fn normalize_counts(
-    count_matrix: &Array2<f64>,
-    normalization: Normalization) -> Array2<f64>
-{
-    match normalization{
-        Normalization::MedianRatio => median_ratio_normalization(count_matrix),
-        Normalization::Total => total_normalization(count_matrix)
-    }
-}
-
-/// Model Mean Variance using Ordinary Least Squares Regression
-fn model_mean_variance(
-    normed_matrix: &Array2<f64>,
-    n_controls: usize) -> Array1<f64>
-{
-    let model_matrix = if n_controls == 1 {
-        normed_matrix.view()
-    } else {
-        normed_matrix.slice(s![.., ..n_controls])
-    };
-
-    let model_mean = model_matrix.mean_axis(Axis(1))
-        .expect("Unexpected Empty Model Matrix");
-    let model_var = model_matrix.var_axis(Axis(1), 1.);
-    let logged_ols = LoggedOLS::fit(&model_mean, &model_var);
-    let adj_var = logged_ols.predict(&model_mean);
-    adj_var
-}
 
 
 pub fn mageck(
@@ -62,11 +28,16 @@ pub fn mageck(
     // Mean-Variance Modeling
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
 
+    // sgRNA Ranking (Enrichment)
+    let pvalues = enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
 
     let mut frame = df!(
+        "sgrna" => _sgrna_names,
+        "gene" => _gene_names,
         "control" => normed_matrix.slice(s![.., 0]).to_vec(),
         "treatment" => normed_matrix.slice(s![.., 1]).to_vec(),
-        "adj_var" => adj_var.to_vec()
+        "adj_var" => adj_var.to_vec(),
+        "pvalues" => pvalues.to_vec()
     )?;
 
     let file = File::create("adj_var.tab")?;
@@ -74,7 +45,6 @@ pub fn mageck(
         .has_header(true)
         .with_delimiter(b'\t')
         .finish(&mut frame)?;
-    // sgRNA Ranking (Enrichment)
     
     // Gene Ranking (Aggregation)
     Ok(())
