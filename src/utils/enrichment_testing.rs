@@ -3,6 +3,8 @@ use ndarray::{s, Array2, Axis, Array1, Zip};
 use ndarray_rand::rand_distr::num_traits::Pow;
 use std::ops::{Div, Sub};
 
+/// Calculates the negative binomial cumulative distribution if measuring depletion otherwise
+/// calculates the negative binomial survival function.
 fn enrichment_test(
     t_mean: f64,
     r: f64,
@@ -19,6 +21,7 @@ fn enrichment_test(
     }
 }
 
+/// Performs enrichment testing using a negative binomial distribution
 pub fn enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
