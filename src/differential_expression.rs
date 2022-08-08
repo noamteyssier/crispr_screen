@@ -2,11 +2,13 @@ use anyhow::Result;
 use std::fs::File;
 use ndarray::s;
 use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
-use crate::{utils::{
-    parse_to_string_vec, parse_to_ndarray, 
-    model_mean_variance, enrichment_testing,
-    normalize_counts, Normalization
-}, math::alpha_rra};
+use crate::{
+    utils::{
+        parse_to_string_vec, parse_to_ndarray, 
+        model_mean_variance, enrichment_testing,
+        normalize_counts, Normalization},
+    rra::alpha_rra
+};
 
 
 pub fn mageck(
