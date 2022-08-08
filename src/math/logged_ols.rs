@@ -1,4 +1,4 @@
-use std::ops::{Sub, Mul, Add};
+use std::ops::Sub;
 use hashbrown::HashSet;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
@@ -34,10 +34,7 @@ impl LoggedOLS {
     {
         // map adjusted variance formula as:
         // adj_var = means + (kappa * (means ** beta))
-        let adj_var = means
-            .mapv(|x| x.pow(self.beta))
-            .mul(self.kappa)
-            .add(means);
+        let adj_var = means + (self.kappa * (means.mapv(|x| x.pow(self.beta))));
 
         // replace all zeros with the nonzero minimum
         let adj_var = Self::replace_zeros_with_min(&adj_var);
