@@ -39,13 +39,14 @@ pub fn alpha_rra(
     npermutations: usize) -> (Vec<String>, Array1<f64>)
 {
     let (encode_map, encode) = encode_index(genes);
+    let n_genes = encode_map.len();
     let nranks = normed_ranks(pvalues);
     let sizes = group_sizes(&encode);
 
     // calculate rra scores for a vector of random samplings for each unique size
     let permutation_vectors = sizes
         .iter()
-        .map(|unique_size| (*unique_size, run_permutations(nranks.len(), alpha, npermutations, *unique_size)))
+        .map(|unique_size| (*unique_size, run_permutations(nranks.len(), alpha, npermutations * n_genes, *unique_size)))
         .map(|(u, v)| (u, Array1::from_vec(v)))
         .collect::<HashMap<usize, Array1<f64>>>();
     
