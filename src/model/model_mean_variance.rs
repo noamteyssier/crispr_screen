@@ -1,5 +1,5 @@
 use ndarray::{s, Array2, Array1, Axis};
-use crate::math::LoggedOLS;
+use super::LoggedOLS;
 
 /// Model Mean Variance using Ordinary Least Squares Regression
 pub fn model_mean_variance(

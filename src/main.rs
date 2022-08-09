@@ -2,7 +2,7 @@ use std::path::Path;
 use clap::Parser;
 use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
 
-mod math;
+mod model;
 mod norm;
 mod utils;
 mod rra;
