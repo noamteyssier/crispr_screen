@@ -1,45 +1,15 @@
 use anyhow::Result;
-use std::fs::File;
 use ndarray::s;
-use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
+use polars::prelude::{DataFrame, Series, NamedFrom, df};
 use crate::{
-    utils::{parse_to_string_vec, parse_to_ndarray},
+    utils::{
+        io::{write_gene_results, write_sgrna_results}, 
+        parse_to_string_vec, parse_to_ndarray},
     norm::{Normalization, normalize_counts},
     model::model_mean_variance,
     enrich::enrichment_testing,
     aggregation::{GeneAggregation, compute_aggregation}
 };
-
-
-
-fn write_table(
-    name: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let file = File::create(name)?;
-    CsvWriter::new(file)
-        .has_header(true)
-        .with_delimiter(b'\t')
-        .finish(frame)?;
-    Ok(())
-}
-
-fn write_sgrna_results(
-    prefix: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let filename = format!("{}.sgrna_results.tab", prefix);
-    write_table(&filename, frame)
-}
-
-fn write_gene_results(
-    prefix: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let filename = format!("{}.gene_results.tab", prefix);
-    write_table(&filename, frame)
-}
-
 pub fn mageck(
     frame: &DataFrame,
     labels_controls: &[String],
@@ -89,7 +59,6 @@ pub fn mageck(
 
     write_sgrna_results(prefix, &mut sgrna_frame)?;
     write_gene_results(prefix, &mut gene_frame)?;
-
 
     Ok(())
 }
