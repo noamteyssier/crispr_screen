@@ -5,4 +5,4 @@ pub mod permutations;
 
 pub use alpha_rra::alpha_rra;
 use robust_rank::robust_rank_aggregation;
-use utils::{encode_index, normed_ranks, group_sizes, filter_alpha};
+use utils::{normed_ranks, group_sizes, filter_alpha};

@@ -1,6 +1,11 @@
 use hashbrown::HashMap;
 use ndarray::Array1;
-use super::{encode_index, normed_ranks, group_sizes, permutations::run_permutations, filter_alpha, robust_rank::robust_rank_aggregation, utils::empirical_cdf};
+use super::{
+    normed_ranks, group_sizes, 
+    permutations::run_permutations, filter_alpha, 
+    robust_rank::robust_rank_aggregation, 
+    utils::empirical_cdf,
+    super::encode_index};
 
 /// Select the ranks for a provided embedding. Essentially applies a filter which selects all ranks
 /// for the current gene index
