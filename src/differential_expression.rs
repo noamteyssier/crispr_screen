@@ -5,9 +5,9 @@ use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
 use crate::{
     utils::{
         parse_to_string_vec, parse_to_ndarray, 
-        model_mean_variance, enrichment_testing,
-        normalize_counts, Normalization},
-    rra::alpha_rra
+        model_mean_variance, enrichment_testing},
+    rra::alpha_rra,
+    norm::{Normalization, normalize_counts}
 };
 
 
