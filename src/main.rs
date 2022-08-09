@@ -2,14 +2,16 @@ use std::path::Path;
 use clap::Parser;
 use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
 
+mod aggregation;
 mod model;
 mod enrich;
 mod norm;
 mod utils;
-mod rra;
 mod differential_expression;
-use differential_expression::{mageck, GeneAggregation};
+
+use differential_expression::mageck;
 use norm::Normalization;
+use aggregation::GeneAggregation;
 
 fn load_dataframe(path: &str) -> Result<DataFrame, PolarsError>
 {
