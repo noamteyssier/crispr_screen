@@ -22,11 +22,11 @@ struct Args {
     input: String,
 
     /// Labels for Control Samples
-    #[clap(short, long, value_parser)]
+    #[clap(short, long, value_parser, required=true)]
     controls: Vec<String>,
 
     /// Labels for Treatment Samples
-    #[clap(short, long, value_parser)]
+    #[clap(short, long, value_parser, required=true)]
     treatments: Vec<String>,
 
     /// Output Prefix
