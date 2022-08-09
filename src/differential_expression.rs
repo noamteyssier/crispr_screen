@@ -3,11 +3,11 @@ use std::fs::File;
 use ndarray::{s, Array1};
 use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
 use crate::{
-    utils::{
-        parse_to_string_vec, parse_to_ndarray, enrichment_testing},
+    utils::{parse_to_string_vec, parse_to_ndarray},
     rra::alpha_rra,
     norm::{Normalization, normalize_counts},
-    model::model_mean_variance
+    model::model_mean_variance,
+    enrich::enrichment_testing
 };
 
 

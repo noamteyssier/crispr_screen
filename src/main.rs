@@ -3,6 +3,7 @@ use clap::Parser;
 use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
 
 mod model;
+mod enrich;
 mod norm;
 mod utils;
 mod rra;
