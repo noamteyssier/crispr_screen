@@ -1,6 +1,7 @@
 use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
 mod math;
 mod utils;
+mod rra;
 mod differential_expression;
 use differential_expression::mageck;
 use utils::Normalization;

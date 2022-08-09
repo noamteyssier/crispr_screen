@@ -41,24 +41,11 @@ fn calculate_p(
     mean / var
 }
 
-/// A boolean array to designate whether the survival function or the cumulative density function
-/// should be used to calculate the pvalue. If the treatment mean is greater than the control then
-/// this will return a true value in that position indicating the survival function should be used.
-fn calculate_survival(
-    control_means: &Array1<f64>,
-    treatment_means: &Array1<f64>) -> Array1<bool>
-{
-    control_means.iter()
-        .zip(treatment_means.iter())
-        .map(|(c, t)| c < t)
-        .collect()
-}
-
 /// Performs enrichment testing using a negative binomial distribution
 pub fn enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
-    n_controls: usize) -> Array1<f64>
+    n_controls: usize) -> (Array1<f64>, Array1<f64>)
 {
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])
@@ -72,12 +59,17 @@ pub fn enrichment_testing(
     
     let param_r = calculate_r(&control_means, adj_var);
     let param_p = calculate_p(&control_means, adj_var);
-    let use_survival: Array1<bool> = calculate_survival(&control_means, &treatment_means);
 
-    Zip::from(&treatment_means)
+    let low = Zip::from(&treatment_means)
         .and(&param_r)
         .and(&param_p)
-        .and(&use_survival)
-        .map_collect(|t_mean, r, p, use_survival| enrichment_test(*t_mean, *r, *p, *use_survival))
+        .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, false));
+
+    let high = Zip::from(&treatment_means)
+        .and(&param_r)
+        .and(&param_p)
+        .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, true));
+
+    (low, high)
 }
 
