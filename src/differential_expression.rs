@@ -21,7 +21,7 @@ pub fn mageck(
     let columns = frame.get_column_names();
     let labels = [labels_controls, labels_treatments].concat();
     let count_matrix = parse_to_ndarray(frame, &labels)?;
-    let _sgrna_names = parse_to_string_vec(frame, columns[0])?;
+    let sgrna_names = parse_to_string_vec(frame, columns[0])?;
     let gene_names = parse_to_string_vec(frame, columns[1])?;
 
     // Normalize
@@ -31,24 +31,39 @@ pub fn mageck(
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
 
     // sgRNA Ranking (Enrichment)
-    let pvalues = enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
+    let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
 
-    alpha_rra(&pvalues, &gene_names);
+    let (genes_low, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, 0.3, 100000);
+    let (genes_high, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, 0.3, 100000);
 
-    let mut frame = df!(
-        "sgrna" => _sgrna_names,
+    let mut sgrna_frame = df!(
+        "sgrna" => &sgrna_names,
         "gene" => gene_names,
         "control" => normed_matrix.slice(s![.., 0]).to_vec(),
         "treatment" => normed_matrix.slice(s![.., 1]).to_vec(),
         "adj_var" => adj_var.to_vec(),
-        "pvalues" => pvalues.to_vec()
+        "pvalues_low" => sgrna_pvalues_low.to_vec(),
+        "pvalues_high" => sgrna_pvalues_high.to_vec()
     )?;
 
-    let file = File::create("adj_var.tab")?;
+    let file = File::create("sgrna_results.tab")?;
     CsvWriter::new(file)
         .has_header(true)
         .with_delimiter(b'\t')
-        .finish(&mut frame)?;
+        .finish(&mut sgrna_frame)?;
+
+    let mut gene_frame = df!(
+        "gene" => genes_low,
+        "gene_test" => genes_high,
+        "pvalues_low" => gene_pvalues_low.to_vec(),
+        "pvalues_high" => gene_pvalues_high.to_vec()
+    )?;
+
+    let file = File::create("gene_results.tab")?;
+    CsvWriter::new(file)
+        .has_header(true)
+        .with_delimiter(b'\t')
+        .finish(&mut gene_frame)?;
     
     // Gene Ranking (Aggregation)
     Ok(())
