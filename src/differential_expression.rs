@@ -33,8 +33,8 @@ pub fn mageck(
     // sgRNA Ranking (Enrichment)
     let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
 
-    let (genes_low, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, 0.3, 100000);
-    let (genes_high, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, 0.3, 100000);
+    let (genes_low, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, 0.05, 100);
+    let (genes_high, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, 0.05, 100);
 
     let mut sgrna_frame = df!(
         "sgrna" => &sgrna_names,
