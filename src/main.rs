@@ -1,21 +1,17 @@
 use std::path::Path;
 use clap::Parser;
-use polars::prelude::{CsvReader, SerReader, DataFrame, PolarsError};
-mod math;
+
+mod aggregation;
+mod model;
+mod enrich;
+mod norm;
 mod utils;
-mod rra;
 mod differential_expression;
-use differential_expression::{mageck, GeneAggregation};
-use utils::Normalization;
 
-fn load_dataframe(path: &str) -> Result<DataFrame, PolarsError>
-{
-    CsvReader::from_path(path)?
-        .has_header(true)
-        .with_delimiter(b'\t')
-        .finish()
-}
-
+use differential_expression::mageck;
+use norm::Normalization;
+use aggregation::GeneAggregation;
+use utils::io::load_dataframe;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]

@@ -1,5 +1,5 @@
 use ndarray::Array2;
-use crate::math::{median_ratio_normalization, total_normalization};
+use super::{median_ratio_normalization, total_normalization};
 
 pub enum Normalization {
     MedianRatio,

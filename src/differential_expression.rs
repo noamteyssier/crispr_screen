@@ -1,62 +1,15 @@
 use anyhow::Result;
-use std::fs::File;
-use ndarray::{s, Array1};
-use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
+use ndarray::s;
+use polars::prelude::{DataFrame, Series, NamedFrom, df};
 use crate::{
     utils::{
-        parse_to_string_vec, parse_to_ndarray, 
-        model_mean_variance, enrichment_testing,
-        normalize_counts, Normalization},
-    rra::alpha_rra
+        io::{write_gene_results, write_sgrna_results}, 
+        parse_to_string_vec, parse_to_ndarray},
+    norm::{Normalization, normalize_counts},
+    model::model_mean_variance,
+    enrich::enrichment_testing,
+    aggregation::{GeneAggregation, compute_aggregation}
 };
-
-
-pub enum GeneAggregation {
-    AlpaRRA{alpha: f64, npermutations: usize}
-}
-
-fn compute_aggregation(
-    agg: GeneAggregation,
-    sgrna_pvalues_low: &Array1<f64>,
-    sgrna_pvalues_high: &Array1<f64>,
-    gene_names: &Vec<String>) -> (Vec<String>, Array1<f64>, Array1<f64>)
-{
-    match agg {
-        GeneAggregation::AlpaRRA { alpha, npermutations } => {
-            let (genes, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, alpha, npermutations);
-            let (_, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, alpha, npermutations);
-            (genes, gene_pvalues_low, gene_pvalues_high)
-        }
-    }
-}
-
-fn write_table(
-    name: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let file = File::create(name)?;
-    CsvWriter::new(file)
-        .has_header(true)
-        .with_delimiter(b'\t')
-        .finish(frame)?;
-    Ok(())
-}
-
-fn write_sgrna_results(
-    prefix: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let filename = format!("{}.sgrna_results.tab", prefix);
-    write_table(&filename, frame)
-}
-
-fn write_gene_results(
-    prefix: &str,
-    frame: &mut DataFrame) -> Result<()>
-{
-    let filename = format!("{}.gene_results.tab", prefix);
-    write_table(&filename, frame)
-}
 
 pub fn mageck(
     frame: &DataFrame,
@@ -107,7 +60,6 @@ pub fn mageck(
 
     write_sgrna_results(prefix, &mut sgrna_frame)?;
     write_gene_results(prefix, &mut gene_frame)?;
-
 
     Ok(())
 }
