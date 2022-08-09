@@ -27,6 +27,8 @@ mod testing {
         let mut rng = thread_rng();
         let num = 5;
         let arr = (0..num).map(|_| rng.gen()).collect::<Array1<f64>>();
-        robust_rank_aggregation(&arr, num);
+        let rra = robust_rank_aggregation(&arr, num);
+        assert!(rra > 0.);
+        assert!(rra <= 1.);
     }
 }
