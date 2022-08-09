@@ -5,5 +5,4 @@ mod utils;
 
 pub use compute_aggregation::{GeneAggregation, compute_aggregation};
 use rra::alpha_rra;
-use utils::encode_index;
-
+use inc::inc;
