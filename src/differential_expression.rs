@@ -10,6 +10,7 @@ use crate::{
     enrich::enrichment_testing,
     aggregation::{GeneAggregation, compute_aggregation}
 };
+
 pub fn mageck(
     frame: &DataFrame,
     labels_controls: &[String],
