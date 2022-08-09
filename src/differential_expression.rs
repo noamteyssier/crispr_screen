@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::fs::File;
-use ndarray::s;
+use ndarray::{s, Array1};
 use polars::prelude::{DataFrame, Series, NamedFrom, df, CsvWriter, SerWriter};
 use crate::{
     utils::{
@@ -11,11 +11,60 @@ use crate::{
 };
 
 
+pub enum GeneAggregation {
+    AlpaRRA{alpha: f64, npermutations: usize}
+}
+
+fn compute_aggregation(
+    agg: GeneAggregation,
+    sgrna_pvalues_low: &Array1<f64>,
+    sgrna_pvalues_high: &Array1<f64>,
+    gene_names: &Vec<String>) -> (Vec<String>, Array1<f64>, Array1<f64>)
+{
+    match agg {
+        GeneAggregation::AlpaRRA { alpha, npermutations } => {
+            let (genes, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, alpha, npermutations);
+            let (_, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, alpha, npermutations);
+            (genes, gene_pvalues_low, gene_pvalues_high)
+        }
+    }
+}
+
+fn write_table(
+    name: &str,
+    frame: &mut DataFrame) -> Result<()>
+{
+    let file = File::create(name)?;
+    CsvWriter::new(file)
+        .has_header(true)
+        .with_delimiter(b'\t')
+        .finish(frame)?;
+    Ok(())
+}
+
+fn write_sgrna_results(
+    prefix: &str,
+    frame: &mut DataFrame) -> Result<()>
+{
+    let filename = format!("{}.sgrna_results.tab", prefix);
+    write_table(&filename, frame)
+}
+
+fn write_gene_results(
+    prefix: &str,
+    frame: &mut DataFrame) -> Result<()>
+{
+    let filename = format!("{}.gene_results.tab", prefix);
+    write_table(&filename, frame)
+}
+
 pub fn mageck(
     frame: &DataFrame,
     labels_controls: &[String],
     labels_treatments: &[String],
-    normalization: Normalization
+    prefix: &str,
+    normalization: Normalization,
+    aggregation: GeneAggregation,
     ) -> Result<()>
 {
     let columns = frame.get_column_names();
@@ -33,8 +82,12 @@ pub fn mageck(
     // sgRNA Ranking (Enrichment)
     let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
 
-    let (genes_low, gene_pvalues_low) = alpha_rra(&sgrna_pvalues_low, &gene_names, 0.05, 100);
-    let (genes_high, gene_pvalues_high) = alpha_rra(&sgrna_pvalues_high, &gene_names, 0.05, 100);
+    // Gene Ranking (Aggregation)
+    let (genes, gene_pvalues_low, gene_pvalues_high) = compute_aggregation(
+        aggregation,
+        &sgrna_pvalues_low,
+        &sgrna_pvalues_high,
+        &gene_names);
 
     let mut sgrna_frame = df!(
         "sgrna" => &sgrna_names,
@@ -46,25 +99,15 @@ pub fn mageck(
         "pvalues_high" => sgrna_pvalues_high.to_vec()
     )?;
 
-    let file = File::create("sgrna_results.tab")?;
-    CsvWriter::new(file)
-        .has_header(true)
-        .with_delimiter(b'\t')
-        .finish(&mut sgrna_frame)?;
-
     let mut gene_frame = df!(
-        "gene" => genes_low,
-        "gene_test" => genes_high,
+        "gene" => genes,
         "pvalues_low" => gene_pvalues_low.to_vec(),
         "pvalues_high" => gene_pvalues_high.to_vec()
     )?;
 
-    let file = File::create("gene_results.tab")?;
-    CsvWriter::new(file)
-        .has_header(true)
-        .with_delimiter(b'\t')
-        .finish(&mut gene_frame)?;
-    
-    // Gene Ranking (Aggregation)
+    write_sgrna_results(prefix, &mut sgrna_frame)?;
+    write_gene_results(prefix, &mut gene_frame)?;
+
+
     Ok(())
 }
