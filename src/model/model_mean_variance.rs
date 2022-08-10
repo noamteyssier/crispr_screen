@@ -1,5 +1,5 @@
 use ndarray::{s, Array2, Array1, Axis};
-use super::LoggedOLS;
+use super::LoggedOls;
 
 /// Model Mean Variance using Ordinary Least Squares Regression
 pub fn model_mean_variance(
@@ -19,7 +19,7 @@ pub fn model_mean_variance(
         .slice(s![.., ..n_controls])
         .mean_axis(Axis(1))
         .expect("Unexpected empty control matrix");
-    let logged_ols = LoggedOLS::fit(&model_mean, &model_var);
+    let logged_ols = LoggedOls::fit(&model_mean, &model_var);
     
     logged_ols.predict(&control_mean)
 }
