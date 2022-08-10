@@ -1,11 +1,13 @@
 use ndarray::Array1;
 use super::{alpha_rra, inc};
 
+/// Enum describing the different gene aggregation procedures and their associated configurations.
 pub enum GeneAggregation <'a> {
     AlpaRRA{ alpha: f64, npermutations: usize },
     INC { token: &'a str }
 }
 
+/// Computes gene aggregation using the provided method and associated configurations.
 pub fn compute_aggregation(
     agg: GeneAggregation,
     sgrna_pvalues_low: &Array1<f64>,
