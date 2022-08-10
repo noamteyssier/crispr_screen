@@ -8,15 +8,12 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
     let mut map = HashMap::with_capacity(genes.len());
     let mut encoding = Vec::with_capacity(genes.len());
     for g in genes {
-        match map.get(g) {
-            Some(e) => {
-                encoding.push(*e);
-            },
-            None => {
-                map.insert(g, total);
-                encoding.push(total);
-                total += 1;
-            }
+        if let Some(e) = map.get(g) {
+            encoding.push(*e);
+        } else {
+            map.insert(g, total);
+            encoding.push(total);
+            total += 1;
         }
     }
     (map.iter().map(|(k, v)| (*v, (*k).clone())).collect(), encoding)
