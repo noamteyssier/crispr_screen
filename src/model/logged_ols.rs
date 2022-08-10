@@ -173,7 +173,7 @@ mod testing {
     fn test_sorted_intersection() {
         let x = vec![1, 2, 4, 6].into_iter().collect();
         let y = vec![6, 4, 5, 11].into_iter().collect();
-        let indices = LoggedOls::set_intersection(x, y);
+        let indices = LoggedOls::set_intersection(&x, &y);
         assert_eq!(indices, vec![4, 6]);
     }
 }
