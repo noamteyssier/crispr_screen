@@ -27,7 +27,7 @@ mod testing {
     #[test]
     fn test_median_normalization() {
         (0..1000).for_each(|_| {
-            let matrix = Array2::random((10, 4), Uniform::new(0, 5)).mapv(|x| f64::from(x));
+            let matrix = Array2::random((10, 4), Uniform::new(0, 5)).mapv(f64::from);
             let norm = total_normalization(&matrix);
 
             // take sample sums for each matrix
