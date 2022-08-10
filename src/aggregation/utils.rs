@@ -46,7 +46,7 @@ mod testing {
     fn test_encoding() {
         let names = vec!["g.0", "g.1", "g.0", "g.2"]
             .iter()
-            .map(|x| x.to_string())
+            .map(|x| (*x).to_string())
             .collect();
         let (encode_map, encoding) = encode_index(&names);
         assert_eq!(encoding, vec![0, 1, 0, 2]);
