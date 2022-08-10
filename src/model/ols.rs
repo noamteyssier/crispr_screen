@@ -3,15 +3,13 @@ use std::ops::Mul;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
 
-/// An implementation of Ordinary Least Squares for a simple linear regression:
-/// https://en.wikipedia.org/wiki/Simple_linear_regression
+/// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
 pub struct OLS {
     alpha: f64,
     beta: f64
 }
 impl OLS {
-    /// An implementation of Ordinary Least Squares for a simple linear regression:
-    /// https://en.wikipedia.org/wiki/Simple_linear_regression
+    /// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
     pub fn fit(
         x: &Array1<f64>,
         y: &Array1<f64>) -> Self 
