@@ -20,7 +20,7 @@ fn write_dataframe(name: &str, frame: &mut DataFrame) -> Result<(), PolarsError>
         .finish(frame)
 }
 
-/// Write the sgRNA results dataframe given a prefix
+/// Write the `sgRNA` results dataframe given a prefix
 pub fn write_sgrna_results(prefix: &str, frame: &mut DataFrame) -> Result<(), PolarsError>
 {
     let filename = format!("{}.sgrna_results.tab", prefix);
