@@ -10,7 +10,7 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
     for g in genes {
         match map.get(g) {
             Some(e) => {
-                encoding.push(*e)
+                encoding.push(*e);
             },
             None => {
                 map.insert(g, total);
@@ -26,7 +26,7 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
 /// for the current gene index
 pub fn select_ranks(
     current_idx: usize,
-    encodings: &Vec<usize>,
+    encodings: &[usize],
     ranks: &Array1<f64>) -> Array1<f64>
 {
     encodings.iter()
