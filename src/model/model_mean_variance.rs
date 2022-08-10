@@ -20,7 +20,7 @@ pub fn model_mean_variance(
         .mean_axis(Axis(1))
         .expect("Unexpected empty control matrix");
     let logged_ols = LoggedOLS::fit(&model_mean, &model_var);
-    let adj_var = logged_ols.predict(&control_mean);
-    adj_var
+    
+    logged_ols.predict(&control_mean)
 }
 
