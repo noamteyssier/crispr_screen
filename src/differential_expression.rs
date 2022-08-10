@@ -11,7 +11,7 @@ use crate::{
     aggregation::{GeneAggregation, compute_aggregation}
 };
 
-/// Performs the MAGeCK Differential Expression and Gene Aggregation Algorithm
+/// Performs the `MAGeCK` Differential Expression and Gene Aggregation Algorithm
 pub fn mageck(
     frame: &DataFrame,
     labels_controls: &[String],
