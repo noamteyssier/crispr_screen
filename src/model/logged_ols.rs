@@ -51,10 +51,10 @@ impl LoggedOls {
 
         let idx_passing = Self::set_intersection(
             // select indices where means are greater than zero
-            Self::mask_zeros(means),
+            &Self::mask_zeros(means),
 
             // select indices where variances are greater than means
-            Self::mask_varied(means, variances)
+            &Self::mask_varied(means, variances)
             );
 
         (
@@ -65,8 +65,8 @@ impl LoggedOls {
 
     /// Return all unique indices 
     fn set_intersection(
-        a: HashSet<usize>, 
-        b: HashSet<usize>) -> Vec<usize>
+        a: &HashSet<usize>, 
+        b: &HashSet<usize>) -> Vec<usize>
     {
         let mut ix = a.intersection(&b).copied()
             .collect::<Vec<usize>>();
