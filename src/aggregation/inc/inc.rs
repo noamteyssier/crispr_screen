@@ -3,6 +3,7 @@ use ndarray::Array1;
 use crate::aggregation::utils::{encode_index, select_ranks};
 use super::mann_whitney_u;
 
+/// Validates the provided token is found one and only once in the gene set
 fn validate_token(
     encode_map: &HashMap<usize, String>, 
     token: &str) -> usize
@@ -17,6 +18,8 @@ fn validate_token(
 }
 
 
+/// Performs the Mann-Whitney U test on the dataset. This process has been called *-INC in the past
+/// and so I've kept the same naming for the time being.
 pub fn inc(
     pvalues: &Array1<f64>,
     genes: &Vec<String>,

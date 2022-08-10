@@ -1,8 +1,10 @@
 use std::ops::Div;
-
 use ndarray::{Array1, s, concatenate, Axis};
-use statrs::{statistics::{Data, RankTieBreaker, OrderStatistics}, distribution::{Normal, ContinuousCDF}};
+use statrs::{
+    statistics::{Data, RankTieBreaker, OrderStatistics}, 
+    distribution::{Normal, ContinuousCDF}};
 
+/// Concatenate two arrays, rank them, and return the rankings for each of the groups.
 fn merged_ranks(
     x: &Array1<f64>,
     y: &Array1<f64>) -> (Array1<f64>, Array1<f64>)
@@ -16,6 +18,7 @@ fn merged_ranks(
     )
 }
 
+/// Calculates the U-Statistic given an array of ranks
 fn u_statistic(array: &Array1<f64>) -> f64
 {
     let s = array.sum();
@@ -23,14 +26,18 @@ fn u_statistic(array: &Array1<f64>) -> f64
     s - ((n * (n+1.))/2.)
 }
 
+/// Calculats the U-Distribution Mean
 fn u_mean(nx: f64, ny: f64) -> f64 {
     (nx * ny) / 2.
 }
 
+/// Calculats the U-Distribution Standard Deviation
 fn u_std(nx: f64, ny: f64) -> f64 {
     (nx * ny * (nx + ny + 1.)).div(12.).sqrt()
 }
 
+/// Performs the Mann-Whitney U Test otherwise known as the Rank-Sum Test to measure the
+/// statistical difference between two values through their ranks.
 pub fn mann_whitney_u(
     x: &Array1<f64>,
     y: &Array1<f64>) -> f64 
