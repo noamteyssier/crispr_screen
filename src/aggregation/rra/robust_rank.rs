@@ -13,7 +13,7 @@ pub fn robust_rank_aggregation(
         .map(|(k, n)| (k+1, num_values - k, n))
         .map(|(k, b, n)| (k as f64, b as f64, n))
         .map(|(k, b, n)| beta_inc(k, b, *n))
-        .fold(1., |acc, x| acc.min(x))
+        .fold(1., f64::min)
 }
 
 #[cfg(test)]

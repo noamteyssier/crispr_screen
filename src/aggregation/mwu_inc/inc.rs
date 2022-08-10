@@ -27,11 +27,11 @@ pub fn inc(
 {
     let (encode_map, encode) = encode_index(genes);
     let ntc_index = validate_token(&encode_map, token);
-    let ntc_values = select_ranks(ntc_index, &encode, &pvalues);
+    let ntc_values = select_ranks(ntc_index, &encode, pvalues);
 
     let pvalues = (0..*encode.iter().max().expect("Unexpected empty encoding"))
         .filter(|x| *x != ntc_index)
-        .map(|x| select_ranks(x, &encode, &pvalues))
+        .map(|x| select_ranks(x, &encode, pvalues))
         .map(|x| mann_whitney_u(&x, &ntc_values))
         .collect::<Array1<f64>>();
 

@@ -55,9 +55,9 @@ pub fn mann_whitney_u(
     let s_u = u_std(nx, ny);
 
     let z_u = (big_u - m_u) / s_u;
-    let pv = Normal::new(0., 1.).unwrap().cdf(z_u);
+    
 
-    pv
+    Normal::new(0., 1.).unwrap().cdf(z_u)
 }
 
 #[cfg(test)]

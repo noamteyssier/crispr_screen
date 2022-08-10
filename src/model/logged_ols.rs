@@ -2,13 +2,13 @@ use std::ops::Sub;
 use hashbrown::HashSet;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
-use super::OLS;
+use super::Ols;
 
-pub struct LoggedOLS {
+pub struct LoggedOls {
     kappa: f64,
     beta: f64
 }
-impl LoggedOLS {
+impl LoggedOls {
     pub fn fit(
         means: &Array1<f64>,
         variances: &Array1<f64>) -> Self
@@ -17,13 +17,13 @@ impl LoggedOLS {
         let (sub_means, sub_variances) = Self::subset_arrays(means, variances);
 
         // calculate y: log(var - mean)
-        let log_variances = sub_variances.sub(&sub_means).mapv(|x| x.ln());
+        let log_variances = sub_variances.sub(&sub_means).mapv(f64::ln);
 
         // calculate x: log(mean)
-        let log_means = sub_means.mapv(|x| x.ln());
+        let log_means = sub_means.mapv(f64::ln);
 
         // fit ordinary least squares to log transformation
-        let ols = OLS::fit(&log_means, &log_variances);
+        let ols = Ols::fit(&log_means, &log_variances);
         let (kappa, beta) = (ols.alpha().exp(), ols.beta()); 
 
         Self { kappa, beta }
@@ -37,9 +37,9 @@ impl LoggedOLS {
         let adj_var = means + (self.kappa * (means.mapv(|x| x.pow(self.beta))));
 
         // replace all zeros with the nonzero minimum
-        let adj_var = Self::replace_zeros_with_min(&adj_var);
+        
 
-        adj_var
+        Self::replace_zeros_with_min(&adj_var)
     }
 
     /// Subset arrays to those that will not cause numerical instability
@@ -51,10 +51,10 @@ impl LoggedOLS {
 
         let idx_passing = Self::set_intersection(
             // select indices where means are greater than zero
-            Self::mask_zeros(means),
+            &Self::mask_zeros(means),
 
             // select indices where variances are greater than means
-            Self::mask_varied(means, variances)
+            &Self::mask_varied(means, variances)
             );
 
         (
@@ -65,13 +65,12 @@ impl LoggedOLS {
 
     /// Return all unique indices 
     fn set_intersection(
-        a: HashSet<usize>, 
-        b: HashSet<usize>) -> Vec<usize>
+        a: &HashSet<usize>, 
+        b: &HashSet<usize>) -> Vec<usize>
     {
-        let mut ix = a.intersection(&b)
-            .map(|x| *x)
+        let mut ix = a.intersection(b).copied()
             .collect::<Vec<usize>>();
-        ix.sort();
+        ix.sort_unstable();
         ix
     }
 
@@ -124,13 +123,13 @@ impl LoggedOLS {
 #[cfg(test)]
 mod testing {
     use ndarray::array;
-    use super::LoggedOLS;
+    use super::LoggedOls;
 
     #[test]
     fn test_mask_zeros() {
         let x = array![1., 2., 0., 3.];
         let truth = vec![0, 1, 3];
-        let mask = LoggedOLS::mask_zeros(&x);
+        let mask = LoggedOls::mask_zeros(&x);
 
         assert_eq!(mask.len(), 3);
         assert!(truth.iter().all(|x| mask.contains(x)));
@@ -141,7 +140,7 @@ mod testing {
         let x = array![1., 2., 3., 4., 5.];
         let y = array![2., 3., 0., 3., 5.];
         let truth = vec![0, 1];
-        let mask = LoggedOLS::mask_varied(&x, &y);
+        let mask = LoggedOls::mask_varied(&x, &y);
 
         assert_eq!(mask.len(), 2);
         assert!(truth.iter().all(|x| mask.contains(x)));
@@ -150,14 +149,14 @@ mod testing {
     #[test]
     fn test_replace_nonzero() {
         let x = array![1., 2., 0., 3.];
-        let y = LoggedOLS::replace_zeros_with_min(&x);
+        let y = LoggedOls::replace_zeros_with_min(&x);
         assert_eq!(y, array![1., 2., 1., 3.]);
     }
 
     #[test]
     fn test_min_nonzero_some() {
         let x = array![1., 2., 0., 3.];
-        let m = LoggedOLS::min_nonzero(&x);
+        let m = LoggedOls::min_nonzero(&x);
         assert_eq!(m, Some(&1.));
     }
 
@@ -165,7 +164,7 @@ mod testing {
     #[test]
     fn test_min_nonzero_none() {
         let x = array![0., 0., 0.];
-        let m = LoggedOLS::min_nonzero(&x);
+        let m = LoggedOls::min_nonzero(&x);
         assert_eq!(m, None);
     }
 
@@ -174,7 +173,7 @@ mod testing {
     fn test_sorted_intersection() {
         let x = vec![1, 2, 4, 6].into_iter().collect();
         let y = vec![6, 4, 5, 11].into_iter().collect();
-        let indices = LoggedOLS::set_intersection(x, y);
+        let indices = LoggedOls::set_intersection(&x, &y);
         assert_eq!(indices, vec![4, 6]);
     }
 }

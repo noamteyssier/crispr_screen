@@ -8,15 +8,12 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
     let mut map = HashMap::with_capacity(genes.len());
     let mut encoding = Vec::with_capacity(genes.len());
     for g in genes {
-        match map.get(g) {
-            Some(e) => {
-                encoding.push(*e)
-            },
-            None => {
-                map.insert(g, total);
-                encoding.push(total);
-                total += 1;
-            }
+        if let Some(e) = map.get(g) {
+            encoding.push(*e);
+        } else {
+            map.insert(g, total);
+            encoding.push(total);
+            total += 1;
         }
     }
     (map.iter().map(|(k, v)| (*v, (*k).clone())).collect(), encoding)
@@ -26,7 +23,7 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
 /// for the current gene index
 pub fn select_ranks(
     current_idx: usize,
-    encodings: &Vec<usize>,
+    encodings: &[usize],
     ranks: &Array1<f64>) -> Array1<f64>
 {
     encodings.iter()
@@ -46,7 +43,7 @@ mod testing {
     fn test_encoding() {
         let names = vec!["g.0", "g.1", "g.0", "g.2"]
             .iter()
-            .map(|x| x.to_string())
+            .map(|x| (*x).to_string())
             .collect();
         let (encode_map, encoding) = encode_index(&names);
         assert_eq!(encoding, vec![0, 1, 0, 2]);

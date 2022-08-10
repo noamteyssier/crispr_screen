@@ -11,14 +11,14 @@ use crate::{
     aggregation::{GeneAggregation, compute_aggregation}
 };
 
-/// Performs the MAGeCK Differential Expression and Gene Aggregation Algorithm
+/// Performs the `MAGeCK` Differential Expression and Gene Aggregation Algorithm
 pub fn mageck(
     frame: &DataFrame,
     labels_controls: &[String],
     labels_treatments: &[String],
     prefix: &str,
-    normalization: Normalization,
-    aggregation: GeneAggregation,
+    normalization: &Normalization,
+    aggregation: &GeneAggregation,
     ) -> Result<()>
 {
     let columns = frame.get_column_names();

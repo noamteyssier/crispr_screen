@@ -51,7 +51,7 @@ mod testing {
             let size = 5;
             let nranks = Array1::random((size,), Uniform::new(1, num_samples))
                 .iter()
-                .map(|x| *x as f64 / num_samples as f64)
+                .map(|x| f64::from(*x) / f64::from(num_samples))
                 .collect::<Array1<f64>>();
             assert_eq!(nranks.len(), size);
             assert!((&nranks).max() <= 1.);

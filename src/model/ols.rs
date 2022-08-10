@@ -3,15 +3,13 @@ use std::ops::Mul;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
 
-/// An implementation of Ordinary Least Squares for a simple linear regression:
-/// https://en.wikipedia.org/wiki/Simple_linear_regression
-pub struct OLS {
+/// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
+pub struct Ols {
     alpha: f64,
     beta: f64
 }
-impl OLS {
-    /// An implementation of Ordinary Least Squares for a simple linear regression:
-    /// https://en.wikipedia.org/wiki/Simple_linear_regression
+impl Ols {
+    /// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
     pub fn fit(
         x: &Array1<f64>,
         y: &Array1<f64>) -> Self 
@@ -71,14 +69,14 @@ mod testing {
     use std::ops::Mul;
     use ndarray::Array1;
     use ndarray_rand::{RandomExt, rand_distr::Uniform};
-    use super::OLS;
+    use super::Ols;
     const EPSILON: f64 = 1e-6;
 
     #[test]
     pub fn test_ols() {
         let x = Array1::range(0., 100., 1.);
         let y = &x * Array1::random(100, Uniform::new(0., 50.));
-        let ols = OLS::fit(&x, &y);
+        let ols = Ols::fit(&x, &y);
         let res = ols.residuals(&x, &y);
 
         // the sum of the residuals should be zero
