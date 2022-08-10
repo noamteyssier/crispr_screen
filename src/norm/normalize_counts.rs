@@ -9,7 +9,7 @@ pub enum Normalization {
 /// Normalize read counts using the provided method
 pub fn normalize_counts(
     count_matrix: &Array2<f64>,
-    normalization: Normalization) -> Array2<f64>
+    normalization: &Normalization) -> Array2<f64>
 {
     match normalization{
         Normalization::MedianRatio => median_ratio_normalization(count_matrix),

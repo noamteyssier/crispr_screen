@@ -87,7 +87,7 @@ fn main() {
         &labels_controls,
         &labels_treatments,
         &args.output,
-        norm_method,
-        agg
+        &norm_method,
+        &agg
     ).unwrap();
 }

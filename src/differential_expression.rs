@@ -17,8 +17,8 @@ pub fn mageck(
     labels_controls: &[String],
     labels_treatments: &[String],
     prefix: &str,
-    normalization: Normalization,
-    aggregation: GeneAggregation,
+    normalization: &Normalization,
+    aggregation: &GeneAggregation,
     ) -> Result<()>
 {
     let columns = frame.get_column_names();
@@ -28,7 +28,7 @@ pub fn mageck(
     let gene_names = parse_to_string_vec(frame, columns[1])?;
 
     // Normalize
-    let normed_matrix = normalize_counts(&count_matrix, normalization);
+    let normed_matrix = normalize_counts(&count_matrix, &normalization);
 
     // Mean-Variance Modeling
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
@@ -38,7 +38,7 @@ pub fn mageck(
 
     // Gene Ranking (Aggregation)
     let (genes, gene_pvalues_low, gene_pvalues_high) = compute_aggregation(
-        aggregation,
+        &aggregation,
         &sgrna_pvalues_low,
         &sgrna_pvalues_high,
         &gene_names);
