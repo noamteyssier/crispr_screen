@@ -11,7 +11,7 @@ use crate::aggregation::utils::{encode_index, select_ranks};
 /// respect to random permutations of that size
 fn gene_rra(
     current_idx: usize,
-    encodings: &Vec<usize>,
+    encodings: &[usize],
     nranks: &Array1<f64>,
     permutation_vectors: &HashMap<usize, Array1<f64>>,
     alpha: f64) -> f64

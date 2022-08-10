@@ -33,8 +33,8 @@ pub fn normed_ranks(array: &Array1<f64>) -> Array1<f64>
 }
 
 /// returns a vector of unique group sizes within the gene sets
-pub fn group_sizes(array: &Vec<usize>) -> Vec<usize> {
-    
+pub fn group_sizes(array: &[usize]) -> Vec<usize> 
+{    
     let size_map = array
         .iter()
         .fold(HashMap::new(), |mut map, x| {
