@@ -18,8 +18,8 @@ pub fn argsort<A: PartialOrd>(array: &Array1<A>) -> Array1<usize>
 pub fn rank<A: PartialOrd>(array: &Array1<A>) -> Array1<usize>
 {
     let order = argsort(array);
-    let ranks = argsort(&order);
-    ranks
+    
+    argsort(&order)
 }
 
 /// return the normalized ranks of an array in place
@@ -44,8 +44,7 @@ pub fn group_sizes(array: &Vec<usize>) -> Vec<usize> {
     size_map
         .values()
         .fold(HashSet::new(), |mut set, x| {set.insert(*x); set})
-        .iter()
-        .map(|x| *x)
+        .iter().copied()
         .collect()
 }
 
@@ -56,8 +55,7 @@ pub fn filter_alpha(
 {
     array
         .iter()
-        .filter(|x| **x < alpha)
-        .map(|x| *x)
+        .filter(|x| **x < alpha).copied()
         .collect()
 }
 
