@@ -32,8 +32,8 @@ fn geometric_means(matrix: &Array2<f64>) -> Array1<f64>
 }
 
 /// Performs the median ratio normalization method. 
-/// Read counts are adjusted by the median of the size factors of each sgRNA.
-/// Size factors are computed as the geometric mean of the sgRNAs across all
+/// Read counts are adjusted by the median of the size factors of each `sgRNA`.
+/// Size factors are computed as the geometric mean of the `sgRNAs` across all
 /// experimental libraries.
 pub fn median_ratio_normalization(
     matrix: &Array2<f64>) -> Array2<f64>
