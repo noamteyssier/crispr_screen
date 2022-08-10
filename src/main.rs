@@ -74,7 +74,7 @@ fn main() {
     // validate aggregation method
     let agg = match args.agg.as_str() {
         "rra" => GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations },
-        "inc" => GeneAggregation::INC { token: &args.ntc_token },
+        "inc" => GeneAggregation::Inc { token: &args.ntc_token },
         _ => panic!("Unexpected aggregation method provided: {}", args.agg)
     };
 
