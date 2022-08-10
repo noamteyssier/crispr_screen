@@ -68,7 +68,7 @@ impl LoggedOls {
         a: &HashSet<usize>, 
         b: &HashSet<usize>) -> Vec<usize>
     {
-        let mut ix = a.intersection(&b).copied()
+        let mut ix = a.intersection(b).copied()
             .collect::<Vec<usize>>();
         ix.sort_unstable();
         ix
