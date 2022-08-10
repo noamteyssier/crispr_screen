@@ -1,20 +1,11 @@
 use hashbrown::HashMap;
 use ndarray::Array1;
-use super::{encode_index, normed_ranks, group_sizes, permutations::run_permutations, filter_alpha, robust_rank::robust_rank_aggregation, utils::empirical_cdf};
-
-/// Select the ranks for a provided embedding. Essentially applies a filter which selects all ranks
-/// for the current gene index
-fn select_ranks(
-    current_idx: usize,
-    encodings: &Vec<usize>,
-    nranks: &Array1<f64>) -> Array1<f64>
-{
-    encodings.iter()
-        .zip(nranks.iter())
-        .filter(|(idx, _nranks)| **idx == current_idx)
-        .map(|(_, nranks)| *nranks)
-        .collect()
-}
+use super::{
+    normed_ranks, group_sizes, 
+    permutations::run_permutations, filter_alpha, 
+    robust_rank::robust_rank_aggregation, 
+    utils::empirical_cdf};
+use crate::aggregation::utils::{encode_index, select_ranks};
 
 /// Calculates an empirical p-value of the robust rank aggregation for the current gene set with
 /// respect to random permutations of that size
@@ -60,20 +51,4 @@ pub fn alpha_rra(
         .collect();
 
     (names, pvalues)
-}
-
-
-#[cfg(test)]
-mod testing {
-
-    use ndarray::array;
-    use super::select_ranks;
-
-    #[test]
-    fn test_selection() {
-        let indices = vec![0, 1, 2, 0, 1, 2];
-        let scores = array![0.5, 0., 0., 0.5, 0., 0.];
-        let selection = select_ranks(0, &indices, &scores);
-        assert_eq!(selection, array![0.5, 0.5]);
-    }
 }

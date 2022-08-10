@@ -34,8 +34,12 @@ struct Args {
     output: String,
 
     /// Normalization Option
-    #[clap(short, long, value_parser)]
-    norm: Option<String>,
+    #[clap(short, long, value_parser, default_value="median")]
+    norm: String,
+
+    /// Aggregation Option
+    #[clap(short='g', long, value_parser, default_value="rra")]
+    agg: String,
 
     /// Permutations
     #[clap(short, long, value_parser, default_value="100")]
@@ -43,7 +47,11 @@ struct Args {
 
     /// Alpha Threshold
     #[clap(short, long, value_parser, default_value="0.1")]
-    alpha: f64
+    alpha: f64,
+
+    /// Non-Targeting Control Token
+    #[clap(short, long, value_parser, default_value="non-targeting")]
+    ntc_token: String
 }
 
 fn main() {
@@ -57,18 +65,23 @@ fn main() {
     };
 
     // validate normalization method
-    let norm_method = match args.norm {
-        Some(x) => match x.as_str() {
-            "median" => Normalization::MedianRatio,
-            "total" => Normalization::Total,
-            _ => panic!("Unexpected normalization method provided: {}", x)
-        },
-        None => Normalization::MedianRatio,
+    let norm_method = match args.norm.as_str() {
+        "median" => Normalization::MedianRatio,
+        "total" => Normalization::Total,
+        _ => panic!("Unexpected normalization method provided: {}", args.norm)
     };
+
+    // validate aggregation method
+    let agg = match args.agg.as_str() {
+        "rra" => GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations },
+        "inc" => GeneAggregation::INC { token: &args.ntc_token },
+        _ => panic!("Unexpected aggregation method provided: {}", args.agg)
+    };
+
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
-    let agg = GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations };
+
     mageck(
         &frame,
         &labels_controls,
