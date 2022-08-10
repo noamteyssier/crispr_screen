@@ -17,10 +17,10 @@ impl LoggedOLS {
         let (sub_means, sub_variances) = Self::subset_arrays(means, variances);
 
         // calculate y: log(var - mean)
-        let log_variances = sub_variances.sub(&sub_means).mapv(|x| x.ln());
+        let log_variances = sub_variances.sub(&sub_means).mapv(f64::ln);
 
         // calculate x: log(mean)
-        let log_means = sub_means.mapv(|x| x.ln());
+        let log_means = sub_means.mapv(f64::ln);
 
         // fit ordinary least squares to log transformation
         let ols = OLS::fit(&log_means, &log_variances);
@@ -37,9 +37,9 @@ impl LoggedOLS {
         let adj_var = means + (self.kappa * (means.mapv(|x| x.pow(self.beta))));
 
         // replace all zeros with the nonzero minimum
-        let adj_var = Self::replace_zeros_with_min(&adj_var);
+        
 
-        adj_var
+        Self::replace_zeros_with_min(&adj_var)
     }
 
     /// Subset arrays to those that will not cause numerical instability
@@ -68,10 +68,9 @@ impl LoggedOLS {
         a: HashSet<usize>, 
         b: HashSet<usize>) -> Vec<usize>
     {
-        let mut ix = a.intersection(&b)
-            .map(|x| *x)
+        let mut ix = a.intersection(&b).copied()
             .collect::<Vec<usize>>();
-        ix.sort();
+        ix.sort_unstable();
         ix
     }
 
