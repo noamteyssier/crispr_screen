@@ -2,6 +2,7 @@ use std::ops::Sub;
 use hashbrown::HashSet;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
+use crate::utils::math::zscore_transform;
 use super::Ols;
 
 pub struct LoggedOls {
@@ -37,8 +38,6 @@ impl LoggedOls {
         let adj_var = means + (self.kappa * (means.mapv(|x| x.pow(self.beta))));
 
         // replace all zeros with the nonzero minimum
-        
-
         Self::replace_zeros_with_min(&adj_var)
     }
 
@@ -50,6 +49,10 @@ impl LoggedOls {
     {
 
         let idx_passing = Self::set_intersection(
+
+            // select indices where means are under 4 std of global mean
+            &Self::mask_outliers(means),
+
             // select indices where means are greater than zero
             &Self::mask_zeros(means),
 
@@ -66,12 +69,29 @@ impl LoggedOls {
     /// Return all unique indices 
     fn set_intersection(
         a: &HashSet<usize>, 
-        b: &HashSet<usize>) -> Vec<usize>
+        b: &HashSet<usize>,
+        c: &HashSet<usize>) -> Vec<usize>
     {
-        let mut ix = a.intersection(b).copied()
-            .collect::<Vec<usize>>();
+        let sets = vec![b, c];
+        let mut results = a.clone();
+        results.retain(|item| {
+            sets.iter().all(|set| set.contains(item))
+        });
+        let mut ix = Vec::from_iter(results.into_iter());
         ix.sort_unstable();
         ix
+    }
+
+    /// Return all indices where means are less than 4 standard deviations away from the global
+    /// mean
+    fn mask_outliers(means: &Array1<f64>) -> HashSet<usize>
+    {
+        zscore_transform(means)
+            .iter()
+            .enumerate()
+            .filter(|(_idx, x)| **x < 4.)
+            .map(|(idx, _)| idx)
+            .collect()
     }
 
     /// Return all indices where variances are greater than sample means
@@ -122,7 +142,10 @@ impl LoggedOls {
 
 #[cfg(test)]
 mod testing {
-    use ndarray::array;
+    use ndarray::{array, Array1, concatenate, Axis};
+    use ndarray_rand::{RandomExt, rand_distr::{Normal, Uniform}};
+    use crate::utils::math::zscore_transform;
+
     use super::LoggedOls;
 
     #[test]
@@ -144,6 +167,19 @@ mod testing {
 
         assert_eq!(mask.len(), 2);
         assert!(truth.iter().all(|x| mask.contains(x)));
+    }
+
+    #[test]
+    fn test_mask_zscore() {
+        let x = Array1::random(1000, Normal::new(0., 1.).unwrap());
+        let y = Array1::random(5, Uniform::new(100., 150.));
+        let merged = concatenate(Axis(0), &[x.view(), y.view()]).unwrap();
+        let znorm = zscore_transform(&merged);
+        let passing = LoggedOls::mask_outliers(&znorm);
+        assert_eq!(passing.len(), 1000);
+        (1000..1005).for_each(|x| {
+            assert!(!passing.contains(&x));
+        });
     }
 
     #[test]
@@ -171,9 +207,10 @@ mod testing {
 
     #[test]
     fn test_sorted_intersection() {
-        let x = vec![1, 2, 4, 6].into_iter().collect();
-        let y = vec![6, 4, 5, 11].into_iter().collect();
-        let indices = LoggedOls::set_intersection(&x, &y);
-        assert_eq!(indices, vec![4, 6]);
+        let x = vec![1, 2, 4, 6, 12].into_iter().collect();
+        let y = vec![6, 4, 5, 12, 11].into_iter().collect();
+        let z = vec![8, 4, 12, 5, 11].into_iter().collect();
+        let indices = LoggedOls::set_intersection(&x, &y, &z);
+        assert_eq!(indices, vec![4, 12]);
     }
 }
