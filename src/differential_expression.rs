@@ -46,6 +46,7 @@ pub fn mageck(
     // Gene Ranking (Aggregation)
     let (genes, gene_pvalues_low, gene_pvalues_high) = compute_aggregation(
         aggregation,
+        &normed_matrix,
         &sgrna_pvalues_low,
         &sgrna_pvalues_high,
         &gene_names,
