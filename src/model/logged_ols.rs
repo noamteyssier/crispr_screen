@@ -28,7 +28,9 @@ impl LoggedOls {
 
         // fit ordinary least squares to log transformation
         let ols = Ols::fit(&log_means, &log_variances);
-        let (kappa, beta) = (ols.alpha().exp(), ols.beta()); 
+        let (kappa, beta) = (ols.alpha().exp(), ols.beta());
+
+        logger.ols_parameters(kappa, beta);
 
         Self { kappa, beta }
     }

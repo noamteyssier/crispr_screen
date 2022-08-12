@@ -17,7 +17,7 @@ impl Logger {
         eprintln!(
             "{:width$} {}", 
             format!(">> {}", prompt.bright_green()),
-            format!("{:?}", value).white().bold(),
+            format!("{:.3?}", value).white().bold(),
             width = 30
             )
     }
@@ -86,6 +86,17 @@ impl Logger {
             Self::write_to_stderr(
                 "Removed Undervaried sgRNAs : ", 
                 x);
+        }
+    }
+
+    pub fn ols_parameters(&self, kappa: f64, beta: f64) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Fit Parameter; K           : ", 
+                kappa);
+            Self::write_to_stderr(
+                "Fit Parameter; B           : ", 
+                beta);
         }
     }
 }
