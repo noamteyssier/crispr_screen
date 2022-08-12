@@ -32,7 +32,7 @@ pub fn mageck(
     logger.num_genes(&gene_names);
 
     // Normalize
-    let normed_matrix = normalize_counts(&count_matrix, normalization);
+    let normed_matrix = normalize_counts(&count_matrix, normalization, logger);
 
     // Mean-Variance Modeling
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
