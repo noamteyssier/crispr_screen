@@ -28,6 +28,7 @@ pub fn mageck(
     let sgrna_names = parse_to_string_vec(frame, columns[0])?;
     let gene_names = parse_to_string_vec(frame, columns[1])?;
 
+    logger.start_mageck();
     logger.num_sgrnas(&sgrna_names);
     logger.num_genes(&gene_names);
 
@@ -35,7 +36,7 @@ pub fn mageck(
     let normed_matrix = normalize_counts(&count_matrix, normalization, logger);
 
     // Mean-Variance Modeling
-    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
+    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);
 
     // sgRNA Ranking (Enrichment)
     let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());

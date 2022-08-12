@@ -22,22 +22,70 @@ impl Logger {
             )
     }
 
+    pub fn start_mageck(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}",
+                "Run Configuration".bold().underline()
+                )
+        }
+    }
+
     pub fn num_sgrnas(&self, x: &[String]) {
         if self.verbose {
-            Self::write_to_stderr("Number of sgRNAs     : ", x.len());
+            Self::write_to_stderr(
+                "Number of sgRNAs           : ", 
+                x.len());
         }
     }
 
     pub fn num_genes(&self, x: &[String]) {
         if self.verbose {
             let unique_genes: HashSet<String> = HashSet::from_iter(x.iter().cloned());
-            Self::write_to_stderr("Number of Genes      : ", unique_genes.len());
+            Self::write_to_stderr(
+                "Number of Genes            : ", 
+                unique_genes.len());
         }
     }
 
     pub fn norm_method(&self, n: &Normalization) {
         if self.verbose {
-            Self::write_to_stderr("Normalization Method : ", n)
+            Self::write_to_stderr(
+                "Normalization Method       : ", 
+                n)
+        }
+    }
+
+    pub fn start_mean_variance(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}",
+                "Modeling Mean Variance".bold().underline()
+                )
+        }
+    }
+
+    pub fn num_outliers(&self, x: usize) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Removed Outlier sgRNAs     : ", 
+                x);
+        }
+    }
+
+    pub fn num_zeros(&self, x: usize) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Removed Zero sgRNAs        : ", 
+                x);
+        }
+    }
+
+    pub fn num_varied(&self, x: usize) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Removed Undervaried sgRNAs : ", 
+                x);
         }
     }
 }
