@@ -48,7 +48,8 @@ pub fn mageck(
         aggregation,
         &sgrna_pvalues_low,
         &sgrna_pvalues_high,
-        &gene_names);
+        &gene_names,
+        logger);
 
     let mut sgrna_frame = df!(
         "sgrna" => &sgrna_names,

@@ -5,7 +5,7 @@ use super::{
     permutations::run_permutations, filter_alpha, 
     robust_rank::robust_rank_aggregation, 
     utils::empirical_cdf};
-use crate::aggregation::utils::{encode_index, select_ranks};
+use crate::{aggregation::utils::{encode_index, select_ranks}, utils::logging::Logger};
 
 /// Calculates an empirical p-value of the robust rank aggregation for the current gene set with
 /// respect to random permutations of that size
@@ -27,12 +27,14 @@ pub fn alpha_rra(
     pvalues: &Array1<f64>,
     genes: &Vec<String>,
     alpha: f64,
-    npermutations: usize) -> (Vec<String>, Array1<f64>)
+    npermutations: usize,
+    logger: &Logger) -> (Vec<String>, Array1<f64>)
 {
     let (encode_map, encode) = encode_index(genes);
     let n_genes = encode_map.len();
     let nranks = normed_ranks(pvalues);
     let sizes = group_sizes(&encode);
+    logger.permutation_sizes(&sizes);
 
     // calculate rra scores for a vector of random samplings for each unique size
     let permutation_vectors = sizes

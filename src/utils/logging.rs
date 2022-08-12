@@ -107,4 +107,33 @@ impl Logger {
                 beta);
         }
     }
+
+    pub fn start_gene_aggregation(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}",
+                "Performing Gene Aggregation".bold().underline()
+                )
+        }
+    }
+
+    pub fn permutation_sizes(&self, sizes: &Vec<usize>) {
+        if self.verbose {
+            let mut sorted_sizes = sizes.clone();
+            sorted_sizes.sort_unstable();
+            Self::write_to_stderr(
+                "Permutation Sizes          : ", 
+                sorted_sizes);
+        }
+    }
+
+    pub fn num_ntcs(&self, num_ntc: usize) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Number of Found Controls   : ",
+                num_ntc
+                );
+        }
+    }
+
 }
