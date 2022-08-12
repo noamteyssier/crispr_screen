@@ -51,7 +51,11 @@ struct Args {
 
     /// Non-Targeting Control Token
     #[clap(short, long, value_parser, default_value="non-targeting")]
-    ntc_token: String
+    ntc_token: String,
+
+    /// Do not write logging information
+    #[clap(short, long)]
+    quiet: bool
 }
 
 fn main() {
@@ -78,9 +82,15 @@ fn main() {
         _ => panic!("Unexpected aggregation method provided: {}", args.agg)
     };
 
+    // create logger based on quiet option
+    let logger = if args.quiet {
+        Logger::new_silent()
+    } else {
+        Logger::new()
+    };
+
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
-    let logger = Logger::new();
     let frame = load_dataframe(&path).unwrap();
 
     mageck(

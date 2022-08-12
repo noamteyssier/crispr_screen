@@ -12,6 +12,10 @@ impl Logger {
     pub fn new() -> Self {
         Self { verbose: true }
     }
+    
+    pub fn new_silent() -> Self {
+        Self { verbose: false }
+    }
 
     fn write_to_stderr<V: Debug>(prompt: &str, value: V) {
         eprintln!(
