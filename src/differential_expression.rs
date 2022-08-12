@@ -4,7 +4,7 @@ use polars::prelude::{DataFrame, Series, NamedFrom, df};
 use crate::{
     utils::{
         io::{write_gene_results, write_sgrna_results}, 
-        parse_to_string_vec, parse_to_ndarray},
+        parse_to_string_vec, parse_to_ndarray, logging::Logger},
     norm::{Normalization, normalize_counts},
     model::model_mean_variance,
     enrich::enrichment_testing,
@@ -19,6 +19,7 @@ pub fn mageck(
     prefix: &str,
     normalization: &Normalization,
     aggregation: &GeneAggregation,
+    logger: &Logger
     ) -> Result<()>
 {
     let columns = frame.get_column_names();
@@ -26,6 +27,9 @@ pub fn mageck(
     let count_matrix = parse_to_ndarray(frame, &labels)?;
     let sgrna_names = parse_to_string_vec(frame, columns[0])?;
     let gene_names = parse_to_string_vec(frame, columns[1])?;
+
+    logger.num_sgrnas(&sgrna_names);
+    logger.num_genes(&gene_names);
 
     // Normalize
     let normed_matrix = normalize_counts(&count_matrix, normalization);

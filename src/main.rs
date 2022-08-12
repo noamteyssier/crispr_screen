@@ -11,7 +11,7 @@ mod differential_expression;
 use differential_expression::mageck;
 use norm::Normalization;
 use aggregation::GeneAggregation;
-use utils::io::load_dataframe;
+use utils::{io::load_dataframe, logging::Logger};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -80,6 +80,7 @@ fn main() {
 
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
+    let logger = Logger::new();
     let frame = load_dataframe(&path).unwrap();
 
     mageck(
@@ -88,6 +89,7 @@ fn main() {
         &labels_treatments,
         &args.output,
         &norm_method,
-        &agg
+        &agg,
+        &logger
     ).unwrap();
 }
