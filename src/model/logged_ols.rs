@@ -154,7 +154,7 @@ impl LoggedOls {
 mod testing {
     use ndarray::{array, Array1, concatenate, Axis};
     use ndarray_rand::{RandomExt, rand_distr::{Normal, Uniform}};
-    use crate::utils::math::zscore_transform;
+    use crate::utils::{math::zscore_transform, logging::Logger};
 
     use super::LoggedOls;
 
@@ -162,7 +162,8 @@ mod testing {
     fn test_mask_zeros() {
         let x = array![1., 2., 0., 3.];
         let truth = vec![0, 1, 3];
-        let mask = LoggedOls::mask_zeros(&x);
+        let logger = Logger::new();
+        let mask = LoggedOls::mask_zeros(&x, &logger);
 
         assert_eq!(mask.len(), 3);
         assert!(truth.iter().all(|x| mask.contains(x)));
@@ -173,7 +174,8 @@ mod testing {
         let x = array![1., 2., 3., 4., 5.];
         let y = array![2., 3., 0., 3., 5.];
         let truth = vec![0, 1];
-        let mask = LoggedOls::mask_varied(&x, &y);
+        let logger = Logger::new();
+        let mask = LoggedOls::mask_varied(&x, &y, &logger);
 
         assert_eq!(mask.len(), 2);
         assert!(truth.iter().all(|x| mask.contains(x)));
@@ -185,7 +187,8 @@ mod testing {
         let y = Array1::random(5, Uniform::new(100., 150.));
         let merged = concatenate(Axis(0), &[x.view(), y.view()]).unwrap();
         let znorm = zscore_transform(&merged);
-        let passing = LoggedOls::mask_outliers(&znorm);
+        let logger = Logger::new();
+        let passing = LoggedOls::mask_outliers(&znorm, &logger);
         assert_eq!(passing.len(), 1000);
         (1000..1005).for_each(|x| {
             assert!(!passing.contains(&x));
