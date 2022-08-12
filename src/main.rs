@@ -11,7 +11,7 @@ mod differential_expression;
 use differential_expression::mageck;
 use norm::Normalization;
 use aggregation::GeneAggregation;
-use utils::io::load_dataframe;
+use utils::{io::load_dataframe, logging::Logger};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -51,7 +51,11 @@ struct Args {
 
     /// Non-Targeting Control Token
     #[clap(short, long, value_parser, default_value="non-targeting")]
-    ntc_token: String
+    ntc_token: String,
+
+    /// Do not write logging information
+    #[clap(short, long)]
+    quiet: bool
 }
 
 fn main() {
@@ -78,6 +82,13 @@ fn main() {
         _ => panic!("Unexpected aggregation method provided: {}", args.agg)
     };
 
+    // create logger based on quiet option
+    let logger = if args.quiet {
+        Logger::new_silent()
+    } else {
+        Logger::new()
+    };
+
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
@@ -88,6 +99,7 @@ fn main() {
         &labels_treatments,
         &args.output,
         &norm_method,
-        &agg
+        &agg,
+        &logger
     ).unwrap();
 }

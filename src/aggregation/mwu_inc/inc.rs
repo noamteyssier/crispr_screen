@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 use ndarray::Array1;
-use crate::aggregation::utils::{encode_index, select_ranks};
+use crate::{aggregation::utils::{encode_index, select_ranks}, utils::logging::Logger};
 use super::mann_whitney_u;
 
 /// Validates the provided token is found one and only once in the gene set
@@ -23,11 +23,14 @@ fn validate_token(
 pub fn inc(
     pvalues: &Array1<f64>,
     genes: &Vec<String>,
-    token: &str) -> (Vec<String>, Array1<f64>)
+    token: &str,
+    logger: &Logger) -> (Vec<String>, Array1<f64>)
 {
     let (encode_map, encode) = encode_index(genes);
     let ntc_index = validate_token(&encode_map, token);
     let ntc_values = select_ranks(ntc_index, &encode, pvalues);
+    logger.num_ntcs(ntc_values.len());
+
 
     let pvalues = (0..*encode.iter().max().expect("Unexpected empty encoding"))
         .filter(|x| *x != ntc_index)

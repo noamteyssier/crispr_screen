@@ -4,7 +4,7 @@ use polars::prelude::{DataFrame, Series, NamedFrom, df};
 use crate::{
     utils::{
         io::{write_gene_results, write_sgrna_results}, 
-        parse_to_string_vec, parse_to_ndarray},
+        parse_to_string_vec, parse_to_ndarray, logging::Logger},
     norm::{Normalization, normalize_counts},
     model::model_mean_variance,
     enrich::enrichment_testing,
@@ -19,6 +19,7 @@ pub fn mageck(
     prefix: &str,
     normalization: &Normalization,
     aggregation: &GeneAggregation,
+    logger: &Logger
     ) -> Result<()>
 {
     let columns = frame.get_column_names();
@@ -27,11 +28,17 @@ pub fn mageck(
     let sgrna_names = parse_to_string_vec(frame, columns[0])?;
     let gene_names = parse_to_string_vec(frame, columns[1])?;
 
+    logger.start_mageck();
+    logger.num_sgrnas(&sgrna_names);
+    logger.num_genes(&gene_names);
+    logger.norm_method(normalization);
+    logger.aggregation_method(aggregation);
+
     // Normalize
     let normed_matrix = normalize_counts(&count_matrix, normalization);
 
     // Mean-Variance Modeling
-    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len());
+    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);
 
     // sgRNA Ranking (Enrichment)
     let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
@@ -41,7 +48,8 @@ pub fn mageck(
         aggregation,
         &sgrna_pvalues_low,
         &sgrna_pvalues_high,
-        &gene_names);
+        &gene_names,
+        logger);
 
     let mut sgrna_frame = df!(
         "sgrna" => &sgrna_names,

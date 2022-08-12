@@ -1,6 +1,7 @@
 use ndarray::Array2;
 use super::{median_ratio_normalization, total_normalization};
 
+#[derive(Debug)]
 pub enum Normalization {
     MedianRatio,
     Total
