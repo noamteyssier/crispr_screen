@@ -2,6 +2,7 @@ use ndarray::Array1;
 use super::{alpha_rra, inc};
 
 /// Enum describing the different gene aggregation procedures and their associated configurations.
+#[derive(Debug)]
 pub enum GeneAggregation <'a> {
     AlpaRRA{ alpha: f64, npermutations: usize },
     Inc { token: &'a str }

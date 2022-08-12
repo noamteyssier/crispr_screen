@@ -31,9 +31,11 @@ pub fn mageck(
     logger.start_mageck();
     logger.num_sgrnas(&sgrna_names);
     logger.num_genes(&gene_names);
+    logger.norm_method(normalization);
+    logger.aggregation_method(aggregation);
 
     // Normalize
-    let normed_matrix = normalize_counts(&count_matrix, normalization, logger);
+    let normed_matrix = normalize_counts(&count_matrix, normalization);
 
     // Mean-Variance Modeling
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);

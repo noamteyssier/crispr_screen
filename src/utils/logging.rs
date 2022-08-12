@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use hashbrown::HashSet;
 use colored::Colorize;
 
-use crate::norm::Normalization;
+use crate::{norm::Normalization, aggregation::GeneAggregation};
 
 pub struct Logger {
     verbose: bool
@@ -53,6 +53,14 @@ impl Logger {
             Self::write_to_stderr(
                 "Normalization Method       : ", 
                 n)
+        }
+    }
+
+    pub fn aggregation_method(&self, g: &GeneAggregation) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Aggregation Method         : ", 
+                g)
         }
     }
 
