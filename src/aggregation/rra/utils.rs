@@ -66,10 +66,9 @@ pub fn empirical_cdf(
     let size = null.len();
     let count = null
         .iter()
-        .filter(|x| **x < obs)
+        .filter(|x| **x <= obs)
         .count();
     (count + 1) as f64 / (size + 1) as f64
-
 }
 
 #[cfg(test)]
