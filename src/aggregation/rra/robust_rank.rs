@@ -1,4 +1,4 @@
-use statrs::function::beta::beta_inc;
+use statrs::distribution::{Beta, ContinuousCDF};
 use ndarray::Array1;
 
 /// performs robust rank aggregation
@@ -7,12 +7,16 @@ pub fn robust_rank_aggregation(
     num_values: usize) -> f64
 {
     if normed_ranks.is_empty() { return 1. }
-    normed_ranks
+    let mut tmp = normed_ranks.to_vec();
+    tmp.sort_floats();
+
+    //normed_ranks
+    tmp
         .iter()
         .enumerate()
         .map(|(k, n)| (k+1, num_values - k, n))
         .map(|(k, b, n)| (k as f64, b as f64, n))
-        .map(|(k, b, n)| beta_inc(k, b, *n))
+        .map(|(k, b, n)| Beta::new(k, b).unwrap().cdf(*n))
         .fold(1., f64::min)
 }
 
