@@ -1,8 +1,7 @@
 use ndarray::{Array1, Array2, Axis};
 use crate::utils::logging::Logger;
 use hashbrown::HashSet;
-
-use super::{alpha_rra, inc};
+use super::{alpha_rra, inc, AggregationResult};
 
 /// Enum describing the different gene aggregation procedures and their associated configurations.
 #[derive(Debug)]
@@ -56,7 +55,7 @@ pub fn compute_aggregation(
     sgrna_pvalues_low: &Array1<f64>,
     sgrna_pvalues_high: &Array1<f64>,
     gene_names: &Vec<String>,
-    logger: &Logger) -> (Vec<String>, Array1<f64>, Array1<f64>)
+    logger: &Logger) -> AggregationResult
 {
     logger.start_gene_aggregation();
     
@@ -65,32 +64,32 @@ pub fn compute_aggregation(
 
     match agg {
         GeneAggregation::AlpaRRA { alpha, npermutations } => {
-            let (genes, gene_pvalues_low) = alpha_rra(
+            let (genes, gene_scores_low, gene_pvalues_low) = alpha_rra(
                 &passing_sgrna_pvalues_low, 
                 &passing_gene_names, 
                 *alpha, 
                 *npermutations, 
                 logger);
-            let (_, gene_pvalues_high) = alpha_rra(
+            let (_, gene_scores_high, gene_pvalues_high) = alpha_rra(
                 &passing_sgrna_pvalues_high, 
                 &passing_gene_names, 
                 *alpha, 
                 *npermutations, 
                 logger);
-            (genes, gene_pvalues_low, gene_pvalues_high)
+            AggregationResult::new(genes, gene_pvalues_low, gene_pvalues_high, gene_scores_low, gene_scores_high)
         },
         GeneAggregation::Inc { token } => {
-            let (genes, gene_pvalues_low) = inc(
+            let (genes, gene_scores_low, gene_pvalues_low) = inc(
                 &passing_sgrna_pvalues_low, 
                 &passing_gene_names, 
                 token, 
                 logger);
-            let (_, gene_pvalues_high) = inc(
+            let (_, gene_scores_high, gene_pvalues_high) = inc(
                 &passing_sgrna_pvalues_high, 
                 &passing_gene_names, 
                 token, 
                 logger);
-            (genes, gene_pvalues_low, gene_pvalues_high)
+            AggregationResult::new(genes, gene_pvalues_low, gene_pvalues_high, gene_scores_low, gene_scores_high)
         }
     }
 }
