@@ -40,24 +40,24 @@ fn u_std(nx: f64, ny: f64) -> f64 {
 /// statistical difference between two values through their ranks.
 pub fn mann_whitney_u(
     x: &Array1<f64>,
-    y: &Array1<f64>) -> f64 
+    y: &Array1<f64>) -> (f64, f64) 
 {
-    let (ranks_x, ranks_y) = merged_ranks(x, y);
+    let (ranks_x, _ranks_y) = merged_ranks(x, y);
 
     let nx = x.len() as f64;
     let ny = y.len() as f64;
 
     let u_t = u_statistic(&ranks_x);
-    let u_c = u_statistic(&ranks_y);
-    let big_u = u_t.min(u_c);
-
     let m_u = u_mean(nx, ny);
     let s_u = u_std(nx, ny);
 
-    let z_u = (big_u - m_u) / s_u;
+    let z_u = (u_t - m_u) / s_u;
     
 
-    Normal::new(0., 1.).unwrap().cdf(z_u)
+    (
+        u_t,
+        Normal::new(0., 1.).unwrap().cdf(z_u)
+    )
 }
 
 #[cfg(test)]
@@ -104,7 +104,7 @@ mod testing {
         let x = Array1::range(1., 6., 1.);
         let y = Array1::range(6., 11., 1.);
         println!("{:?} {:?}", x, y);
-        let pv = mann_whitney_u(&x, &y);
+        let (_, pv) = mann_whitney_u(&x, &y);
         assert!(pv - 1.2185e-2 < 1e-6);
     }
 }
