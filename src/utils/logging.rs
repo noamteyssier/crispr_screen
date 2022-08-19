@@ -45,7 +45,7 @@ impl Logger {
 
     pub fn num_genes(&self, x: &[String]) {
         if self.verbose {
-            let unique_genes: HashSet<String> = HashSet::from_iter(x.iter().cloned());
+            let unique_genes = x.iter().cloned().collect::<HashSet<String>>();
             Self::write_to_stderr(
                 "Number of Genes            : ", 
                 unique_genes.len());
