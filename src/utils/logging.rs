@@ -23,7 +23,7 @@ impl Logger {
             format!(">> {}", prompt.bright_green()),
             format!("{:.3?}", value).white().bold(),
             width = 30
-            )
+            );
     }
 
     pub fn start_mageck(&self) {
@@ -31,7 +31,7 @@ impl Logger {
             eprintln!(
                 "\n{}",
                 "Run Configuration".bold().underline()
-                )
+                );
         }
     }
 
@@ -56,7 +56,7 @@ impl Logger {
         if self.verbose {
             Self::write_to_stderr(
                 "Normalization Method       : ", 
-                n)
+                n);
         }
     }
 
@@ -64,7 +64,7 @@ impl Logger {
         if self.verbose {
             Self::write_to_stderr(
                 "Aggregation Method         : ", 
-                g)
+                g);
         }
     }
 
@@ -73,7 +73,7 @@ impl Logger {
             eprintln!(
                 "\n{}",
                 "Modeling Mean Variance".bold().underline()
-                )
+                );
         }
     }
 
@@ -117,7 +117,7 @@ impl Logger {
             eprintln!(
                 "\n{}",
                 "Performing Gene Aggregation".bold().underline()
-                )
+                );
         }
     }
 
