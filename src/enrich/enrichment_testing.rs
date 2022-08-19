@@ -1,6 +1,8 @@
 use statrs::function::beta;
 use ndarray::{s, Array2, Axis, Array1, Zip};
 
+use super::EnrichmentResult;
+
 /// Calculates the negative binomial cumulative distribution if measuring depletion otherwise
 /// calculates the negative binomial survival function.
 fn enrichment_test(
@@ -45,7 +47,7 @@ fn calculate_p(
 pub fn enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
-    n_controls: usize) -> (Array1<f64>, Array1<f64>)
+    n_controls: usize) -> EnrichmentResult
 {
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])
@@ -70,6 +72,6 @@ pub fn enrichment_testing(
         .and(&param_p)
         .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, true));
 
-    (low, high)
+    EnrichmentResult::new(low, high)
 }
 
