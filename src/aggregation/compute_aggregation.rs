@@ -27,7 +27,7 @@ fn mask_zeros(array: &Array1<f64>, logger: &Logger) -> HashSet<usize>
 /// Filter `sgRNAs` with zero counts in both samples
 fn filter_zeros(
     normed_matrix: &Array2<f64>,
-    gene_names: &Vec<String>,
+    gene_names: &[String],
     sgrna_pvalues_low: &Array1<f64>,
     sgrna_pvalues_high: &Array1<f64>,
     logger: &Logger) -> (Vec<String>, Array1<f64>, Array1<f64>)
@@ -53,7 +53,7 @@ pub fn compute_aggregation(
     agg: &GeneAggregation,
     normed_matrix: &Array2<f64>,
     sgrna_results: &EnrichmentResult,
-    gene_names: &Vec<String>,
+    gene_names: &[String],
     logger: &Logger) -> AggregationResult
 {
     logger.start_gene_aggregation();
