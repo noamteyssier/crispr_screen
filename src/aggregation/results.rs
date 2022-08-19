@@ -1,3 +1,4 @@
+use adjustp::{adjust, Procedure};
 use ndarray::Array1;
 
 pub struct AggregationResult {
@@ -5,7 +6,9 @@ pub struct AggregationResult {
     pvalues_low: Array1<f64>,
     pvalues_high: Array1<f64>,
     aggregation_score_low: Array1<f64>,
-    aggregation_score_high: Array1<f64>
+    aggregation_score_high: Array1<f64>,
+    fdr_low: Array1<f64>,
+    fdr_high: Array1<f64>,
 }
 impl AggregationResult {
     pub fn new(
@@ -13,14 +16,21 @@ impl AggregationResult {
         pvalues_low: Array1<f64>,
         pvalues_high: Array1<f64>,
         aggregation_score_low: Array1<f64>,
-        aggregation_score_high: Array1<f64>) -> Self {
+        aggregation_score_high: Array1<f64>) -> Self 
+    {
         Self {
             genes,
+            fdr_low: Self::fdr_adjustment(&pvalues_low),
+            fdr_high: Self::fdr_adjustment(&pvalues_high),
             pvalues_low,
             pvalues_high,
             aggregation_score_low,
             aggregation_score_high,
         }
+    }
+
+    fn fdr_adjustment(pvalues: &Array1<f64>) -> Array1<f64> {
+        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), Procedure::BenjaminiHochberg))
     }
 
     pub fn genes(&self) -> &Vec<String> {
@@ -41,6 +51,14 @@ impl AggregationResult {
 
     pub fn score_high(&self) -> &Array1<f64> {
         &self.aggregation_score_high
+    }
+
+    pub fn fdr_low(&self) -> &Array1<f64> {
+        &self.fdr_low
+    }
+
+    pub fn fdr_high(&self) -> &Array1<f64> {
+        &self.fdr_high
     }
 }
 

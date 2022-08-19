@@ -62,7 +62,7 @@ pub fn compute_aggregation(
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
         normed_matrix, gene_names, sgrna_pvalues_low, sgrna_pvalues_high, logger);
 
-    match agg {
+    let (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high) = match agg {
         GeneAggregation::AlpaRRA { alpha, npermutations } => {
             let (genes, gene_scores_low, gene_pvalues_low) = alpha_rra(
                 &passing_sgrna_pvalues_low, 
@@ -76,7 +76,7 @@ pub fn compute_aggregation(
                 *alpha, 
                 *npermutations, 
                 logger);
-            AggregationResult::new(genes, gene_pvalues_low, gene_pvalues_high, gene_scores_low, gene_scores_high)
+            (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high)
         },
         GeneAggregation::Inc { token } => {
             let (genes, gene_scores_low, gene_pvalues_low) = inc(
@@ -89,7 +89,14 @@ pub fn compute_aggregation(
                 &passing_gene_names, 
                 token, 
                 logger);
-            AggregationResult::new(genes, gene_pvalues_low, gene_pvalues_high, gene_scores_low, gene_scores_high)
+            (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high)
         }
-    }
+    };
+
+    AggregationResult::new(
+        genes, 
+        gene_pvalues_low, 
+        gene_pvalues_high, 
+        gene_scores_low, 
+        gene_scores_high)
 }
