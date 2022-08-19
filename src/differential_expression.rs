@@ -66,8 +66,10 @@ pub fn mageck(
         "gene" => aggregation_results.genes(),
         "score_low" => aggregation_results.score_low().to_vec(),
         "pvalues_low" => aggregation_results.pvalues_low().to_vec(),
+        "fdr_low" => aggregation_results.fdr_low().to_vec(),
         "score_high" => aggregation_results.score_high().to_vec(),
-        "pvalues_high" => aggregation_results.pvalues_high().to_vec()
+        "pvalues_high" => aggregation_results.pvalues_high().to_vec(),
+        "fdr_high" => aggregation_results.fdr_high().to_vec(),
     )?;
 
     write_sgrna_results(prefix, &mut sgrna_frame)?;
