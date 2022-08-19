@@ -121,9 +121,9 @@ impl Logger {
         }
     }
 
-    pub fn permutation_sizes(&self, sizes: &Vec<usize>) {
+    pub fn permutation_sizes(&self, sizes: &[usize]) {
         if self.verbose {
-            let mut sorted_sizes = sizes.clone();
+            let mut sorted_sizes = sizes.to_owned();
             sorted_sizes.sort_unstable();
             Self::write_to_stderr(
                 "Permutation Sizes          : ", 
