@@ -41,14 +41,14 @@ pub fn mageck(
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);
 
     // sgRNA Ranking (Enrichment)
-    let (sgrna_pvalues_low, sgrna_pvalues_high)= enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
+    let sgrna_results = enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
 
     // Gene Ranking (Aggregation)
     let aggregation_results = compute_aggregation(
         aggregation,
         &normed_matrix,
-        &sgrna_pvalues_low,
-        &sgrna_pvalues_high,
+        sgrna_results.pvalues_low(),
+        sgrna_results.pvalues_high(),
         &gene_names,
         logger);
 
@@ -58,17 +58,19 @@ pub fn mageck(
         "control" => normed_matrix.slice(s![.., 0]).to_vec(),
         "treatment" => normed_matrix.slice(s![.., 1]).to_vec(),
         "adj_var" => adj_var.to_vec(),
-        "pvalues_low" => sgrna_pvalues_low.to_vec(),
-        "pvalues_high" => sgrna_pvalues_high.to_vec()
+        "pvalue_low" => sgrna_results.pvalues_low().to_vec(),
+        "pvalue_high" => sgrna_results.pvalues_high().to_vec(),
+        "pvalue_twosided" => sgrna_results.pvalues_twosided().to_vec(),
+        "fdr" => sgrna_results.fdr().to_vec()
     )?;
 
     let mut gene_frame = df!(
         "gene" => aggregation_results.genes(),
         "score_low" => aggregation_results.score_low().to_vec(),
-        "pvalues_low" => aggregation_results.pvalues_low().to_vec(),
+        "pvalue_low" => aggregation_results.pvalues_low().to_vec(),
         "fdr_low" => aggregation_results.fdr_low().to_vec(),
         "score_high" => aggregation_results.score_high().to_vec(),
-        "pvalues_high" => aggregation_results.pvalues_high().to_vec(),
+        "pvalue_high" => aggregation_results.pvalues_high().to_vec(),
         "fdr_high" => aggregation_results.fdr_high().to_vec(),
     )?;
 
