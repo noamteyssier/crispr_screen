@@ -47,8 +47,7 @@ pub fn mageck(
     let aggregation_results = compute_aggregation(
         aggregation,
         &normed_matrix,
-        sgrna_results.pvalues_low(),
-        sgrna_results.pvalues_high(),
+        &sgrna_results,
         &gene_names,
         logger);
 
