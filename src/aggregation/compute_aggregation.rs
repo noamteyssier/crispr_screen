@@ -24,7 +24,7 @@ fn mask_zeros(array: &Array1<f64>, logger: &Logger) -> HashSet<usize>
 }
 
 
-/// Filter sgRNAs with zero counts in both samples
+/// Filter `sgRNAs` with zero counts in both samples
 fn filter_zeros(
     normed_matrix: &Array2<f64>,
     gene_names: &Vec<String>,
@@ -34,7 +34,7 @@ fn filter_zeros(
 {
     let sgrna_means = normed_matrix.mean_axis(Axis(1)).unwrap();
     let passing_indices = mask_zeros(&sgrna_means, logger);
-    let mut sorted_indices = Vec::from_iter(passing_indices.iter().cloned());
+    let mut sorted_indices = Vec::from_iter(passing_indices.iter().copied());
     sorted_indices.sort_unstable();
 
     let passing_gene_names = sorted_indices.iter().map(|x| gene_names[*x].clone()).collect::<Vec<String>>();

@@ -17,10 +17,10 @@ mod testing {
 
     #[test]
     fn test_zscore() {
-        let x = Array1::random(100000, Normal::new(100., 300.).unwrap());
+        let x = Array1::random(100_000, Normal::new(100., 300.).unwrap());
         let z = zscore_transform(&x);
         
-        assert!((&z).mean() < Some(1e-6));
+        assert!(z.mean() < Some(1e-6));
         assert!(z.std(0.) - 1. < 1e-6);
     }
 }
