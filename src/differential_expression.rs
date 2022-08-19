@@ -1,9 +1,8 @@
 use anyhow::Result;
-use ndarray::s;
-use polars::prelude::{DataFrame, Series, NamedFrom, df};
+use polars::prelude::DataFrame;
 use crate::{
     utils::{
-        io::{write_gene_results, write_sgrna_results}, 
+        io::{write_gene_results, write_sgrna_results, build_gene_dataframe, build_sgrna_dataframe}, 
         parse_to_string_vec, parse_to_ndarray, logging::Logger},
     norm::{Normalization, normalize_counts},
     model::model_mean_variance,
@@ -51,29 +50,18 @@ pub fn mageck(
         &gene_names,
         logger);
 
-    let mut sgrna_frame = df!(
-        "sgrna" => &sgrna_names,
-        "gene" => gene_names,
-        "control" => normed_matrix.slice(s![.., 0]).to_vec(),
-        "treatment" => normed_matrix.slice(s![.., 1]).to_vec(),
-        "adj_var" => adj_var.to_vec(),
-        "pvalue_low" => sgrna_results.pvalues_low().to_vec(),
-        "pvalue_high" => sgrna_results.pvalues_high().to_vec(),
-        "pvalue_twosided" => sgrna_results.pvalues_twosided().to_vec(),
-        "fdr" => sgrna_results.fdr().to_vec()
-    )?;
-
-    let mut gene_frame = df!(
-        "gene" => aggregation_results.genes(),
-        "score_low" => aggregation_results.score_low().to_vec(),
-        "pvalue_low" => aggregation_results.pvalues_low().to_vec(),
-        "fdr_low" => aggregation_results.fdr_low().to_vec(),
-        "score_high" => aggregation_results.score_high().to_vec(),
-        "pvalue_high" => aggregation_results.pvalues_high().to_vec(),
-        "fdr_high" => aggregation_results.fdr_high().to_vec(),
-    )?;
-
+    // Build sgRNA DataFrame
+    let mut sgrna_frame = build_sgrna_dataframe(
+        &sgrna_names, 
+        &gene_names, 
+        &normed_matrix, 
+        &adj_var, 
+        &sgrna_results)?;
     write_sgrna_results(prefix, &mut sgrna_frame)?;
+
+
+    // Build Gene DataFrame
+    let mut gene_frame = build_gene_dataframe(&aggregation_results)?;
     write_gene_results(prefix, &mut gene_frame)?;
 
     Ok(())
