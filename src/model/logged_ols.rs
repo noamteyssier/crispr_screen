@@ -82,7 +82,7 @@ impl LoggedOls {
         results.retain(|item| {
             sets.iter().all(|set| set.contains(item))
         });
-        let mut ix = Vec::from_iter(results.into_iter());
+        let mut ix = results.into_iter().collect::<Vec<usize>>();
         ix.sort_unstable();
         ix
     }
