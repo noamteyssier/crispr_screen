@@ -1,5 +1,5 @@
 use ndarray::{Array1, Array2, Axis};
-use crate::utils::logging::Logger;
+use crate::{utils::logging::Logger, enrich::EnrichmentResult};
 use hashbrown::HashSet;
 use super::{alpha_rra, inc, AggregationResult};
 
@@ -52,15 +52,14 @@ fn filter_zeros(
 pub fn compute_aggregation(
     agg: &GeneAggregation,
     normed_matrix: &Array2<f64>,
-    sgrna_pvalues_low: &Array1<f64>,
-    sgrna_pvalues_high: &Array1<f64>,
+    sgrna_results: &EnrichmentResult,
     gene_names: &Vec<String>,
     logger: &Logger) -> AggregationResult
 {
     logger.start_gene_aggregation();
     
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
-        normed_matrix, gene_names, sgrna_pvalues_low, sgrna_pvalues_high, logger);
+        normed_matrix, gene_names, sgrna_results.pvalues_low(), sgrna_results.pvalues_high(), logger);
 
     let (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high) = match agg {
         GeneAggregation::AlpaRRA { alpha, npermutations } => {
