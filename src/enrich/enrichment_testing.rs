@@ -1,3 +1,4 @@
+use adjustp::Procedure;
 use statrs::function::beta;
 use ndarray::{s, Array2, Axis, Array1, Zip};
 
@@ -47,7 +48,8 @@ fn calculate_p(
 pub fn enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
-    n_controls: usize) -> EnrichmentResult
+    n_controls: usize,
+    correction: &Procedure) -> EnrichmentResult
 {
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])
@@ -72,6 +74,6 @@ pub fn enrichment_testing(
         .and(&param_p)
         .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, true));
 
-    EnrichmentResult::new(low, high)
+    EnrichmentResult::new(low, high, correction)
 }
 

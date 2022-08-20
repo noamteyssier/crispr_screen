@@ -7,9 +7,13 @@ pub struct EnrichmentResult {
     fdr: Array1<f64>
 }
 impl EnrichmentResult {
-    pub fn new(pvalues_low: Array1<f64>, pvalues_high: Array1<f64>) -> Self {
+    pub fn new(
+            pvalues_low: Array1<f64>, 
+            pvalues_high: Array1<f64>, 
+            correction: &Procedure) -> Self 
+    {
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
-        let fdr = Self::calculate_fdr(&pvalues_twosided);
+        let fdr = Self::calculate_fdr(&pvalues_twosided, correction);
         Self {
             pvalues_low,
             pvalues_high,
@@ -26,9 +30,9 @@ impl EnrichmentResult {
             .collect()
     }
 
-    fn calculate_fdr(pvalues: &Array1<f64>) -> Array1<f64> {
+    fn calculate_fdr(pvalues: &Array1<f64>, correction: &Procedure) -> Array1<f64> {
         Array1::from_vec(
-            adjust(pvalues.as_slice().unwrap(), Procedure::BenjaminiHochberg)
+            adjust(pvalues.as_slice().unwrap(), *correction)
         )
     }
 
