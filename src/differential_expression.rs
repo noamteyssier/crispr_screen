@@ -1,3 +1,4 @@
+use adjustp::Procedure;
 use anyhow::Result;
 use polars::prelude::DataFrame;
 use crate::{
@@ -18,8 +19,8 @@ pub fn mageck(
     prefix: &str,
     normalization: &Normalization,
     aggregation: &GeneAggregation,
-    logger: &Logger
-    ) -> Result<()>
+    logger: &Logger,
+    correction: &Procedure) -> Result<()>
 {
     let columns = frame.get_column_names();
     let labels = [labels_controls, labels_treatments].concat();
@@ -32,6 +33,7 @@ pub fn mageck(
     logger.num_genes(&gene_names);
     logger.norm_method(normalization);
     logger.aggregation_method(aggregation);
+    logger.correction(correction);
 
     // Normalize
     let normed_matrix = normalize_counts(&count_matrix, normalization);
@@ -40,7 +42,11 @@ pub fn mageck(
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);
 
     // sgRNA Ranking (Enrichment)
-    let sgrna_results = enrichment_testing(&normed_matrix, &adj_var, labels_controls.len());
+    let sgrna_results = enrichment_testing(
+        &normed_matrix, 
+        &adj_var, 
+        labels_controls.len(),
+        correction);
 
     // Gene Ranking (Aggregation)
     let aggregation_results = compute_aggregation(
@@ -48,7 +54,8 @@ pub fn mageck(
         &normed_matrix,
         &sgrna_results,
         &gene_names,
-        logger);
+        logger,
+        correction);
 
     // Build sgRNA DataFrame
     let mut sgrna_frame = build_sgrna_dataframe(

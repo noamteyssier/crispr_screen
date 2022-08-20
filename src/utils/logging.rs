@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use adjustp::Procedure;
 use hashbrown::HashSet;
 use colored::Colorize;
 
@@ -65,6 +66,15 @@ impl Logger {
             Self::write_to_stderr(
                 "Aggregation Method         : ", 
                 g);
+        }
+    }
+
+    pub fn correction(&self, correction: &Procedure) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "P-Value Correction Method  : ", 
+                correction
+                );
         }
     }
 

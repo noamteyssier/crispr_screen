@@ -1,4 +1,5 @@
 use std::path::Path;
+use adjustp::Procedure;
 use clap::Parser;
 
 mod aggregation;
@@ -55,7 +56,11 @@ struct Args {
 
     /// Do not write logging information
     #[clap(short, long)]
-    quiet: bool
+    quiet: bool,
+
+    /// Multiple Hypothesis Correction (bonferroni, bh, by)
+    #[clap(short='f', long, value_parser, default_value="bh")]
+    correction: String
 }
 
 fn main() {
@@ -89,6 +94,14 @@ fn main() {
         Logger::new()
     };
 
+    // create multiple hypothesis correction from option
+    let correction = match args.correction.as_str() {
+        "bonferroni" => Procedure::Bonferroni,
+        "bh" | "fdr" => Procedure::BenjaminiHochberg,
+        "by" => Procedure::BenjaminiYekutieli,
+        _ => panic!("Unexpected correction method provided: {}", args.correction)
+    };
+
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
@@ -100,6 +113,7 @@ fn main() {
         &args.output,
         &norm_method,
         &agg,
-        &logger
+        &logger,
+        &correction
     ).unwrap();
 }

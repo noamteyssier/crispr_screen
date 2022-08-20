@@ -1,3 +1,4 @@
+use adjustp::Procedure;
 use ndarray::{Array1, Array2, Axis};
 use crate::{utils::logging::Logger, enrich::EnrichmentResult};
 use hashbrown::HashSet;
@@ -54,7 +55,8 @@ pub fn compute_aggregation(
     normed_matrix: &Array2<f64>,
     sgrna_results: &EnrichmentResult,
     gene_names: &[String],
-    logger: &Logger) -> AggregationResult
+    logger: &Logger,
+    correction: &Procedure) -> AggregationResult
 {
     logger.start_gene_aggregation();
     
@@ -97,5 +99,6 @@ pub fn compute_aggregation(
         gene_pvalues_low, 
         gene_pvalues_high, 
         gene_scores_low, 
-        gene_scores_high)
+        gene_scores_high,
+        correction)
 }

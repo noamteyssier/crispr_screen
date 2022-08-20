@@ -16,21 +16,24 @@ impl AggregationResult {
         pvalues_low: Array1<f64>,
         pvalues_high: Array1<f64>,
         aggregation_score_low: Array1<f64>,
-        aggregation_score_high: Array1<f64>) -> Self 
+        aggregation_score_high: Array1<f64>,
+        correction: &Procedure) -> Self 
     {
+        let fdr_low = Self::fdr_adjustment(&pvalues_low, correction);
+        let fdr_high = Self::fdr_adjustment(&pvalues_high, correction);
         Self {
             genes,
-            fdr_low: Self::fdr_adjustment(&pvalues_low),
-            fdr_high: Self::fdr_adjustment(&pvalues_high),
             pvalues_low,
             pvalues_high,
             aggregation_score_low,
             aggregation_score_high,
+            fdr_low,
+            fdr_high
         }
     }
 
-    fn fdr_adjustment(pvalues: &Array1<f64>) -> Array1<f64> {
-        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), Procedure::BenjaminiHochberg))
+    fn fdr_adjustment(pvalues: &Array1<f64>, correction: &Procedure) -> Array1<f64> {
+        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), *correction))
     }
 
     pub fn genes(&self) -> &Vec<String> {
