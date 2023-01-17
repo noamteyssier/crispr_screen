@@ -11,6 +11,3 @@ Cargo.lock
 
 # Ignore testing tables
 *.tab
-
-# Ignore Justfile
-justfile
