@@ -13,7 +13,7 @@ mod differential_expression;
 use differential_expression::mageck;
 use norm::Normalization;
 use aggregation::{GeneAggregation, GeneAggregationSelection};
-use utils::{io::load_dataframe, logging::Logger};
+use utils::{io::load_dataframe, logging::Logger, Adjustment};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -59,9 +59,9 @@ struct Args {
     #[arg(short, long)]
     quiet: bool,
 
-    /// Multiple Hypothesis Correction (bonferroni, bh, by)
+    /// Multiple Hypothesis Correction
     #[arg(short='f', long, default_value="bh")]
-    correction: String
+    correction: Adjustment
 }
 
 fn main() -> Result<()> {
@@ -97,11 +97,10 @@ fn main() -> Result<()> {
     };
 
     // create multiple hypothesis correction from option
-    let correction = match args.correction.as_str() {
-        "bonferroni" => Procedure::Bonferroni,
-        "bh" | "fdr" => Procedure::BenjaminiHochberg,
-        "by" => Procedure::BenjaminiYekutieli,
-        _ => panic!("Unexpected correction method provided: {}", args.correction)
+    let correction = match args.correction {
+        Adjustment::Bf => Procedure::Bonferroni,
+        Adjustment::Bh => Procedure::BenjaminiHochberg,
+        Adjustment::By => Procedure::BenjaminiYekutieli
     };
 
     let labels_controls = args.controls;
