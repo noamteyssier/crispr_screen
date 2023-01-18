@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::path::Path;
 use adjustp::Procedure;
 use clap::Parser;
@@ -51,7 +52,7 @@ struct Args {
     alpha: f64,
 
     /// Non-Targeting Control Token
-    #[clap(short, long, value_parser, default_value="non-targeting")]
+    #[clap(long, value_parser, default_value="non-targeting")]
     ntc_token: String,
 
     /// Do not write logging information
@@ -63,7 +64,7 @@ struct Args {
     correction: String
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Args::parse();
 
     // validate input path
@@ -106,7 +107,7 @@ fn main() {
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
 
-    mageck(
+    let mageck_results = mageck(
         &frame,
         &labels_controls,
         &labels_treatments,
@@ -115,5 +116,16 @@ fn main() {
         &agg,
         &logger,
         &correction
-    ).unwrap();
+    );
+
+    match mageck_results {
+        Err(e) => {
+            println!("ERROR: {}", e);
+            Ok(())
+        },
+        Ok(_) => {
+            Ok(())
+        }
+    }
 }
+
