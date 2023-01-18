@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 adjustp = "0.1.1"
 anyhow = "1.0.59"
-clap = { version = "3.2.16", features = ["derive"] }
+clap = { version = "4.1.1", features = ["derive"] }
 colored = "2.0.0"
 hashbrown = "0.12.3"
 ndarray = "0.15.6"
