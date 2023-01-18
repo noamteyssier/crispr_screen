@@ -36,8 +36,9 @@ struct Args {
     output: String,
 
     /// Normalization Option
-    #[arg(short, long, default_value="median")]
-    norm: String,
+    #[arg(short, long, default_value="median-ratio")]
+    // norm: String,
+    norm: Normalization,
 
     /// Aggregation Option
     #[arg(short='g', long, default_value="rra")]
@@ -74,13 +75,6 @@ fn main() -> Result<()> {
         panic!("Provided Input Does Not Exist: {}", args.input) 
     };
 
-    // validate normalization method
-    let norm_method = match args.norm.as_str() {
-        "median" => Normalization::MedianRatio,
-        "total" => Normalization::Total,
-        _ => panic!("Unexpected normalization method provided: {}", args.norm)
-    };
-
     // validate aggregation method
     let agg = match args.agg.as_str() {
         "rra" => GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations },
@@ -112,7 +106,7 @@ fn main() -> Result<()> {
         &labels_controls,
         &labels_treatments,
         &args.output,
-        &norm_method,
+        &args.norm,
         &agg,
         &logger,
         &correction
