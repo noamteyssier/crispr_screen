@@ -12,8 +12,8 @@ mod differential_expression;
 
 use differential_expression::mageck;
 use norm::Normalization;
-use aggregation::GeneAggregation;
-use utils::{io::load_dataframe, logging::Logger};
+use aggregation::{GeneAggregation, GeneAggregationSelection};
+use utils::{io::load_dataframe, logging::Logger, Adjustment};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -24,11 +24,11 @@ struct Args {
     input: String,
 
     /// Labels for Control Samples
-    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
+    #[arg(short, long, num_args=1.., required=true)]
     controls: Vec<String>,
 
     /// Labels for Treatment Samples
-    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
+    #[arg(short, long, num_args=1.., required=true)]
     treatments: Vec<String>,
 
     /// Output Prefix
@@ -36,12 +36,12 @@ struct Args {
     output: String,
 
     /// Normalization Option
-    #[arg(short, long, default_value="median")]
-    norm: String,
+    #[arg(short, long, default_value="median-ratio")]
+    norm: Normalization,
 
     /// Aggregation Option
     #[arg(short='g', long, default_value="rra")]
-    agg: String,
+    agg: GeneAggregationSelection,
 
     /// Permutations
     #[arg(short, long, default_value="100")]
@@ -59,9 +59,9 @@ struct Args {
     #[arg(short, long)]
     quiet: bool,
 
-    /// Multiple Hypothesis Correction (bonferroni, bh, by)
+    /// Multiple Hypothesis Correction
     #[arg(short='f', long, default_value="bh")]
-    correction: String
+    correction: Adjustment
 }
 
 fn main() -> Result<()> {
@@ -74,18 +74,19 @@ fn main() -> Result<()> {
         panic!("Provided Input Does Not Exist: {}", args.input) 
     };
 
-    // validate normalization method
-    let norm_method = match args.norm.as_str() {
-        "median" => Normalization::MedianRatio,
-        "total" => Normalization::Total,
-        _ => panic!("Unexpected normalization method provided: {}", args.norm)
-    };
-
-    // validate aggregation method
-    let agg = match args.agg.as_str() {
-        "rra" => GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations },
-        "inc" => GeneAggregation::Inc { token: &args.ntc_token },
-        _ => panic!("Unexpected aggregation method provided: {}", args.agg)
+    // assign and parameterize gene aggregation method
+    let agg = match args.agg {
+        GeneAggregationSelection::RRA => {
+            GeneAggregation::AlpaRRA { 
+                alpha: args.alpha, 
+                npermutations: args.permutations, 
+            }
+        },
+        GeneAggregationSelection::Inc => {
+            GeneAggregation::Inc {
+                token: &args.ntc_token,
+            }
+        }
     };
 
     // create logger based on quiet option
@@ -96,11 +97,10 @@ fn main() -> Result<()> {
     };
 
     // create multiple hypothesis correction from option
-    let correction = match args.correction.as_str() {
-        "bonferroni" => Procedure::Bonferroni,
-        "bh" | "fdr" => Procedure::BenjaminiHochberg,
-        "by" => Procedure::BenjaminiYekutieli,
-        _ => panic!("Unexpected correction method provided: {}", args.correction)
+    let correction = match args.correction {
+        Adjustment::Bf => Procedure::Bonferroni,
+        Adjustment::Bh => Procedure::BenjaminiHochberg,
+        Adjustment::By => Procedure::BenjaminiYekutieli
     };
 
     let labels_controls = args.controls;
@@ -112,7 +112,7 @@ fn main() -> Result<()> {
         &labels_controls,
         &labels_treatments,
         &args.output,
-        &norm_method,
+        &args.norm,
         &agg,
         &logger,
         &correction
