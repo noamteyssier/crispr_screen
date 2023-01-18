@@ -12,7 +12,7 @@ mod differential_expression;
 
 use differential_expression::mageck;
 use norm::Normalization;
-use aggregation::GeneAggregation;
+use aggregation::{GeneAggregation, GeneAggregationSelection};
 use utils::{io::load_dataframe, logging::Logger};
 
 #[derive(Parser, Debug)]
@@ -41,7 +41,7 @@ struct Args {
 
     /// Aggregation Option
     #[arg(short='g', long, default_value="rra")]
-    agg: String,
+    agg: GeneAggregationSelection,
 
     /// Permutations
     #[arg(short, long, default_value="100")]
@@ -74,11 +74,19 @@ fn main() -> Result<()> {
         panic!("Provided Input Does Not Exist: {}", args.input) 
     };
 
-    // validate aggregation method
-    let agg = match args.agg.as_str() {
-        "rra" => GeneAggregation::AlpaRRA { alpha: args.alpha, npermutations: args.permutations },
-        "inc" => GeneAggregation::Inc { token: &args.ntc_token },
-        _ => panic!("Unexpected aggregation method provided: {}", args.agg)
+    // assign and parameterize gene aggregation method
+    let agg = match args.agg {
+        GeneAggregationSelection::RRA => {
+            GeneAggregation::AlpaRRA { 
+                alpha: args.alpha, 
+                npermutations: args.permutations, 
+            }
+        },
+        GeneAggregationSelection::Inc => {
+            GeneAggregation::Inc {
+                token: &args.ntc_token,
+            }
+        }
     };
 
     // create logger based on quiet option
