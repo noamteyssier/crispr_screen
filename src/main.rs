@@ -16,51 +16,51 @@ use aggregation::GeneAggregation;
 use utils::{io::load_dataframe, logging::Logger};
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
 
     /// Filepath of the input count matrix
-    #[clap(short, long, value_parser)]
+    #[arg(short, long)]
     input: String,
 
     /// Labels for Control Samples
-    #[clap(short, long, value_parser, required=true)]
+    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
     controls: Vec<String>,
 
     /// Labels for Treatment Samples
-    #[clap(short, long, value_parser, required=true)]
+    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
     treatments: Vec<String>,
 
     /// Output Prefix
-    #[clap(short, long, value_parser, default_value="results")]
+    #[arg(short, long, default_value="results")]
     output: String,
 
     /// Normalization Option
-    #[clap(short, long, value_parser, default_value="median")]
+    #[arg(short, long, default_value="median")]
     norm: String,
 
     /// Aggregation Option
-    #[clap(short='g', long, value_parser, default_value="rra")]
+    #[arg(short='g', long, default_value="rra")]
     agg: String,
 
     /// Permutations
-    #[clap(short, long, value_parser, default_value="100")]
+    #[arg(short, long, default_value="100")]
     permutations: usize,
 
     /// Alpha Threshold
-    #[clap(short, long, value_parser, default_value="0.1")]
+    #[arg(short, long, default_value="0.1")]
     alpha: f64,
 
     /// Non-Targeting Control Token
-    #[clap(long, value_parser, default_value="non-targeting")]
+    #[arg(long, default_value="non-targeting")]
     ntc_token: String,
 
     /// Do not write logging information
-    #[clap(short, long)]
+    #[arg(short, long)]
     quiet: bool,
 
     /// Multiple Hypothesis Correction (bonferroni, bh, by)
-    #[clap(short='f', long, value_parser, default_value="bh")]
+    #[arg(short='f', long, default_value="bh")]
     correction: String
 }
 
@@ -106,6 +106,9 @@ fn main() -> Result<()> {
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
+
+    println!("{:?}", labels_controls);
+    println!("{:?}", labels_treatments);
 
     let mageck_results = mageck(
         &frame,
