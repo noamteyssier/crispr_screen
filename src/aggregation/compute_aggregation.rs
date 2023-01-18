@@ -1,16 +1,8 @@
 use adjustp::Procedure;
-use clap::ValueEnum;
 use ndarray::{Array1, Array2, Axis};
 use crate::{utils::logging::Logger, enrich::EnrichmentResult};
 use hashbrown::HashSet;
 use super::{alpha_rra, inc, AggregationResult};
-
-/// Enum describing aggregation procedure selection
-#[derive(ValueEnum, Clone, Debug)]
-pub enum GeneAggregationSelection {
-    RRA,
-    Inc,
-}
 
 /// Enum describing the different gene aggregation procedures and their associated configurations.
 #[derive(Debug)]
