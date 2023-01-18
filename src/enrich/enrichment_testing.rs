@@ -41,7 +41,10 @@ fn calculate_p(
     mean: &Array1<f64>,
     var: &Array1<f64>) -> Array1<f64>
 {
-    mean / var
+    (mean / var)
+        .into_iter()
+        .map(|x| if x <= 1.0 { x } else { 1.0 })
+        .collect()
 }
 
 /// Performs enrichment testing using a negative binomial distribution
@@ -60,7 +63,7 @@ pub fn enrichment_testing(
         .slice(s![.., n_controls..])
         .mean_axis(Axis(1))
         .expect("Unexpected Empty Treatment Matrix");
-    
+
     let param_r = calculate_r(&control_means, adj_var);
     let param_p = calculate_p(&control_means, adj_var);
 
