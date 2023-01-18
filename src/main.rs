@@ -24,11 +24,11 @@ struct Args {
     input: String,
 
     /// Labels for Control Samples
-    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
+    #[arg(short, long, num_args=1.., required=true)]
     controls: Vec<String>,
 
     /// Labels for Treatment Samples
-    #[arg(short, long, use_value_delimiter=true, value_delimiter = ' ')]
+    #[arg(short, long, num_args=1.., required=true)]
     treatments: Vec<String>,
 
     /// Output Prefix
