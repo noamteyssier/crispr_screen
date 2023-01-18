@@ -37,7 +37,6 @@ struct Args {
 
     /// Normalization Option
     #[arg(short, long, default_value="median-ratio")]
-    // norm: String,
     norm: Normalization,
 
     /// Aggregation Option
