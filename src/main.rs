@@ -107,9 +107,6 @@ fn main() -> Result<()> {
     let labels_treatments = args.treatments;
     let frame = load_dataframe(&path).unwrap();
 
-    println!("{:?}", labels_controls);
-    println!("{:?}", labels_treatments);
-
     let mageck_results = mageck(
         &frame,
         &labels_controls,
