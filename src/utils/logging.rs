@@ -150,4 +150,14 @@ impl Logger {
         }
     }
 
+    pub fn convert_normalization(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}: {}",
+                "Warning".bold().yellow(),
+                "Numeric instability found in median-ratio normalization. Performing total normalization instead.".bold()
+                )
+        }
+    }
+
 }
