@@ -1,4 +1,5 @@
 use std::ops::{Div, Mul};
+use anyhow::{Result, bail};
 use ndarray::{Axis, Array2, ArrayView1, Array1};
 use ndarray_stats::SummaryStatisticsExt;
 
@@ -36,13 +37,18 @@ fn geometric_means(matrix: &Array2<f64>) -> Array1<f64>
 /// Size factors are computed as the geometric mean of the `sgRNAs` across all
 /// experimental libraries.
 pub fn median_ratio_normalization(
-    matrix: &Array2<f64>) -> Array2<f64>
+    matrix: &Array2<f64>) -> Result<Array2<f64>>
 {
     let gmeans = geometric_means(matrix);
     let transformed_matrix = matrix.t().div(gmeans).reversed_axes();
     let sample_scalars = transformed_matrix
         .map_axis(Axis(0), |axis| 1. / median(&axis));
-    matrix.mul(sample_scalars)
+
+    if sample_scalars.iter().any(|x| x.is_infinite()) {
+        bail!("median-ratio is unstable")
+    }
+
+    Ok(matrix.mul(sample_scalars))
 }
 
 
