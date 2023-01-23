@@ -73,11 +73,18 @@ mod testing {
     #[test]
     fn test_median_normalization() {
         (0..1000).for_each(|_| {
-            let matrix = Array2::random((10, 4), Uniform::new(0., 10.));
-            let norm = median_ratio_normalization(&matrix);
+            let matrix = Array2::random((10, 4), Uniform::new(1., 10.));
+            let norm = median_ratio_normalization(&matrix).unwrap();
 
             // matrices must be equal shape
             assert_eq!(norm.shape(), matrix.shape());
         })
+    }
+
+    #[test]
+    fn test_median_error() {
+        let matrix = Array2::zeros((10, 4));
+        let norm = median_ratio_normalization(&matrix);
+        assert!(norm.is_err());
     }
 }
