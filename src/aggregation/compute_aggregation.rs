@@ -7,8 +7,14 @@ use super::{alpha_rra, inc, AggregationResult};
 /// Enum describing the different gene aggregation procedures and their associated configurations.
 #[derive(Debug)]
 pub enum GeneAggregation <'a> {
-    AlpaRRA{ alpha: f64, npermutations: usize },
-    Inc { token: &'a str }
+    AlpaRRA{ 
+        alpha: f64, 
+        npermutations: usize, 
+        adjust_alpha: bool
+    },
+    Inc { 
+        token: &'a str 
+    }
 }
 
 /// Return all indices where values are above zero
@@ -49,6 +55,32 @@ fn filter_zeros(
     )
 }
 
+/// Calculates an empirical alpha threshold for RRA
+fn calculate_empirical_alpha(pvalue_arr: &Array1<f64>, alpha: &f64) -> f64 {
+    pvalue_arr
+        .map(|x| if x < alpha {1.0} else {0.0})
+        .mean()
+        .expect("Error calculating mean in empirical alpha")
+}
+
+/// Sets the alpha threshold empirically or returns the untouched alpha
+fn set_alpha_threshold(
+    pvalue_low: &Array1<f64>,
+    pvalue_high: &Array1<f64>,
+    alpha: &f64,
+    adjust_alpha: &bool) -> (f64, f64) 
+{
+    if *adjust_alpha {
+        (
+            calculate_empirical_alpha(pvalue_low, alpha),
+            calculate_empirical_alpha(pvalue_high, alpha),
+        )
+
+    } else {
+        (*alpha, *alpha)
+    }
+}
+
 /// Computes gene aggregation using the provided method and associated configurations.
 pub fn compute_aggregation(
     agg: &GeneAggregation,
@@ -64,19 +96,29 @@ pub fn compute_aggregation(
         normed_matrix, gene_names, sgrna_results.pvalues_low(), sgrna_results.pvalues_high(), logger);
 
     let (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high) = match agg {
-        GeneAggregation::AlpaRRA { alpha, npermutations } => {
+        GeneAggregation::AlpaRRA { alpha, npermutations, adjust_alpha } => {
+
+            let (alpha_low, alpha_high) = set_alpha_threshold(
+                &passing_sgrna_pvalues_low,
+                &passing_sgrna_pvalues_high,
+                alpha,
+                adjust_alpha);
+            logger.report_rra_alpha(&alpha_low, &alpha_high);
+
             let (genes, gene_scores_low, gene_pvalues_low) = alpha_rra(
                 &passing_sgrna_pvalues_low, 
                 &passing_gene_names, 
-                *alpha, 
+                alpha_low, 
                 *npermutations, 
                 logger);
+
             let (_, gene_scores_high, gene_pvalues_high) = alpha_rra(
                 &passing_sgrna_pvalues_high, 
                 &passing_gene_names, 
-                *alpha, 
+                alpha_high, 
                 *npermutations, 
                 logger);
+
             (genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high)
         },
         GeneAggregation::Inc { token } => {
