@@ -17,5 +17,5 @@ ndarray-stats = "0.5.0"
 noisy_float = "0.2.0"
 polars = { version = "0.26.1", features = ["ndarray"] }
 rayon = "1.5.3"
-statrs = "0.15.0"
+statrs = "0.16.0"
 thiserror = "1.0.38"
