@@ -4,12 +4,16 @@ pub struct EnrichmentResult {
     pvalues_low: Array1<f64>,
     pvalues_high: Array1<f64>,
     pvalues_twosided: Array1<f64>,
-    fdr: Array1<f64>
+    fdr: Array1<f64>,
+    control_means: Array1<f64>,
+    treatment_means: Array1<f64>,
 }
 impl EnrichmentResult {
     pub fn new(
             pvalues_low: Array1<f64>, 
-            pvalues_high: Array1<f64>, 
+            pvalues_high: Array1<f64>,
+            control_means: Array1<f64>,
+            treatment_means: Array1<f64>,
             correction: &Procedure) -> Self 
     {
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
@@ -18,7 +22,9 @@ impl EnrichmentResult {
             pvalues_low,
             pvalues_high,
             pvalues_twosided,
-            fdr
+            fdr,
+            control_means,
+            treatment_means,
         }
     }
 
@@ -50,5 +56,13 @@ impl EnrichmentResult {
 
     pub fn fdr(&self) -> &Array1<f64> {
         &self.fdr
+    }
+
+    pub fn control_means(&self) -> &Array1<f64> {
+        &self.control_means
+    }
+
+    pub fn treatment_means(&self) -> &Array1<f64> {
+        &self.treatment_means
     }
 }
