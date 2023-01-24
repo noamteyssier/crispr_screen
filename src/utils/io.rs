@@ -1,6 +1,6 @@
 use std::fs::File;
 use polars::prelude::{CsvReader, CsvWriter, SerReader, SerWriter, DataFrame, PolarsError, df, Series, NamedFrom};
-use ndarray::{Array2, Array1, s};
+use ndarray::Array1;
 use crate::{
     enrich::EnrichmentResult,
     aggregation::AggregationResult
@@ -57,15 +57,14 @@ pub fn build_gene_dataframe(aggregation_results: &AggregationResult) -> Result<D
 pub fn build_sgrna_dataframe(
     sgrna_names: &[String],
     gene_names: &[String],
-    normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
     sgrna_results: &EnrichmentResult) -> Result<DataFrame, PolarsError>
 {
     df!(
         "sgrna" => &sgrna_names,
         "gene" => gene_names,
-        "control" => normed_matrix.slice(s![.., 0]).to_vec(),
-        "treatment" => normed_matrix.slice(s![.., 1]).to_vec(),
+        "control" => sgrna_results.control_means().to_vec(),
+        "treatment" => sgrna_results.treatment_means().to_vec(),
         "adj_var" => adj_var.to_vec(),
         "pvalue_low" => sgrna_results.pvalues_low().to_vec(),
         "pvalue_high" => sgrna_results.pvalues_high().to_vec(),

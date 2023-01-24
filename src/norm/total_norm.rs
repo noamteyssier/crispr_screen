@@ -25,7 +25,7 @@ mod testing {
     use super::total_normalization;
 
     #[test]
-    fn test_median_normalization() {
+    fn test_total_normalization() {
         (0..1000).for_each(|_| {
             let matrix = Array2::random((10, 4), Uniform::new(0, 5)).mapv(f64::from);
             let norm = total_normalization(&matrix);
