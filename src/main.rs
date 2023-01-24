@@ -48,8 +48,12 @@ struct Args {
     permutations: usize,
 
     /// Alpha Threshold
-    #[arg(short, long, default_value="0.1")]
+    #[arg(short, long, default_value="0.25")]
     alpha: f64,
+
+    /// Do not adjust alpha threshold for RRA.
+    #[arg(long)]
+    no_adjust_alpha: bool,
 
     /// Non-Targeting Control Token
     #[arg(long, default_value="non-targeting")]
@@ -80,6 +84,7 @@ fn main() -> Result<()> {
             GeneAggregation::AlpaRRA { 
                 alpha: args.alpha, 
                 npermutations: args.permutations, 
+                adjust_alpha: !args.no_adjust_alpha,
             }
         },
         GeneAggregationSelection::Inc => {
