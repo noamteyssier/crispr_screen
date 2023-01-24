@@ -57,15 +57,18 @@ pub fn enrichment_testing(
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])
         .mean_axis(Axis(1))
-        .expect("Unexpected Empty Control Matrix")
+        .expect("Unexpected Empty Control Matrix");
+
+    let adj_control_means = control_means
         .map(|x| if *x == 0. {1.} else {*x});
+
     let treatment_means = normed_matrix
         .slice(s![.., n_controls..])
         .mean_axis(Axis(1))
         .expect("Unexpected Empty Treatment Matrix");
 
-    let param_r = calculate_r(&control_means, adj_var);
-    let param_p = calculate_p(&control_means, adj_var);
+    let param_r = calculate_r(&adj_control_means, adj_var);
+    let param_p = calculate_p(&adj_control_means, adj_var);
 
     let low = Zip::from(&treatment_means)
         .and(&param_r)
@@ -77,6 +80,12 @@ pub fn enrichment_testing(
         .and(&param_p)
         .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, true));
 
-    EnrichmentResult::new(low, high, correction)
+    EnrichmentResult::new(
+        low, 
+        high, 
+        control_means,
+        treatment_means,
+        correction,
+        )
 }
 
