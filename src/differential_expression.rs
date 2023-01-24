@@ -61,7 +61,6 @@ pub fn mageck(
     let mut sgrna_frame = build_sgrna_dataframe(
         &sgrna_names, 
         &gene_names, 
-        &normed_matrix, 
         &adj_var, 
         &sgrna_results)?;
     write_sgrna_results(prefix, &mut sgrna_frame)?;
