@@ -1,5 +1,5 @@
 use std::fs::File;
-use polars::prelude::{CsvReader, CsvWriter, SerReader, SerWriter, DataFrame, PolarsError, df, Series, NamedFrom};
+use polars::prelude::{CsvReader, CsvWriter, SerReader, SerWriter, DataFrame, PolarsError, df, NamedFrom};
 use ndarray::Array1;
 use crate::{
     enrich::EnrichmentResult,
