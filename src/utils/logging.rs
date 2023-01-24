@@ -22,7 +22,7 @@ impl Logger {
         eprintln!(
             "{:width$} {}", 
             format!(">> {}", prompt.bright_green()),
-            format!("{:.3?}", value).white().bold(),
+            format!("{:.4?}", value).white().bold(),
             width = 30
             );
     }
@@ -127,6 +127,19 @@ impl Logger {
             eprintln!(
                 "\n{}",
                 "Performing Gene Aggregation".bold().underline()
+                );
+        }
+    }
+
+    pub fn report_rra_alpha(&self, alpha_low: &f64, alpha_high: &f64) {
+        if self.verbose {
+            Self::write_to_stderr(
+                "Alpha threshold low        : ", 
+                alpha_low,
+                );
+            Self::write_to_stderr(
+                "Alpha threshold high       : ", 
+                alpha_high,
                 );
         }
     }
