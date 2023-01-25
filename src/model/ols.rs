@@ -1,37 +1,38 @@
-use std::ops::Mul;
+use ndarray::{Array1, Array2, Axis};
+use ndarray_linalg::solve::Inverse;
 
-use ndarray::Array1;
-use ndarray_rand::rand_distr::num_traits::Pow;
-
-/// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
+/// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares#Matrix/vector_formulation) using a Matrix/Vector Formulation
+#[derive(Debug)]
 pub struct Ols {
     alpha: f64,
     beta: f64
 }
 impl Ols {
-    /// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Simple_linear_regression) for a simple linear regression:
+    /// Fits an Ordinary Least Squares Linear Regression
     pub fn fit(
         x: &Array1<f64>,
         y: &Array1<f64>) -> Self 
     {
-        assert_eq!(x.len(), y.len(), "Provided vectors are of unequal size");
-        let n = x.len() as f64;
+        assert_eq!(x.len(), y.len(), "Provided vectors to OLS are of unequal size");
+        let n = x.len();
 
-        let mean_x = x.mean().expect("Empty Array in OLS: X");
-        let mean_y = y.mean().expect("Empty Array in OLS: Y");
-        
-        // numerators
-        let num1 = x.mul(y).sum();
-        let num2 = x.sum();
-        let num3 = y.sum();
+        // create design matrix with intercept as first column
+        let mut mat_x = Array2::ones((n, 1));
+        mat_x.push_column(x.view()).expect("Unable to construct design matrix in OLS");
 
-        // denominators
-        let den1 = x.mapv(|x| x.pow(2)).sum();
-        let den2 = num2.pow(2);
+        // convert y to 2D matrix
+        let mat_y = y.clone().insert_axis(Axis(1));
 
-        // calculate coefficients
-        let beta = ((n * num1) - (num2 * num3)) / ((n * den1) - den2);
-        let alpha = mean_y - (beta * mean_x);
+        // B = inv(XtX)XtY
+        let xt = mat_x.t();
+        let xtx = xt.dot(&mat_x);
+        let inv_xtx = Inverse::inv(&xtx).expect("Unable to computer inverse matrix in OLS");
+
+        // drop an axis from the solution for a 1D vector
+        let solution = inv_xtx.dot(&xt).dot(&mat_y).remove_axis(Axis(1));
+
+        let alpha = solution[0];
+        let beta = solution[1];
 
         Self { alpha, beta }
     }
@@ -66,7 +67,7 @@ impl Ols {
 
 #[cfg(test)]
 mod testing {
-    use std::ops::Mul;
+    use std::ops::{Mul, Add, Sub};
     use ndarray::Array1;
     use ndarray_rand::{RandomExt, rand_distr::Uniform};
     use super::Ols;
@@ -84,5 +85,24 @@ mod testing {
 
         // the residuals and x values should be uncorrelated
         assert!(x.mul(res).sum() < EPSILON);
+    }
+
+    fn f(x: &Array1<f64>, m: f64, b: f64) -> Array1<f64> {
+        x.mul(m).add(b)
+    }
+
+    #[test]
+    pub fn test_ols_known_function() {
+        let n = 5000;
+        let x = Array1::linspace(0., 10., n);
+        
+        for m in Array1::random(5, Uniform::new(5.0, 10.0)) {
+            for b in Array1::random(5, Uniform::new(5.0, 10.0)) {
+                let y = f(&x, m, b);
+                let ols = Ols::fit(&x, &y);
+                assert!(ols.alpha().sub(b).abs() < EPSILON);
+                assert!(ols.beta().sub(m).abs() < EPSILON);
+            }
+        }
     }
 }
