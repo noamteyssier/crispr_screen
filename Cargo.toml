@@ -11,7 +11,9 @@ anyhow = "1.0.59"
 clap = { version = "4.1.1", features = ["derive"] }
 colored = "2.0.0"
 hashbrown = "0.12.3"
+nalgebra = "0.32.1"
 ndarray = "0.15.6"
+ndarray-linalg = { version = "0.16.0", features = ["intel-mkl"] }
 ndarray-rand = "0.14.0"
 ndarray-stats = "0.5.0"
 noisy_float = "0.2.0"
