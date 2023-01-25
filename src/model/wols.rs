@@ -1,19 +1,21 @@
 use ndarray::{Array1, Array2, Axis};
 use ndarray_linalg::solve::Inverse;
 
-/// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares#Matrix/vector_formulation) using a Matrix/Vector Formulation
+/// An implementation of [Weighted Least Squares](https://en.wikipedia.org/wiki/Weighted_least_squares) using a Matrix/Vector Formulation
 #[derive(Debug)]
-pub struct Ols {
+pub struct Wols {
     alpha: f64,
     beta: f64
 }
-impl Ols {
-    /// Fits an Ordinary Least Squares Linear Regression
+impl Wols {
+    /// Fits a Weighted Least Squares Linear Regression
     pub fn fit(
         x: &Array1<f64>,
-        y: &Array1<f64>) -> Self 
+        y: &Array1<f64>,
+        w: &Array1<f64>) -> Self 
     {
-        assert_eq!(x.len(), y.len(), "Provided vectors to OLS are of unequal size");
+        assert_eq!(x.len(), y.len(), "Provided vectors to WLS are of unequal size");
+        assert_eq!(x.len(), w.len(), "Provided weights to WLS are of unequal size");
         let n = x.len();
 
         // create design matrix with intercept as first column
@@ -23,13 +25,17 @@ impl Ols {
         // convert y to 2D matrix
         let mat_y = y.clone().insert_axis(Axis(1));
 
-        // B = inv(XtX)XtY
+        // create diagonal weight matrix
+        let mat_w = Array2::from_diag(w);
+
+        // B = inv(XtWX)XtWY
         let xt = mat_x.t();
-        let xtx = xt.dot(&mat_x);
-        let inv_xtx = Inverse::inv(&xtx).expect("Unable to computer inverse matrix in OLS");
+        let xtw = xt.dot(&mat_w);
+        let xtwx = xtw.dot(&mat_x);
+        let inv_xtwx = Inverse::inv(&xtwx).expect("Unable to computer inverse matrix in OLS");
 
         // drop an axis from the solution for a 1D vector
-        let solution = inv_xtx.dot(&xt).dot(&mat_y).remove_axis(Axis(1));
+        let solution = inv_xtwx.dot(&xtw).dot(&mat_y).remove_axis(Axis(1));
 
         let alpha = solution[0];
         let beta = solution[1];
@@ -70,39 +76,27 @@ mod testing {
     use std::ops::{Mul, Add, Sub};
     use ndarray::Array1;
     use ndarray_rand::{RandomExt, rand_distr::Uniform};
-    use super::Ols;
+    use super::Wols;
     const EPSILON: f64 = 1e-6;
-
-    #[test]
-    pub fn test_ols() {
-        let x = Array1::range(0., 100., 1.);
-        let y = &x * Array1::random(100, Uniform::new(0., 50.));
-        let ols = Ols::fit(&x, &y);
-        let res = ols.residuals(&x, &y);
-
-        // the sum of the residuals should be zero
-        assert!(res.sum() < EPSILON);
-
-        // the residuals and x values should be uncorrelated
-        assert!(x.mul(res).sum() < EPSILON);
-    }
 
     fn f(x: &Array1<f64>, m: f64, b: f64) -> Array1<f64> {
         x.mul(m).add(b)
     }
 
     #[test]
-    pub fn test_ols_known_function() {
+    pub fn test_wls_known_function() {
         let n = 5000;
         let x = Array1::linspace(0., 10., n);
+        let w = x.clone();
         
         for m in Array1::random(5, Uniform::new(5.0, 10.0)) {
             for b in Array1::random(5, Uniform::new(5.0, 10.0)) {
                 let y = f(&x, m, b);
-                let ols = Ols::fit(&x, &y);
+                let ols = Wols::fit(&x, &y, &w);
                 assert!(ols.alpha().sub(b).abs() < EPSILON);
                 assert!(ols.beta().sub(m).abs() < EPSILON);
             }
         }
     }
 }
+

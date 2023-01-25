@@ -3,7 +3,7 @@ use adjustp::Procedure;
 use hashbrown::HashSet;
 use colored::Colorize;
 
-use crate::{norm::Normalization, aggregation::GeneAggregation};
+use crate::{norm::Normalization, aggregation::GeneAggregation, model::ModelChoice};
 
 pub struct Logger {
     verbose: bool
@@ -111,8 +111,11 @@ impl Logger {
         }
     }
 
-    pub fn ols_parameters(&self, kappa: f64, beta: f64) {
+    pub fn ols_parameters(&self, model_choice: &ModelChoice, kappa: f64, beta: f64) {
         if self.verbose {
+            Self::write_to_stderr(
+                "Linear Model Type          : ", 
+                model_choice);
             Self::write_to_stderr(
                 "Fit Parameter; K           : ", 
                 kappa);

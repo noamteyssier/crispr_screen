@@ -6,7 +6,7 @@ use crate::{
         io::{write_gene_results, write_sgrna_results, build_gene_dataframe, build_sgrna_dataframe}, 
         parse_to_ndarray, parse_sgrna, parse_genes, logging::Logger},
     norm::{Normalization, normalize_counts},
-    model::model_mean_variance,
+    model::{model_mean_variance, ModelChoice},
     enrich::enrichment_testing,
     aggregation::{GeneAggregation, compute_aggregation}
 };
@@ -20,7 +20,8 @@ pub fn mageck(
     normalization: &Normalization,
     aggregation: &GeneAggregation,
     logger: &Logger,
-    correction: &Procedure) -> Result<()>
+    correction: &Procedure,
+    model_choice: &ModelChoice) -> Result<()>
 {
     let columns = frame.get_column_names();
     let labels = [labels_controls, labels_treatments].concat();
@@ -39,7 +40,7 @@ pub fn mageck(
     let normed_matrix = normalize_counts(&count_matrix, normalization, logger);
 
     // Mean-Variance Modeling
-    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), logger);
+    let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), model_choice, logger);
 
     // sgRNA Ranking (Enrichment)
     let sgrna_results = enrichment_testing(
