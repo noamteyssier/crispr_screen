@@ -21,10 +21,10 @@ impl LoggedOls {
         let (sub_means, sub_variances) = Self::subset_arrays(means, variances, logger);
 
         // calculate y: log(var - mean)
-        let log_variances = sub_variances.sub(&sub_means).mapv(f64::ln);
+        let log_variances = sub_variances.sub(&sub_means).mapv(|x| x + 1.).mapv(f64::ln);
 
         // calculate x: log(mean)
-        let log_means = sub_means.mapv(f64::ln);
+        let log_means = sub_means.mapv(|x| x + 1.).mapv(f64::ln);
 
         // fit ordinary least squares to log transformation
         let ols = Ols::fit(&log_means, &log_variances);
