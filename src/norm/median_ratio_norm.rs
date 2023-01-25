@@ -4,18 +4,18 @@ use ndarray::{Axis, Array2, ArrayView1, Array1};
 use ndarray_stats::SummaryStatisticsExt;
 
 /// Calculates the median of a provided ndarray
-fn median(
+pub fn median(
     array: &ArrayView1<f64>) -> f64
 {
     let mut sorted = array.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).expect("NaN Uncovered in Median"));
     if array.len() % 2 == 0 {
+        let rhs = array.len().div(2);
+        let lhs = rhs - 1;
+        (sorted[lhs] + sorted[rhs]).div(2.)
+    } else {
         let midpoint = array.len().div(2);
         sorted[midpoint]
-    } else {
-        let lhs = array.len().div(2);
-        let rhs = lhs + 1;
-        (sorted[lhs] + sorted[rhs]).div(2.)
     }
 }
 
@@ -59,15 +59,15 @@ mod testing {
     use super::{median, median_ratio_normalization};
 
     #[test]
-    fn test_median_odd() {
+    fn test_median_even() {
         let arr = Array1::range(1., 5., 1.);
-        assert_eq!(median(&arr.view()), 3.);
+        assert_eq!(median(&arr.view()), 2.5);
     }
 
     #[test]
-    fn test_median_even() {
+    fn test_median_odd() {
         let arr = Array1::range(1., 6., 1.);
-        assert_eq!(median(&arr.view()), 3.5);
+        assert_eq!(median(&arr.view()), 3.0);
     }
 
     #[test]
