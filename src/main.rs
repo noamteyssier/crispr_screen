@@ -69,7 +69,7 @@ struct Args {
     correction: Adjustment,
 
     /// Least Squares Model Choice
-    #[arg(short, long, default_value="ols")]
+    #[arg(short, long, default_value="wols")]
     model_choice: ModelChoice,
 }
 
