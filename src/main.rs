@@ -1,4 +1,5 @@
 use anyhow::Result;
+use model::ModelChoice;
 use std::path::Path;
 use adjustp::Procedure;
 use clap::Parser;
@@ -65,7 +66,11 @@ struct Args {
 
     /// Multiple Hypothesis Correction
     #[arg(short='f', long, default_value="bh")]
-    correction: Adjustment
+    correction: Adjustment,
+
+    /// Least Squares Model Choice
+    #[arg(short, long, default_value="ols")]
+    model_choice: ModelChoice,
 }
 
 fn main() -> Result<()> {
@@ -120,7 +125,8 @@ fn main() -> Result<()> {
         &args.norm,
         &agg,
         &logger,
-        &correction
+        &correction,
+        &args.model_choice,
     );
 
     match mageck_results {
