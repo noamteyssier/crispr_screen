@@ -3,7 +3,7 @@ use hashbrown::HashSet;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
 use crate::utils::{math::zscore_transform, logging::Logger};
-use super::Ols;
+use super::{Ols, ModelChoice, Wols};
 
 pub struct LoggedOls {
     kappa: f64,
@@ -13,6 +13,7 @@ impl LoggedOls {
     pub fn fit(
         means: &Array1<f64>,
         variances: &Array1<f64>,
+        model_choice: &ModelChoice,
         logger: &Logger) -> Self
     {
         logger.start_mean_variance();
@@ -26,12 +27,19 @@ impl LoggedOls {
         // calculate x: log(mean)
         let log_means = sub_means.mapv(|x| x + 1.).mapv(f64::ln);
 
-        // fit ordinary least squares to log transformation
-        let ols = Ols::fit(&log_means, &log_variances);
-        let (kappa, beta) = (ols.alpha().exp(), ols.beta());
+        let (kappa, beta) = match model_choice {
+            ModelChoice::Ols => {
+                let ols = Ols::fit(&log_means, &log_variances);
+                (ols.alpha().exp(), ols.beta())
+            },
+            ModelChoice::Wols => {
+                // use non-logged means as the weights 
+                let wols = Wols::fit(&log_means, &log_variances, &sub_means);
+                (wols.alpha().exp(), wols.beta())
+            }
+        };
 
-        logger.ols_parameters(kappa, beta);
-
+        logger.ols_parameters(model_choice, kappa, beta);
         Self { kappa, beta }
     }
 
