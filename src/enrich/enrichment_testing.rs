@@ -1,8 +1,8 @@
 use adjustp::Procedure;
 use statrs::function::beta;
 use ndarray::{s, Array2, Axis, Array1, Zip};
-
 use super::EnrichmentResult;
+use crate::norm::median;
 
 /// Calculates the negative binomial cumulative distribution if measuring depletion otherwise
 /// calculates the negative binomial survival function.
@@ -31,7 +31,8 @@ fn calculate_r(
     var: &Array1<f64>) -> Array1<f64>
 {
     let r = (mean * mean) / (var - mean);
-    r.mapv(|x| if x > 0. {x} else { 1. })
+    // r.mapv(|x| if x > 0. {x} else { 1. })
+    r.mapv(|x| if x >= 1. {x} else {1.})
 }
 
 /// Calculates the negative binomial probability from the provided mean and variance.
@@ -56,16 +57,21 @@ pub fn enrichment_testing(
 {
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])
-        .mean_axis(Axis(1))
-        .expect("Unexpected Empty Control Matrix");
+        .map_axis(Axis(1), |x| median(&x));
+    
+    let min_control_mean = control_means
+        .iter()
+        .filter(|x| **x > 0.)
+        .map(|x| *x)
+        .reduce(f64::min)
+        .expect("Unable to calculate minimum control mean");
 
     let adj_control_means = control_means
-        .map(|x| if *x == 0. {1.} else {*x});
+        .map(|x| if *x == 0. {min_control_mean} else {*x});
 
     let treatment_means = normed_matrix
         .slice(s![.., n_controls..])
-        .mean_axis(Axis(1))
-        .expect("Unexpected Empty Treatment Matrix");
+        .map_axis(Axis(1), |x| median(&x));
 
     let param_r = calculate_r(&adj_control_means, adj_var);
     let param_p = calculate_p(&adj_control_means, adj_var);

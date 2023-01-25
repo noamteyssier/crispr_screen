@@ -21,10 +21,10 @@ impl LoggedOls {
         let (sub_means, sub_variances) = Self::subset_arrays(means, variances, logger);
 
         // calculate y: log(var - mean)
-        let log_variances = sub_variances.sub(&sub_means).mapv(f64::ln);
+        let log_variances = sub_variances.sub(&sub_means).mapv(|x| x + 1.).mapv(f64::ln);
 
         // calculate x: log(mean)
-        let log_means = sub_means.mapv(f64::ln);
+        let log_means = sub_means.mapv(|x| x + 1.).mapv(f64::ln);
 
         // fit ordinary least squares to log transformation
         let ols = Ols::fit(&log_means, &log_variances);
@@ -58,9 +58,6 @@ impl LoggedOls {
             // select indices where means are under 4 std of global mean
             &Self::mask_outliers(means, logger),
 
-            // select indices where means are greater than zero
-            &Self::mask_zeros(means, logger),
-
             // select indices where variances are greater than means
             &Self::mask_varied(means, variances, logger)
             );
@@ -74,15 +71,9 @@ impl LoggedOls {
     /// Return all unique indices 
     fn set_intersection(
         a: &HashSet<usize>, 
-        b: &HashSet<usize>,
-        c: &HashSet<usize>) -> Vec<usize>
+        b: &HashSet<usize>) -> Vec<usize>
     {
-        let sets = vec![b, c];
-        let mut results = a.clone();
-        results.retain(|item| {
-            sets.iter().all(|set| set.contains(item))
-        });
-        let mut ix = results.into_iter().collect::<Vec<usize>>();
+        let mut ix = (a & b).into_iter().collect::<Vec<usize>>();
         ix.sort_unstable();
         ix
     }
@@ -118,19 +109,6 @@ impl LoggedOls {
         mask
     }
 
-    /// Return all indices where values are above zero
-    fn mask_zeros(array: &Array1<f64>, logger: &Logger) -> HashSet<usize>
-    {
-        let mask = array
-            .iter()
-            .enumerate()
-            .filter(|(_idx, x)| **x > 0.)
-            .map(|(idx, _)| idx)
-            .collect::<HashSet<usize>>();
-        logger.num_zeros(array.len() - mask.len());
-        mask
-    }
-
     /// Calculates the minimum value in an array
     fn min_nonzero(array: &Array1<f64>) -> Option<&f64>
     {
@@ -159,17 +137,6 @@ mod testing {
     use crate::utils::{math::zscore_transform, logging::Logger};
 
     use super::LoggedOls;
-
-    #[test]
-    fn test_mask_zeros() {
-        let x = array![1., 2., 0., 3.];
-        let truth = vec![0, 1, 3];
-        let logger = Logger::new();
-        let mask = LoggedOls::mask_zeros(&x, &logger);
-
-        assert_eq!(mask.len(), 3);
-        assert!(truth.iter().all(|x| mask.contains(x)));
-    }
 
     #[test]
     fn test_mask_varied() {
@@ -224,8 +191,7 @@ mod testing {
     fn test_sorted_intersection() {
         let x = vec![1, 2, 4, 6, 12].into_iter().collect();
         let y = vec![6, 4, 5, 12, 11].into_iter().collect();
-        let z = vec![8, 4, 12, 5, 11].into_iter().collect();
-        let indices = LoggedOls::set_intersection(&x, &y, &z);
-        assert_eq!(indices, vec![4, 12]);
+        let indices = LoggedOls::set_intersection(&x, &y);
+        assert_eq!(indices, vec![4, 6, 12]);
     }
 }
