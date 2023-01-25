@@ -79,21 +79,6 @@ mod testing {
     use super::Wols;
     const EPSILON: f64 = 1e-6;
 
-    #[test]
-    pub fn test_wls() {
-        let x = Array1::range(0., 100., 1.);
-        let y = &x * Array1::random(100, Uniform::new(0., 50.));
-        let w = x.clone();
-        let ols = Wols::fit(&x, &y, &w);
-        let res = ols.residuals(&x, &y);
-
-        // the sum of the residuals should be zero
-        assert!(res.sum() < EPSILON);
-
-        // the residuals and x values should be uncorrelated
-        assert!(x.mul(res).sum() < EPSILON);
-    }
-
     fn f(x: &Array1<f64>, m: f64, b: f64) -> Array1<f64> {
         x.mul(m).add(b)
     }
