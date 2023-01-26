@@ -118,7 +118,6 @@ fn main() -> Result<()> {
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = SimpleFrame::from_filepath(&path)?;
-    // let frame = load_dataframe(&path).unwrap();
 
     let mageck_results = mageck(
         &frame,
