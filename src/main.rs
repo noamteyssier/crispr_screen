@@ -128,7 +128,7 @@ fn main() -> Result<()> {
 
     match mageck_results {
         Err(e) => {
-            println!("ERROR: {}", e);
+            println!("ERROR: {e}");
             Ok(())
         }
         Ok(_) => Ok(()),
