@@ -177,3 +177,52 @@ pub fn compute_aggregation(
         correction,
     )
 }
+
+#[cfg(test)]
+mod testing {
+    use ndarray::{Array1, Array2, Axis};
+    use ndarray_rand::{RandomExt, rand_distr::{Binomial, Uniform}};
+    use crate::utils::logging::Logger;
+    use super::{calculate_empirical_alpha, mask_zeros, filter_zeros};
+
+
+    #[test]
+    fn test_empirical_alpha() {
+        let array = Array1::from_vec(vec![0.1, 0.2, 0.25, 0.5, 0.5]);
+        let alpha = 0.3;
+        let emp = calculate_empirical_alpha(&array, alpha);
+        assert_eq!(emp, 3.0 / 5.0);
+    }
+
+    #[test]
+    fn test_mask_zeros() {
+        let array = Array1::from_vec(vec![0., 1., 0., 1., 0.]);
+        let logger = Logger::new();
+        let mask = mask_zeros(&array, &logger);
+        assert_eq!(mask.len(), 2);
+        assert!(mask.contains(&1));
+        assert!(mask.contains(&3));
+    }
+
+    #[test]
+    fn test_filter_zeros() {
+        let logger = Logger::new();
+        let array = Array2::random((100, 2), Binomial::new(1, 0.2).unwrap())
+            .mapv(|x| x as f64);
+        let means = array.mean_axis(Axis(1)).unwrap();
+        let nonzero = mask_zeros(&means, &logger);
+        let gene_names = (0..100)
+            .map(|x| format!("gene_{x}"))
+            .collect::<Vec<String>>();
+        let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
+        let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+
+        assert_eq!(pgn.len(), nonzero.len());
+        assert_eq!(ppl.len(), nonzero.len());
+        assert_eq!(pph.len(), nonzero.len());
+
+        
+
+    }
+}
