@@ -160,3 +160,124 @@ impl SimpleFrame {
         self.meta.get(&self.headers[1]).unwrap()
     }
 }
+
+#[cfg(test)]
+mod testing {
+    use ndarray_rand::rand::random;
+    use super::SimpleFrame;
+
+
+    fn example_dataset() -> String {
+        let mut s = String::with_capacity(1000);
+        let headers = ["sgrna", "gene", "low_1", "low_2", "high_1", "high_2"];
+        let num_rows = 10;
+
+        headers
+            .iter()
+            .enumerate()
+            .for_each(|(idx, x)| {
+                if idx > 0 { 
+                    s.push_str(&format!("\t{x}")) 
+                } else {
+                    s.push_str(&format!("{x}"))
+                }
+            });
+        s.push_str("\n");
+
+        (0..num_rows)
+            .for_each(|row_id| {
+                headers
+                    .iter()
+                    .enumerate()
+                    .for_each(|(idx, _)| {
+                        if idx == 0 {
+                            s.push_str(&format!("sgrna_{row_id}"));
+                        } else if idx == 1 {
+                            s.push_str(&format!("\tgene_{}", row_id % 5));
+                        }
+                        else {
+                            s.push_str(&format!("\t{}", random::<f64>()))
+                        }
+                    });
+                s.push_str("\n");
+
+            });
+        s
+    }
+
+    fn broken_dataset() -> String {
+        let mut s = String::with_capacity(1000);
+        let headers = ["sgrna", "low_1", "low_2", "high_1", "high_2"];
+        let num_rows = 10;
+
+        headers
+            .iter()
+            .enumerate()
+            .for_each(|(idx, x)| {
+                if idx > 0 { 
+                    s.push_str(&format!("\t{x}")) 
+                } else {
+                    s.push_str(&format!("{x}"))
+                }
+            });
+        s.push_str("\n");
+
+        (0..num_rows)
+            .for_each(|row_id| {
+                headers
+                    .iter()
+                    .enumerate()
+                    .for_each(|(idx, _)| {
+                        if idx == 0 {
+                            s.push_str(&format!("sgrna_{row_id}"));
+                        }
+                        else {
+                            s.push_str(&format!("\t{}", random::<f64>()))
+                        }
+                    });
+                s.push_str("\n");
+
+            });
+        s
+    }
+
+    #[test]
+    fn test_simple_frame() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+
+        assert_eq!(
+            frame.headers,
+            vec!["sgrna", "gene", "low_1", "low_2", "high_1", "high_2"]
+            );
+
+        let dm = frame.data_matrix(
+            &vec!["low_1", "low_2", "high_1", "high_2"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
+        ).unwrap();
+        assert_eq!(dm.shape(), &[10, 4]);
+    }
+
+    #[test]
+    fn test_missing_label() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let dm = frame.data_matrix(
+            &vec!["low_1", "low_2", "high_1", "missing_label"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
+        );
+        assert!(dm.is_err());
+    }
+
+    #[test]
+    fn test_broken_dataset() {
+        let datastream = broken_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        assert_eq!(
+            frame.headers,
+            vec!["sgrna", "low_1", "low_2", "high_1", "high_2"]
+            );
+        let dm = frame.data_matrix(
+            &vec!["low_1", "low_2", "high_1", "high_2"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
+        );
+        assert!(dm.is_err());
+    }
+}
