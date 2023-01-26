@@ -35,21 +35,21 @@ impl SimpleFrame {
         let headers = header_row
             .trim()
             .split('\t')
-            .map(|x| x.to_string())
+            .map(std::string::ToString::to_string)
             .collect::<Vec<String>>();
         Ok(headers)
     }
 
     fn build_meta_hashmap(headers: &[String]) -> HashMap<String, Vec<String>> {
         headers.iter().take(2).fold(HashMap::new(), |mut map, s| {
-            map.entry(s.to_owned()).or_insert(Vec::new());
+            map.entry(s.clone()).or_insert(Vec::new());
             map
         })
     }
 
     fn build_data_hashmap(headers: &[String]) -> HashMap<String, Vec<f64>> {
         headers.iter().skip(2).fold(HashMap::new(), |mut map, s| {
-            map.entry(s.to_owned()).or_insert(Vec::new());
+            map.entry(s.clone()).or_insert(Vec::new());
             map
         })
     }
@@ -72,7 +72,7 @@ impl SimpleFrame {
                     meta_hash
                         .get_mut(h)
                         .unwrap()
-                        .push(record.get(h).expect("Malformed Record").to_owned());
+                        .push(record.get(h).expect("Malformed Record").clone());
                 } else {
                     data_hash.get_mut(h).unwrap().push(
                         record
