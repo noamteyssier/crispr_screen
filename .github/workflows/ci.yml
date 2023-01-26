@@ -1,0 +1,48 @@
+name: Rust
+
+on: push
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  
+  ci:
+    needs: [build, test, coverage]
+    name: CI
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Done
+        run: exit 0
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+
+  test:
+    name: Test
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+      - name: Test
+        run: cargo nextest run
+
+  coverage:
+    name: Coverage
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install LLVM-Coverage
+      uses: taiki-e/install-action@cargo-llvm-cov
+    - name: Measure Coverage
+      run: cargo llvm-cov --lcov --output-path coverage.lcov
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.lcov
