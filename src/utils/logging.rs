@@ -21,7 +21,7 @@ impl Logger {
         eprintln!(
             "{:width$} {}",
             format!(">> {}", prompt.bright_green()),
-            format!("{:.5?}", value).white().bold(),
+            format!("{value:.5?}").white().bold(),
             width = 30
         );
     }
