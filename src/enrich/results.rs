@@ -10,12 +10,12 @@ pub struct EnrichmentResult {
 }
 impl EnrichmentResult {
     pub fn new(
-            pvalues_low: Array1<f64>, 
-            pvalues_high: Array1<f64>,
-            control_means: Array1<f64>,
-            treatment_means: Array1<f64>,
-            correction: &Procedure) -> Self 
-    {
+        pvalues_low: Array1<f64>,
+        pvalues_high: Array1<f64>,
+        control_means: Array1<f64>,
+        treatment_means: Array1<f64>,
+        correction: Procedure,
+    ) -> Self {
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
         let fdr = Self::calculate_fdr(&pvalues_twosided, correction);
         Self {
@@ -28,7 +28,7 @@ impl EnrichmentResult {
         }
     }
 
-    fn calculate_twosided(pvalues_low: &Array1<f64>, pvalues_high: &Array1<f64>) -> Array1<f64>{
+    fn calculate_twosided(pvalues_low: &Array1<f64>, pvalues_high: &Array1<f64>) -> Array1<f64> {
         pvalues_low
             .iter()
             .zip(pvalues_high.iter())
@@ -36,10 +36,8 @@ impl EnrichmentResult {
             .collect()
     }
 
-    fn calculate_fdr(pvalues: &Array1<f64>, correction: &Procedure) -> Array1<f64> {
-        Array1::from_vec(
-            adjust(pvalues.as_slice().unwrap(), *correction)
-        )
+    fn calculate_fdr(pvalues: &Array1<f64>, correction: Procedure) -> Array1<f64> {
+        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), correction))
     }
 
     pub fn pvalues_low(&self) -> &Array1<f64> {
@@ -49,7 +47,7 @@ impl EnrichmentResult {
     pub fn pvalues_high(&self) -> &Array1<f64> {
         &self.pvalues_high
     }
-    
+
     pub fn pvalues_twosided(&self) -> &Array1<f64> {
         &self.pvalues_twosided
     }

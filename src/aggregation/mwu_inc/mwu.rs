@@ -1,29 +1,28 @@
-use std::ops::Div;
-use ndarray::{Array1, s, concatenate, Axis};
+use ndarray::{concatenate, s, Array1, Axis};
 use statrs::{
-    statistics::{Data, RankTieBreaker, OrderStatistics}, 
-    distribution::{Normal, ContinuousCDF}};
+    distribution::{ContinuousCDF, Normal},
+    statistics::{Data, OrderStatistics, RankTieBreaker},
+};
+use std::ops::Div;
 
 /// Concatenate two arrays, rank them, and return the rankings for each of the groups.
-fn merged_ranks(
-    x: &Array1<f64>,
-    y: &Array1<f64>) -> (Array1<f64>, Array1<f64>)
-{
+fn merged_ranks(x: &Array1<f64>, y: &Array1<f64>) -> (Array1<f64>, Array1<f64>) {
     let midpoint = x.len();
-    let joined = concatenate(Axis(0), &[x.view(), y.view()]).unwrap().to_vec();
+    let joined = concatenate(Axis(0), &[x.view(), y.view()])
+        .unwrap()
+        .to_vec();
     let ranks = Array1::from_vec(Data::new(joined).ranks(RankTieBreaker::Average));
     (
         ranks.slice(s![..midpoint]).to_owned(),
-        ranks.slice(s![midpoint..]).to_owned()
+        ranks.slice(s![midpoint..]).to_owned(),
     )
 }
 
 /// Calculates the U-Statistic given an array of ranks
-fn u_statistic(array: &Array1<f64>) -> f64
-{
+fn u_statistic(array: &Array1<f64>) -> f64 {
     let s = array.sum();
     let n = array.len() as f64;
-    s - ((n * (n+1.))/2.)
+    s - ((n * (n + 1.)) / 2.)
 }
 
 /// Calculats the U-Distribution Mean
@@ -38,10 +37,7 @@ fn u_std(nx: f64, ny: f64) -> f64 {
 
 /// Performs the Mann-Whitney U Test otherwise known as the Rank-Sum Test to measure the
 /// statistical difference between two values through their ranks.
-pub fn mann_whitney_u(
-    x: &Array1<f64>,
-    y: &Array1<f64>) -> (f64, f64) 
-{
+pub fn mann_whitney_u(x: &Array1<f64>, y: &Array1<f64>) -> (f64, f64) {
     let (ranks_x, _ranks_y) = merged_ranks(x, y);
 
     let nx = x.len() as f64;
@@ -52,12 +48,8 @@ pub fn mann_whitney_u(
     let s_u = u_std(nx, ny);
 
     let z_u = (u_t - m_u) / s_u;
-    
 
-    (
-        u_t,
-        Normal::new(0., 1.).unwrap().cdf(z_u)
-    )
+    (u_t, Normal::new(0., 1.).unwrap().cdf(z_u))
 }
 
 #[cfg(test)]
@@ -65,7 +57,7 @@ mod testing {
 
     use ndarray::{array, Array1};
 
-    use super::{merged_ranks, u_statistic, mann_whitney_u};
+    use super::{mann_whitney_u, merged_ranks, u_statistic};
 
     #[test]
     fn test_merged_ranks() {
@@ -103,7 +95,7 @@ mod testing {
     fn test_mwu() {
         let x = Array1::range(1., 6., 1.);
         let y = Array1::range(6., 11., 1.);
-        println!("{:?} {:?}", x, y);
+        println!("{x:?} {y:?}");
         let (_, pv) = mann_whitney_u(&x, &y);
         assert!(pv - 1.2185e-2 < 1e-6);
     }

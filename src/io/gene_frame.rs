@@ -1,8 +1,10 @@
-use std::{fs::File, io::{BufWriter, Write}};
+use crate::aggregation::AggregationResult;
 use anyhow::Result;
 use ndarray::Array1;
-use crate::aggregation::AggregationResult;
-
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
 
 pub struct GeneFrame<'a> {
     gene: &'a [String],
@@ -15,8 +17,7 @@ pub struct GeneFrame<'a> {
     size: usize,
 }
 
-impl <'a> GeneFrame <'a> {
-
+impl<'a> GeneFrame<'a> {
     pub fn new(aggregation_results: &'a AggregationResult) -> Self {
         Self {
             gene: aggregation_results.genes(),
@@ -31,19 +32,11 @@ impl <'a> GeneFrame <'a> {
     }
 
     pub fn write(&self, prefix: &str) -> Result<()> {
-        let mut writer = File::create(format!("{}.gene_results.tab", prefix))
-            .map(BufWriter::new)?;
+        let mut writer = File::create(format!("{prefix}.gene_results.tab")).map(BufWriter::new)?;
 
         writeln!(
             writer,
-            "{}\t{}\t{}\t{}\t{}\t{}\t{}",
-            "gene",
-            "score_low",
-            "pvalue_low",
-            "fdr_low",
-            "score_high",
-            "pvalue_high",
-            "fdr_high",
+            "gene\tscore_low\tpvalue_low\tfdr_low\tscore_high\tpvalue_high\tfdr_high",
         )?;
 
         for idx in 0..self.size {
@@ -57,7 +50,7 @@ impl <'a> GeneFrame <'a> {
                 self.score_high[idx],
                 self.pvalue_high[idx],
                 self.fdr_high[idx],
-                )?;
+            )?;
         }
 
         Ok(())

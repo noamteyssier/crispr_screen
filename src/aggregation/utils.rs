@@ -2,8 +2,7 @@ use hashbrown::HashMap;
 use ndarray::Array1;
 
 /// Converts a vector of strings to an integer representation
-pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
-{
+pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>) {
     let mut total = 0usize;
     let mut map = HashMap::with_capacity(genes.len());
     let mut encoding = Vec::with_capacity(genes.len());
@@ -16,28 +15,27 @@ pub fn encode_index(genes: &Vec<String>) -> (HashMap<usize, String>, Vec<usize>)
             total += 1;
         }
     }
-    (map.iter().map(|(k, v)| (*v, (*k).clone())).collect(), encoding)
+    (
+        map.iter().map(|(k, v)| (*v, (*k).clone())).collect(),
+        encoding,
+    )
 }
 
 /// Select the ranks for a provided embedding. Essentially applies a filter which selects all ranks
 /// for the current gene index
-pub fn select_ranks(
-    current_idx: usize,
-    encodings: &[usize],
-    ranks: &Array1<f64>) -> Array1<f64>
-{
-    encodings.iter()
+pub fn select_ranks(current_idx: usize, encodings: &[usize], ranks: &Array1<f64>) -> Array1<f64> {
+    encodings
+        .iter()
         .zip(ranks.iter())
         .filter(|(idx, _ranks)| **idx == current_idx)
         .map(|(_, ranks)| *ranks)
         .collect()
 }
 
-
 #[cfg(test)]
 mod testing {
-    use ndarray::array;
     use super::{encode_index, select_ranks};
+    use ndarray::array;
 
     #[test]
     fn test_encoding() {
