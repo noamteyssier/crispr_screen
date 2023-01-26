@@ -17,10 +17,10 @@ pub struct SimpleFrame {
 }
 impl SimpleFrame {
     pub fn from_filepath(path: &str) -> Result<Self> {
-        let headers = Self::parse_headers(path)?;
+        let headers = Self::parse_headers(&mut Self::read_file(path)?)?;
         let mut meta = Self::build_meta_hashmap(&headers);
         let mut data = Self::build_data_hashmap(&headers);
-        Self::parse_to_hashmaps(path, &headers, &mut meta, &mut data)?;
+        Self::parse_to_hashmaps(&mut Self::read_file(path)?, &headers, &mut meta, &mut data)?;
         Ok(Self {
             headers,
             meta,
@@ -28,10 +28,29 @@ impl SimpleFrame {
         })
     }
 
-    fn parse_headers(filename: &str) -> Result<Vec<String>> {
-        let mut file_buffer = File::open(filename).map(BufReader::new)?;
+    #[allow(dead_code)]
+    pub fn from_string(string: &str) -> Result<Self> {
+        let headers = Self::parse_headers(&mut string.as_bytes())?;
+        let mut meta = Self::build_meta_hashmap(&headers);
+        let mut data = Self::build_data_hashmap(&headers);
+        Self::parse_to_hashmaps(&mut string.as_bytes(), &headers, &mut meta, &mut data)?;
+        Ok(Self {
+            headers,
+            meta,
+            data,
+        })
+    }
+
+    fn read_file(filename: &str) -> Result<BufReader<File>> {
+        Ok(
+            File::open(filename)
+                .map(BufReader::new)?
+        )
+    }
+
+    fn parse_headers<R: BufRead>(buffer: &mut R) -> Result<Vec<String>> {
         let mut header_row = String::new();
-        file_buffer.read_line(&mut header_row)?;
+        buffer.read_line(&mut header_row)?;
         let headers = header_row
             .trim()
             .split('\t')
@@ -53,17 +72,17 @@ impl SimpleFrame {
             map
         })
     }
-    fn parse_to_hashmaps(
-        filename: &str,
+
+    fn parse_to_hashmaps<R: BufRead>(
+        buffer: &mut R,
         headers: &[String],
         meta_hash: &mut HashMap<String, Vec<String>>,
         data_hash: &mut HashMap<String, Vec<f64>>,
     ) -> Result<()> {
-        let file_buffer = File::open(filename).map(BufReader::new)?;
         let mut reader = ReaderBuilder::new()
             .has_headers(true)
             .delimiter(b'\t')
-            .from_reader(file_buffer);
+            .from_reader(buffer);
 
         for result in reader.deserialize() {
             let record: Record = result?;
