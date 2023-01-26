@@ -17,9 +17,10 @@ pub fn normalize_counts(
     logger: &Logger,
 ) -> Array2<f64> {
     match normalization {
-        Normalization::MedianRatio => match median_ratio_normalization(count_matrix) {
-            Ok(normed_matrix) => normed_matrix,
-            Err(_) => {
+        Normalization::MedianRatio => {
+            if let Ok(normed_matrix) = median_ratio_normalization(count_matrix) {
+                normed_matrix
+            } else {
                 logger.convert_normalization();
                 total_normalization(count_matrix)
             }
