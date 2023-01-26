@@ -42,10 +42,7 @@ impl SimpleFrame {
     }
 
     fn read_file(filename: &str) -> Result<BufReader<File>> {
-        Ok(
-            File::open(filename)
-                .map(BufReader::new)?
-        )
+        Ok(File::open(filename).map(BufReader::new)?)
     }
 
     fn parse_headers<R: BufRead>(buffer: &mut R) -> Result<Vec<String>> {
@@ -104,12 +101,15 @@ impl SimpleFrame {
                 }
             }
         }
-        
+
         Self::validate_input(headers, &meta_hash, &data_hash)
     }
 
-    fn validate_input(headers: &[String], meta_hash: &HashMap<String, Vec<String>>, data_hash: &HashMap<String, Vec<f64>>) -> Result<()> {
-
+    fn validate_input(
+        headers: &[String],
+        meta_hash: &HashMap<String, Vec<String>>,
+        data_hash: &HashMap<String, Vec<f64>>,
+    ) -> Result<()> {
         // Checks if there were not enough headers read
         if headers.len() != meta_hash.len() + data_hash.len() {
             bail!("Malformed data entry in Axis(0)")
@@ -163,45 +163,35 @@ impl SimpleFrame {
 
 #[cfg(test)]
 mod testing {
-    use ndarray_rand::rand::random;
     use super::SimpleFrame;
-
+    use ndarray_rand::rand::random;
 
     fn example_dataset() -> String {
         let mut s = String::with_capacity(1000);
         let headers = ["sgrna", "gene", "low_1", "low_2", "high_1", "high_2"];
         let num_rows = 10;
 
-        headers
-            .iter()
-            .enumerate()
-            .for_each(|(idx, x)| {
-                if idx > 0 { 
-                    s.push_str(&format!("\t{x}")) 
-                } else {
-                    s.push_str(&format!("{x}"))
-                }
-            });
+        headers.iter().enumerate().for_each(|(idx, x)| {
+            if idx > 0 {
+                s.push_str(&format!("\t{x}"))
+            } else {
+                s.push_str(&format!("{x}"))
+            }
+        });
         s.push_str("\n");
 
-        (0..num_rows)
-            .for_each(|row_id| {
-                headers
-                    .iter()
-                    .enumerate()
-                    .for_each(|(idx, _)| {
-                        if idx == 0 {
-                            s.push_str(&format!("sgrna_{row_id}"));
-                        } else if idx == 1 {
-                            s.push_str(&format!("\tgene_{}", row_id % 5));
-                        }
-                        else {
-                            s.push_str(&format!("\t{}", random::<f64>()))
-                        }
-                    });
-                s.push_str("\n");
-
+        (0..num_rows).for_each(|row_id| {
+            headers.iter().enumerate().for_each(|(idx, _)| {
+                if idx == 0 {
+                    s.push_str(&format!("sgrna_{row_id}"));
+                } else if idx == 1 {
+                    s.push_str(&format!("\tgene_{}", row_id % 5));
+                } else {
+                    s.push_str(&format!("\t{}", random::<f64>()))
+                }
             });
+            s.push_str("\n");
+        });
         s
     }
 
@@ -210,34 +200,25 @@ mod testing {
         let headers = ["sgrna", "low_1", "low_2", "high_1", "high_2"];
         let num_rows = 10;
 
-        headers
-            .iter()
-            .enumerate()
-            .for_each(|(idx, x)| {
-                if idx > 0 { 
-                    s.push_str(&format!("\t{x}")) 
-                } else {
-                    s.push_str(&format!("{x}"))
-                }
-            });
+        headers.iter().enumerate().for_each(|(idx, x)| {
+            if idx > 0 {
+                s.push_str(&format!("\t{x}"))
+            } else {
+                s.push_str(&format!("{x}"))
+            }
+        });
         s.push_str("\n");
 
-        (0..num_rows)
-            .for_each(|row_id| {
-                headers
-                    .iter()
-                    .enumerate()
-                    .for_each(|(idx, _)| {
-                        if idx == 0 {
-                            s.push_str(&format!("sgrna_{row_id}"));
-                        }
-                        else {
-                            s.push_str(&format!("\t{}", random::<f64>()))
-                        }
-                    });
-                s.push_str("\n");
-
+        (0..num_rows).for_each(|row_id| {
+            headers.iter().enumerate().for_each(|(idx, _)| {
+                if idx == 0 {
+                    s.push_str(&format!("sgrna_{row_id}"));
+                } else {
+                    s.push_str(&format!("\t{}", random::<f64>()))
+                }
             });
+            s.push_str("\n");
+        });
         s
     }
 
@@ -249,11 +230,16 @@ mod testing {
         assert_eq!(
             frame.headers,
             vec!["sgrna", "gene", "low_1", "low_2", "high_1", "high_2"]
-            );
+        );
 
-        let dm = frame.data_matrix(
-            &vec!["low_1", "low_2", "high_1", "high_2"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
-        ).unwrap();
+        let dm = frame
+            .data_matrix(
+                &vec!["low_1", "low_2", "high_1", "high_2"]
+                    .into_iter()
+                    .map(|x| x.to_owned())
+                    .collect::<Vec<String>>(),
+            )
+            .unwrap();
         assert_eq!(dm.shape(), &[10, 4]);
     }
 
@@ -262,7 +248,10 @@ mod testing {
         let datastream = example_dataset();
         let frame = SimpleFrame::from_string(&datastream).unwrap();
         let dm = frame.data_matrix(
-            &vec!["low_1", "low_2", "high_1", "missing_label"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
+            &vec!["low_1", "low_2", "high_1", "missing_label"]
+                .into_iter()
+                .map(|x| x.to_owned())
+                .collect::<Vec<String>>(),
         );
         assert!(dm.is_err());
     }
@@ -274,9 +263,12 @@ mod testing {
         assert_eq!(
             frame.headers,
             vec!["sgrna", "low_1", "low_2", "high_1", "high_2"]
-            );
+        );
         let dm = frame.data_matrix(
-            &vec!["low_1", "low_2", "high_1", "high_2"].into_iter().map(|x| x.to_owned()).collect::<Vec<String>>()
+            &vec!["low_1", "low_2", "high_1", "high_2"]
+                .into_iter()
+                .map(|x| x.to_owned())
+                .collect::<Vec<String>>(),
         );
         assert!(dm.is_err());
     }
