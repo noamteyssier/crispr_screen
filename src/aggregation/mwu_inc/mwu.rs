@@ -95,7 +95,7 @@ mod testing {
     fn test_mwu() {
         let x = Array1::range(1., 6., 1.);
         let y = Array1::range(6., 11., 1.);
-        println!("{:?} {:?}", x, y);
+        println!("{x:?} {y:?}");
         let (_, pv) = mann_whitney_u(&x, &y);
         assert!(pv - 1.2185e-2 < 1e-6);
     }
