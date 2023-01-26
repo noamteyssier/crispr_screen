@@ -37,6 +37,6 @@ impl<'a> Configuration<'a> {
         &self.model_choice
     }
     pub fn prefix(&self) -> &str {
-        &self.prefix
+        self.prefix
     }
 }
