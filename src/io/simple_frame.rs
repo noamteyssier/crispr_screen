@@ -104,7 +104,7 @@ impl SimpleFrame {
                         .get(x)
                         .expect("Unexpected column name provided")
                         .iter()
-                        .map(|x| *x),
+                        .copied(),
                 )
                 .insert_axis(Axis(0))
             })

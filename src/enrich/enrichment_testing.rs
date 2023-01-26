@@ -51,7 +51,7 @@ pub fn enrichment_testing(
     let min_control_mean = control_means
         .iter()
         .filter(|x| **x > 0.)
-        .map(|x| *x)
+        .copied()
         .reduce(f64::min)
         .expect("Unable to calculate minimum control mean");
 
