@@ -119,10 +119,10 @@ impl SimpleFrame {
     }
 
     pub fn get_sgrna_names(&self) -> &[String] {
-        &self.meta.get(&self.headers[0]).unwrap()
+        self.meta.get(&self.headers[0]).unwrap()
     }
 
     pub fn get_gene_names(&self) -> &[String] {
-        &self.meta.get(&self.headers[1]).unwrap()
+        self.meta.get(&self.headers[1]).unwrap()
     }
 }
