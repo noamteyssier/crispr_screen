@@ -1,11 +1,10 @@
-pub mod math;
 pub mod logging;
+pub mod math;
 use clap::ValueEnum;
 
 /// Selection for P-Value Adjustments
 #[derive(ValueEnum, Clone, Debug)]
 pub enum Adjustment {
-
     /// Bonferroni
     Bf,
 

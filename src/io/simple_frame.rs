@@ -1,8 +1,11 @@
-use std::{io::{BufReader, BufRead}, fs::File};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use csv::ReaderBuilder;
-use ndarray::{Array1, Axis, Array2};
+use ndarray::{Array1, Array2, Axis};
 use std::collections::HashMap;
 
 type Record = HashMap<String, String>;
@@ -18,7 +21,11 @@ impl SimpleFrame {
         let mut meta = Self::build_meta_hashmap(&headers);
         let mut data = Self::build_data_hashmap(&headers);
         Self::parse_to_hashmaps(path, &headers, &mut meta, &mut data)?;
-        Ok(Self { headers, meta, data })
+        Ok(Self {
+            headers,
+            meta,
+            data,
+        })
     }
 
     fn parse_headers(filename: &str) -> Result<Vec<String>> {
@@ -34,30 +41,24 @@ impl SimpleFrame {
     }
 
     fn build_meta_hashmap(headers: &[String]) -> HashMap<String, Vec<String>> {
-        headers
-            .iter()
-            .take(2)
-            .fold(HashMap::new(), |mut map, s| {
-                map.entry(s.to_owned()).or_insert(Vec::new());
-                map
-            })
+        headers.iter().take(2).fold(HashMap::new(), |mut map, s| {
+            map.entry(s.to_owned()).or_insert(Vec::new());
+            map
+        })
     }
 
     fn build_data_hashmap(headers: &[String]) -> HashMap<String, Vec<f64>> {
-        headers
-            .iter()
-            .skip(2)
-            .fold(HashMap::new(), |mut map, s| {
-                map.entry(s.to_owned()).or_insert(Vec::new());
-                map
-            })
+        headers.iter().skip(2).fold(HashMap::new(), |mut map, s| {
+            map.entry(s.to_owned()).or_insert(Vec::new());
+            map
+        })
     }
     fn parse_to_hashmaps(
-            filename: &str,
-            headers: &[String],
-            meta_hash: &mut HashMap<String, Vec<String>>,
-            data_hash: &mut HashMap<String, Vec<f64>>) -> Result<()>
-    {
+        filename: &str,
+        headers: &[String],
+        meta_hash: &mut HashMap<String, Vec<String>>,
+        data_hash: &mut HashMap<String, Vec<f64>>,
+    ) -> Result<()> {
         let file_buffer = File::open(filename).map(BufReader::new)?;
         let mut reader = ReaderBuilder::new()
             .has_headers(true)
@@ -71,24 +72,16 @@ impl SimpleFrame {
                     meta_hash
                         .get_mut(h)
                         .unwrap()
-                        .push(
-                            record
-                                .get(h)
-                                .expect("Malformed Record")
-                                .to_owned()
-                        );
+                        .push(record.get(h).expect("Malformed Record").to_owned());
                 } else {
-                    data_hash
-                        .get_mut(h)
-                        .unwrap()
-                        .push(
-                            record
-                                .get(h)
-                                .expect("Malformed Record")
-                                .parse::<f64>()
-                                .expect("Unable to parse record to float")
-                                .to_owned()
-                        );
+                    data_hash.get_mut(h).unwrap().push(
+                        record
+                            .get(h)
+                            .expect("Malformed Record")
+                            .parse::<f64>()
+                            .expect("Unable to parse record to float")
+                            .to_owned(),
+                    );
                 }
             }
         }
@@ -96,9 +89,7 @@ impl SimpleFrame {
     }
 
     pub fn valid_headers(&self, labels: &[String]) -> bool {
-        labels
-            .iter()
-            .all(|x| self.headers.contains(x))
+        labels.iter().all(|x| self.headers.contains(x))
     }
 
     pub fn data_matrix(&self, labels: &[String]) -> Result<Array2<f64>> {
@@ -109,16 +100,17 @@ impl SimpleFrame {
             .iter()
             .map(|x| {
                 Array1::from_iter(
-                        self.data
-                            .get(x)
-                            .expect("Unexpected column name provided")
-                            .iter()
-                            .map(|x| *x)
-                    )
-                    .insert_axis(Axis(0))
+                    self.data
+                        .get(x)
+                        .expect("Unexpected column name provided")
+                        .iter()
+                        .map(|x| *x),
+                )
+                .insert_axis(Axis(0))
             })
             .reduce(|mut x, y| {
-                x.push(Axis(0), y.view().remove_axis(Axis(0))).expect("Could not append column");
+                x.push(Axis(0), y.view().remove_axis(Axis(0)))
+                    .expect("Could not append column");
                 x
             })
             .expect("Could not create matrix");

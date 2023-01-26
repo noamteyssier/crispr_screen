@@ -1,7 +1,10 @@
-use std::{fs::File, io::{BufWriter, Write}};
+use crate::enrich::EnrichmentResult;
 use anyhow::Result;
 use ndarray::Array1;
-use crate::enrich::EnrichmentResult;
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
 
 pub struct SgrnaFrame<'a> {
     sgrna_names: &'a [String],
@@ -15,13 +18,13 @@ pub struct SgrnaFrame<'a> {
     fdr: &'a Array1<f64>,
     size: usize,
 }
-impl <'a> SgrnaFrame<'a> {
+impl<'a> SgrnaFrame<'a> {
     pub fn new(
-        sgrna_names: &'a [String], 
+        sgrna_names: &'a [String],
         gene_names: &'a [String],
         adj_var: &'a Array1<f64>,
-        sgrna_results: &'a EnrichmentResult) -> Self 
-    {
+        sgrna_results: &'a EnrichmentResult,
+    ) -> Self {
         Self {
             sgrna_names,
             gene_names,
@@ -37,8 +40,8 @@ impl <'a> SgrnaFrame<'a> {
     }
 
     pub fn write(&self, prefix: &str) -> Result<()> {
-        let mut writer = File::create(format!("{}.sgrna_results.tab", prefix))
-            .map(BufWriter::new)?;
+        let mut writer =
+            File::create(format!("{}.sgrna_results.tab", prefix)).map(BufWriter::new)?;
 
         writeln!(
             writer,

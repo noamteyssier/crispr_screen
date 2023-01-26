@@ -1,27 +1,26 @@
+use adjustp::Procedure;
 use anyhow::Result;
+use clap::Parser;
 use io::SimpleFrame;
 use model::ModelChoice;
 use std::path::Path;
-use adjustp::Procedure;
-use clap::Parser;
 
 mod aggregation;
-mod model;
+mod differential_expression;
 mod enrich;
+mod io;
+mod model;
 mod norm;
 mod utils;
-mod differential_expression;
-mod io;
 
+use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
 use norm::Normalization;
-use aggregation::{GeneAggregation, GeneAggregationSelection};
 use utils::{logging::Logger, Adjustment};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-
     /// Filepath of the input count matrix
     #[arg(short, long)]
     input: String,
@@ -35,23 +34,23 @@ struct Args {
     treatments: Vec<String>,
 
     /// Output Prefix
-    #[arg(short, long, default_value="results")]
+    #[arg(short, long, default_value = "results")]
     output: String,
 
     /// Normalization Option
-    #[arg(short, long, default_value="median-ratio")]
+    #[arg(short, long, default_value = "median-ratio")]
     norm: Normalization,
 
     /// Aggregation Option
-    #[arg(short='g', long, default_value="rra")]
+    #[arg(short = 'g', long, default_value = "rra")]
     agg: GeneAggregationSelection,
 
     /// Permutations
-    #[arg(short, long, default_value="100")]
+    #[arg(short, long, default_value = "100")]
     permutations: usize,
 
     /// Alpha Threshold
-    #[arg(short, long, default_value="0.25")]
+    #[arg(short, long, default_value = "0.25")]
     alpha: f64,
 
     /// Do not adjust alpha threshold for RRA.
@@ -59,7 +58,7 @@ struct Args {
     no_adjust_alpha: bool,
 
     /// Non-Targeting Control Token
-    #[arg(long, default_value="non-targeting")]
+    #[arg(long, default_value = "non-targeting")]
     ntc_token: String,
 
     /// Do not write logging information
@@ -67,11 +66,11 @@ struct Args {
     quiet: bool,
 
     /// Multiple Hypothesis Correction
-    #[arg(short='f', long, default_value="bh")]
+    #[arg(short = 'f', long, default_value = "bh")]
     correction: Adjustment,
 
     /// Least Squares Model Choice
-    #[arg(short, long, default_value="wols")]
+    #[arg(short, long, default_value = "wols")]
     model_choice: ModelChoice,
 }
 
@@ -79,26 +78,22 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     // validate input path
-    let path = if Path::new(&args.input).exists() { 
-        args.input 
-    } else { 
-        panic!("Provided Input Does Not Exist: {}", args.input) 
+    let path = if Path::new(&args.input).exists() {
+        args.input
+    } else {
+        panic!("Provided Input Does Not Exist: {}", args.input)
     };
 
     // assign and parameterize gene aggregation method
     let agg = match args.agg {
-        GeneAggregationSelection::RRA => {
-            GeneAggregation::AlpaRRA { 
-                alpha: args.alpha, 
-                npermutations: args.permutations, 
-                adjust_alpha: !args.no_adjust_alpha,
-            }
+        GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
+            alpha: args.alpha,
+            npermutations: args.permutations,
+            adjust_alpha: !args.no_adjust_alpha,
         },
-        GeneAggregationSelection::Inc => {
-            GeneAggregation::Inc {
-                token: &args.ntc_token,
-            }
-        }
+        GeneAggregationSelection::Inc => GeneAggregation::Inc {
+            token: &args.ntc_token,
+        },
     };
 
     // create logger based on quiet option
@@ -112,7 +107,7 @@ fn main() -> Result<()> {
     let correction = match args.correction {
         Adjustment::Bf => Procedure::Bonferroni,
         Adjustment::Bh => Procedure::BenjaminiHochberg,
-        Adjustment::By => Procedure::BenjaminiYekutieli
+        Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
     let labels_controls = args.controls;
@@ -135,10 +130,7 @@ fn main() -> Result<()> {
         Err(e) => {
             println!("ERROR: {}", e);
             Ok(())
-        },
-        Ok(_) => {
-            Ok(())
         }
+        Ok(_) => Ok(()),
     }
 }
-

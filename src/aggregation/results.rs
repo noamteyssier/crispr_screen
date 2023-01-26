@@ -17,8 +17,8 @@ impl AggregationResult {
         pvalues_high: Array1<f64>,
         aggregation_score_low: Array1<f64>,
         aggregation_score_high: Array1<f64>,
-        correction: &Procedure) -> Self 
-    {
+        correction: &Procedure,
+    ) -> Self {
         let fdr_low = Self::fdr_adjustment(&pvalues_low, correction);
         let fdr_high = Self::fdr_adjustment(&pvalues_high, correction);
         Self {
@@ -28,7 +28,7 @@ impl AggregationResult {
             aggregation_score_low,
             aggregation_score_high,
             fdr_low,
-            fdr_high
+            fdr_high,
         }
     }
 
@@ -64,4 +64,3 @@ impl AggregationResult {
         &self.fdr_high
     }
 }
-

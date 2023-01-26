@@ -1,21 +1,21 @@
-use std::ops::Sub;
+use super::{ModelChoice, Ols, Wols};
+use crate::utils::{logging::Logger, math::zscore_transform};
 use hashbrown::HashSet;
 use ndarray::Array1;
 use ndarray_rand::rand_distr::num_traits::Pow;
-use crate::utils::{math::zscore_transform, logging::Logger};
-use super::{Ols, ModelChoice, Wols};
+use std::ops::Sub;
 
 pub struct LoggedOls {
     kappa: f64,
-    beta: f64
+    beta: f64,
 }
 impl LoggedOls {
     pub fn fit(
         means: &Array1<f64>,
         variances: &Array1<f64>,
         model_choice: &ModelChoice,
-        logger: &Logger) -> Self
-    {
+        logger: &Logger,
+    ) -> Self {
         logger.start_mean_variance();
 
         // subset arrays to values which won't cause numerical instability
@@ -31,9 +31,9 @@ impl LoggedOls {
             ModelChoice::Ols => {
                 let ols = Ols::fit(&log_means, &log_variances);
                 (ols.alpha().exp(), ols.beta())
-            },
+            }
             ModelChoice::Wols => {
-                // use non-logged means as the weights 
+                // use non-logged means as the weights
                 let wols = Wols::fit(&log_means, &log_variances, &sub_means);
                 (wols.alpha().exp(), wols.beta())
             }
@@ -44,8 +44,7 @@ impl LoggedOls {
     }
 
     /// Calculates the adjusted variance from the model fit parameters
-    pub fn predict(&self, means: &Array1<f64>) -> Array1<f64>
-    {
+    pub fn predict(&self, means: &Array1<f64>) -> Array1<f64> {
         // map adjusted variance formula as:
         // adj_var = means + (kappa * (means ** beta))
         let adj_var = means + (self.kappa * (means.mapv(|x| x.pow(self.beta))));
@@ -58,29 +57,23 @@ impl LoggedOls {
     fn subset_arrays(
         means: &Array1<f64>,
         variances: &Array1<f64>,
-        logger: &Logger) -> (Array1<f64>, Array1<f64>)
-    {
-
+        logger: &Logger,
+    ) -> (Array1<f64>, Array1<f64>) {
         let idx_passing = Self::set_intersection(
-
             // select indices where means are under 4 std of global mean
             &Self::mask_outliers(means, logger),
-
             // select indices where variances are greater than means
-            &Self::mask_varied(means, variances, logger)
-            );
+            &Self::mask_varied(means, variances, logger),
+        );
 
         (
             idx_passing.iter().map(|idx| means[*idx]).collect(),
-            idx_passing.iter().map(|idx| variances[*idx]).collect()
+            idx_passing.iter().map(|idx| variances[*idx]).collect(),
         )
     }
 
-    /// Return all unique indices 
-    fn set_intersection(
-        a: &HashSet<usize>, 
-        b: &HashSet<usize>) -> Vec<usize>
-    {
+    /// Return all unique indices
+    fn set_intersection(a: &HashSet<usize>, b: &HashSet<usize>) -> Vec<usize> {
         let mut ix = (a & b).into_iter().collect::<Vec<usize>>();
         ix.sort_unstable();
         ix
@@ -88,8 +81,7 @@ impl LoggedOls {
 
     /// Return all indices where means are less than 4 standard deviations away from the global
     /// mean
-    fn mask_outliers(means: &Array1<f64>, logger: &Logger) -> HashSet<usize>
-    {
+    fn mask_outliers(means: &Array1<f64>, logger: &Logger) -> HashSet<usize> {
         let mask = zscore_transform(means)
             .iter()
             .enumerate()
@@ -104,8 +96,8 @@ impl LoggedOls {
     fn mask_varied(
         means: &Array1<f64>,
         variances: &Array1<f64>,
-        logger: &Logger) -> HashSet<usize>
-    {
+        logger: &Logger,
+    ) -> HashSet<usize> {
         let mask = variances
             .iter()
             .zip(means.iter())
@@ -118,8 +110,7 @@ impl LoggedOls {
     }
 
     /// Calculates the minimum value in an array
-    fn min_nonzero(array: &Array1<f64>) -> Option<&f64>
-    {
+    fn min_nonzero(array: &Array1<f64>) -> Option<&f64> {
         array
             .iter()
             .filter(|x| **x > 0.)
@@ -127,12 +118,10 @@ impl LoggedOls {
     }
 
     /// Replace all zero elements with the minumum nonzero array
-    fn replace_zeros_with_min(array: &Array1<f64>) -> Array1<f64>
-    {
+    fn replace_zeros_with_min(array: &Array1<f64>) -> Array1<f64> {
         if let Some(min) = Self::min_nonzero(array) {
             array.mapv(|x| if x > 0. { x } else { *min })
-        }
-        else {
+        } else {
             array.to_owned()
         }
     }
@@ -140,9 +129,12 @@ impl LoggedOls {
 
 #[cfg(test)]
 mod testing {
-    use ndarray::{array, Array1, concatenate, Axis};
-    use ndarray_rand::{RandomExt, rand_distr::{Normal, Uniform}};
-    use crate::utils::{math::zscore_transform, logging::Logger};
+    use crate::utils::{logging::Logger, math::zscore_transform};
+    use ndarray::{array, concatenate, Array1, Axis};
+    use ndarray_rand::{
+        rand_distr::{Normal, Uniform},
+        RandomExt,
+    };
 
     use super::LoggedOls;
 
@@ -186,14 +178,12 @@ mod testing {
         assert_eq!(m, Some(&1.));
     }
 
-
     #[test]
     fn test_min_nonzero_none() {
         let x = array![0., 0., 0.];
         let m = LoggedOls::min_nonzero(&x);
         assert_eq!(m, None);
     }
-
 
     #[test]
     fn test_sorted_intersection() {

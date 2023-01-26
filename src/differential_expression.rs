@@ -1,13 +1,13 @@
+use crate::{
+    aggregation::{compute_aggregation, GeneAggregation},
+    enrich::enrichment_testing,
+    io::{GeneFrame, SgrnaFrame, SimpleFrame},
+    model::{model_mean_variance, ModelChoice},
+    norm::{normalize_counts, Normalization},
+    utils::logging::Logger,
+};
 use adjustp::Procedure;
 use anyhow::Result;
-use crate::{
-    io::{SimpleFrame, SgrnaFrame, GeneFrame},
-    utils::logging::Logger,
-    norm::{Normalization, normalize_counts},
-    model::{model_mean_variance, ModelChoice},
-    enrich::enrichment_testing,
-    aggregation::{GeneAggregation, compute_aggregation}
-};
 
 /// Performs the `MAGeCK` Differential Expression and Gene Aggregation Algorithm
 pub fn mageck(
@@ -19,8 +19,8 @@ pub fn mageck(
     aggregation: &GeneAggregation,
     logger: &Logger,
     correction: &Procedure,
-    model_choice: &ModelChoice) -> Result<()>
-{
+    model_choice: &ModelChoice,
+) -> Result<()> {
     let labels = [labels_controls, labels_treatments].concat();
     let count_matrix = frame.data_matrix(&labels)?;
     let sgrna_names = frame.get_sgrna_names();
@@ -40,11 +40,8 @@ pub fn mageck(
     let adj_var = model_mean_variance(&normed_matrix, labels_controls.len(), model_choice, logger);
 
     // sgRNA Ranking (Enrichment)
-    let sgrna_results = enrichment_testing(
-        &normed_matrix, 
-        &adj_var, 
-        labels_controls.len(),
-        correction);
+    let sgrna_results =
+        enrichment_testing(&normed_matrix, &adj_var, labels_controls.len(), correction);
 
     // Gene Ranking (Aggregation)
     let aggregation_results = compute_aggregation(
@@ -53,16 +50,12 @@ pub fn mageck(
         &sgrna_results,
         &gene_names,
         logger,
-        correction);
+        correction,
+    );
 
     // Build sgRNA DataFrame
-    let sgrna_frame = SgrnaFrame::new(
-        sgrna_names, 
-        gene_names, 
-        &adj_var, 
-        &sgrna_results);
+    let sgrna_frame = SgrnaFrame::new(sgrna_names, gene_names, &adj_var, &sgrna_results);
     sgrna_frame.write(prefix)?;
-
 
     // Build Gene DataFrame
     let gene_frame = GeneFrame::new(&aggregation_results);

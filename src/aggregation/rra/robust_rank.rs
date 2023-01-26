@@ -1,25 +1,23 @@
-use statrs::distribution::{Beta, ContinuousCDF};
 use ndarray::Array1;
+use statrs::distribution::{Beta, ContinuousCDF};
 
 /// Sorts the rank array in ascending order
-pub fn sort_array(array: &Array1<f64>) -> Array1<f64>
-{
+pub fn sort_array(array: &Array1<f64>) -> Array1<f64> {
     let mut vec = array.to_vec();
     vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
     Array1::from_vec(vec)
 }
 
 /// performs robust rank aggregation
-pub fn robust_rank_aggregation(
-    normed_ranks: &Array1<f64>,
-    num_values: usize) -> f64
-{
-    if normed_ranks.is_empty() { return 1. }
+pub fn robust_rank_aggregation(normed_ranks: &Array1<f64>, num_values: usize) -> f64 {
+    if normed_ranks.is_empty() {
+        return 1.;
+    }
 
     sort_array(normed_ranks)
         .iter()
         .enumerate()
-        .map(|(k, n)| (k+1, num_values - k, n))
+        .map(|(k, n)| (k + 1, num_values - k, n))
         .map(|(k, b, n)| (k as f64, b as f64, n))
         .map(|(k, b, n)| Beta::new(k, b).unwrap().cdf(*n))
         .fold(1., f64::min)
@@ -28,12 +26,12 @@ pub fn robust_rank_aggregation(
 #[cfg(test)]
 mod testing {
     use super::{robust_rank_aggregation, sort_array};
+    use ndarray::{array, Array1};
     use ndarray_rand::rand::{thread_rng, Rng};
     use statrs::distribution::{Beta, ContinuousCDF};
-    use ndarray::{Array1, array};
 
     #[test]
-    fn test_robust_rank(){
+    fn test_robust_rank() {
         let mut rng = thread_rng();
         let num = 5;
         let arr = (0..num).map(|_| rng.gen()).collect::<Array1<f64>>();
