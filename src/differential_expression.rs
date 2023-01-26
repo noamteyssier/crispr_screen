@@ -1,10 +1,8 @@
 use adjustp::Procedure;
 use anyhow::Result;
-use polars::prelude::DataFrame;
 use crate::{
-    utils::{
-        io::{write_gene_results, write_sgrna_results, build_gene_dataframe, build_sgrna_dataframe}, 
-        parse_to_ndarray, parse_sgrna, parse_genes, logging::Logger},
+    io::{SimpleFrame, SgrnaFrame, GeneFrame},
+    utils::logging::Logger,
     norm::{Normalization, normalize_counts},
     model::{model_mean_variance, ModelChoice},
     enrich::enrichment_testing,
@@ -13,7 +11,7 @@ use crate::{
 
 /// Performs the `MAGeCK` Differential Expression and Gene Aggregation Algorithm
 pub fn mageck(
-    frame: &DataFrame,
+    frame: &SimpleFrame,
     labels_controls: &[String],
     labels_treatments: &[String],
     prefix: &str,
@@ -23,15 +21,14 @@ pub fn mageck(
     correction: &Procedure,
     model_choice: &ModelChoice) -> Result<()>
 {
-    let columns = frame.get_column_names();
     let labels = [labels_controls, labels_treatments].concat();
-    let count_matrix = parse_to_ndarray(frame, &labels)?;
-    let sgrna_names = parse_sgrna(frame, columns[0])?;
-    let gene_names = parse_genes(frame, columns[1])?;
+    let count_matrix = frame.data_matrix(&labels)?;
+    let sgrna_names = frame.get_sgrna_names();
+    let gene_names = frame.get_gene_names();
 
     logger.start_mageck();
-    logger.num_sgrnas(&sgrna_names);
-    logger.num_genes(&gene_names);
+    logger.num_sgrnas(sgrna_names);
+    logger.num_genes(gene_names);
     logger.norm_method(normalization);
     logger.aggregation_method(aggregation);
     logger.correction(correction);
@@ -59,17 +56,17 @@ pub fn mageck(
         correction);
 
     // Build sgRNA DataFrame
-    let mut sgrna_frame = build_sgrna_dataframe(
-        &sgrna_names, 
-        &gene_names, 
+    let sgrna_frame = SgrnaFrame::new(
+        sgrna_names, 
+        gene_names, 
         &adj_var, 
-        &sgrna_results)?;
-    write_sgrna_results(prefix, &mut sgrna_frame)?;
+        &sgrna_results);
+    sgrna_frame.write(prefix)?;
 
 
     // Build Gene DataFrame
-    let mut gene_frame = build_gene_dataframe(&aggregation_results)?;
-    write_gene_results(prefix, &mut gene_frame)?;
+    let gene_frame = GeneFrame::new(&aggregation_results);
+    gene_frame.write(prefix)?;
 
     Ok(())
 }
