@@ -1,4 +1,5 @@
 use anyhow::Result;
+use io::SimpleFrame;
 use model::ModelChoice;
 use std::path::Path;
 use adjustp::Procedure;
@@ -10,11 +11,12 @@ mod enrich;
 mod norm;
 mod utils;
 mod differential_expression;
+mod io;
 
 use differential_expression::mageck;
 use norm::Normalization;
 use aggregation::{GeneAggregation, GeneAggregationSelection};
-use utils::{io::load_dataframe, logging::Logger, Adjustment};
+use utils::{logging::Logger, Adjustment};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -115,7 +117,8 @@ fn main() -> Result<()> {
 
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
-    let frame = load_dataframe(&path).unwrap();
+    let frame = SimpleFrame::from_filepath(&path)?;
+    // let frame = load_dataframe(&path).unwrap();
 
     let mageck_results = mageck(
         &frame,
