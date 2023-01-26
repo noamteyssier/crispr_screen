@@ -128,7 +128,7 @@ impl Logger {
                 "\n{}: {}",
                 "Warning".bold().yellow(),
                 "Numeric instability found in median-ratio normalization. Performing total normalization instead.".bold()
-                )
+                );
         }
     }
 }
