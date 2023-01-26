@@ -12,6 +12,7 @@ use rra::alpha_rra;
 
 /// Enum describing aggregation procedure selection
 #[derive(ValueEnum, Clone, Debug)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum GeneAggregationSelection {
     /// Alpha Robust Rank Algorithm (αRRA)
     RRA,
