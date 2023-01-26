@@ -1,9 +1,5 @@
+use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
 use adjustp::Procedure;
-use crate::{
-    norm::Normalization, 
-    aggregation::GeneAggregation, 
-    model::ModelChoice
-};
 
 pub struct Configuration<'a> {
     normalization: Normalization,
@@ -12,14 +8,14 @@ pub struct Configuration<'a> {
     model_choice: ModelChoice,
     prefix: &'a str,
 }
-impl <'a> Configuration<'a> {
+impl<'a> Configuration<'a> {
     pub fn new(
-        normalization: Normalization, 
-        aggregation: GeneAggregation<'a>, 
-        correction: Procedure, 
+        normalization: Normalization,
+        aggregation: GeneAggregation<'a>,
+        correction: Procedure,
         model_choice: ModelChoice,
         prefix: &'a str,
-) -> Self {
+    ) -> Self {
         Self {
             normalization,
             aggregation,

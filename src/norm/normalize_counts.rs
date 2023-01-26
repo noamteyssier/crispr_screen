@@ -24,7 +24,7 @@ pub fn normalize_counts(
                 logger.convert_normalization();
                 total_normalization(count_matrix)
             }
-        },
+        }
         Normalization::Total => total_normalization(count_matrix),
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     io::{GeneFrame, SgrnaFrame, SimpleFrame},
     model::model_mean_variance,
     norm::normalize_counts,
-    utils::{logging::Logger, config::Configuration},
+    utils::{config::Configuration, logging::Logger},
 };
 use anyhow::Result;
 
@@ -36,7 +36,8 @@ pub fn mageck(
     let adj_var = model_mean_variance(&normed_matrix, n_controls, config.model_choice(), logger);
 
     // sgRNA Ranking (Enrichment)
-    let sgrna_results = enrichment_testing(&normed_matrix, &adj_var, n_controls, config.correction());
+    let sgrna_results =
+        enrichment_testing(&normed_matrix, &adj_var, n_controls, config.correction());
 
     // Gene Ranking (Aggregation)
     let aggregation_results = compute_aggregation(

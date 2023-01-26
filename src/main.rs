@@ -16,7 +16,7 @@ mod utils;
 use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
 use norm::Normalization;
-use utils::{logging::Logger, Adjustment, config::Configuration};
+use utils::{config::Configuration, logging::Logger, Adjustment};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -110,13 +110,7 @@ fn main() -> Result<()> {
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new(
-        args.norm, 
-        agg, 
-        correction, 
-        args.model_choice,
-        &args.output,
-    );
+    let config = Configuration::new(args.norm, agg, correction, args.model_choice, &args.output);
 
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
