@@ -1,5 +1,6 @@
 pub mod logging;
 pub mod math;
+pub mod config;
 use clap::ValueEnum;
 
 /// Selection for P-Value Adjustments

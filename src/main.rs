@@ -16,7 +16,7 @@ mod utils;
 use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
 use norm::Normalization;
-use utils::{logging::Logger, Adjustment};
+use utils::{logging::Logger, Adjustment, config::Configuration};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -110,6 +110,14 @@ fn main() -> Result<()> {
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
+    let config = Configuration::new(
+        args.norm, 
+        agg, 
+        correction, 
+        args.model_choice,
+        &args.output,
+    );
+
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
     let frame = SimpleFrame::from_filepath(&path)?;
@@ -118,12 +126,8 @@ fn main() -> Result<()> {
         &frame,
         &labels_controls,
         &labels_treatments,
-        &args.output,
-        &args.norm,
-        &agg,
+        config,
         &logger,
-        correction,
-        &args.model_choice,
     );
 
     match mageck_results {
