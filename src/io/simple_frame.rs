@@ -104,6 +104,17 @@ impl SimpleFrame {
                 }
             }
         }
+        
+        Self::validate_input(headers, &meta_hash, &data_hash)
+    }
+
+    fn validate_input(headers: &[String], meta_hash: &HashMap<String, Vec<String>>, data_hash: &HashMap<String, Vec<f64>>) -> Result<()> {
+
+        // Checks if there were not enough headers read
+        if headers.len() != meta_hash.len() + data_hash.len() {
+            bail!("Malformed data entry in Axis(0)")
+        }
+
         Ok(())
     }
 
@@ -115,6 +126,10 @@ impl SimpleFrame {
         if !self.valid_headers(labels) {
             bail!("Invalid headers provided")
         }
+        if labels.len() != self.data.keys().len() {
+            bail!("Provided count matrix is of unexpected shape!\nMust be [sgrna, gene, samples ... ]")
+        }
+
         let matrix = labels
             .iter()
             .map(|x| {
