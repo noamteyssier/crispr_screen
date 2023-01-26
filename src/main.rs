@@ -122,7 +122,7 @@ fn main() -> Result<()> {
         &args.norm,
         &agg,
         &logger,
-        &correction,
+        correction,
         &args.model_choice,
     );
 

@@ -57,7 +57,7 @@ impl Logger {
         }
     }
 
-    pub fn correction(&self, correction: &Procedure) {
+    pub fn correction(&self, correction: Procedure) {
         if self.verbose {
             Self::write_to_stderr("P-Value Correction Method  : ", correction);
         }
@@ -101,7 +101,7 @@ impl Logger {
         }
     }
 
-    pub fn report_rra_alpha(&self, alpha_low: &f64, alpha_high: &f64) {
+    pub fn report_rra_alpha(&self, alpha_low: f64, alpha_high: f64) {
         if self.verbose {
             Self::write_to_stderr("Alpha threshold low        : ", alpha_low);
             Self::write_to_stderr("Alpha threshold high       : ", alpha_high);

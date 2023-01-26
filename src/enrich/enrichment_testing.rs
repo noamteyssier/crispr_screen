@@ -42,7 +42,7 @@ pub fn enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
     n_controls: usize,
-    correction: &Procedure,
+    correction: Procedure,
 ) -> EnrichmentResult {
     let control_means = normed_matrix
         .slice(s![.., ..n_controls])

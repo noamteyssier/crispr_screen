@@ -63,9 +63,9 @@ fn filter_zeros(
 }
 
 /// Calculates an empirical alpha threshold for RRA
-fn calculate_empirical_alpha(pvalue_arr: &Array1<f64>, alpha: &f64) -> f64 {
+fn calculate_empirical_alpha(pvalue_arr: &Array1<f64>, alpha: f64) -> f64 {
     pvalue_arr
-        .map(|x| if x < alpha { 1.0 } else { 0.0 })
+        .map(|x| if *x < alpha { 1.0 } else { 0.0 })
         .mean()
         .expect("Error calculating mean in empirical alpha")
 }
@@ -74,16 +74,16 @@ fn calculate_empirical_alpha(pvalue_arr: &Array1<f64>, alpha: &f64) -> f64 {
 fn set_alpha_threshold(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,
-    alpha: &f64,
-    adjust_alpha: &bool,
+    alpha: f64,
+    adjust_alpha: bool,
 ) -> (f64, f64) {
-    if *adjust_alpha {
+    if adjust_alpha {
         (
             calculate_empirical_alpha(pvalue_low, alpha),
             calculate_empirical_alpha(pvalue_high, alpha),
         )
     } else {
-        (*alpha, *alpha)
+        (alpha, alpha)
     }
 }
 
@@ -94,7 +94,7 @@ pub fn compute_aggregation(
     sgrna_results: &EnrichmentResult,
     gene_names: &[String],
     logger: &Logger,
-    correction: &Procedure,
+    correction: Procedure,
 ) -> AggregationResult {
     logger.start_gene_aggregation();
 
@@ -116,10 +116,10 @@ pub fn compute_aggregation(
             let (alpha_low, alpha_high) = set_alpha_threshold(
                 &passing_sgrna_pvalues_low,
                 &passing_sgrna_pvalues_high,
-                alpha,
-                adjust_alpha,
+                *alpha,
+                *adjust_alpha,
             );
-            logger.report_rra_alpha(&alpha_low, &alpha_high);
+            logger.report_rra_alpha(alpha_low, alpha_high);
 
             let (genes, gene_scores_low, gene_pvalues_low) = alpha_rra(
                 &passing_sgrna_pvalues_low,

@@ -18,7 +18,7 @@ pub fn mageck(
     normalization: &Normalization,
     aggregation: &GeneAggregation,
     logger: &Logger,
-    correction: &Procedure,
+    correction: Procedure,
     model_choice: &ModelChoice,
 ) -> Result<()> {
     let labels = [labels_controls, labels_treatments].concat();

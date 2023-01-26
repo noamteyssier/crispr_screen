@@ -14,7 +14,7 @@ impl EnrichmentResult {
         pvalues_high: Array1<f64>,
         control_means: Array1<f64>,
         treatment_means: Array1<f64>,
-        correction: &Procedure,
+        correction: Procedure,
     ) -> Self {
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
         let fdr = Self::calculate_fdr(&pvalues_twosided, correction);
@@ -36,8 +36,8 @@ impl EnrichmentResult {
             .collect()
     }
 
-    fn calculate_fdr(pvalues: &Array1<f64>, correction: &Procedure) -> Array1<f64> {
-        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), *correction))
+    fn calculate_fdr(pvalues: &Array1<f64>, correction: Procedure) -> Array1<f64> {
+        Array1::from_vec(adjust(pvalues.as_slice().unwrap(), correction))
     }
 
     pub fn pvalues_low(&self) -> &Array1<f64> {
