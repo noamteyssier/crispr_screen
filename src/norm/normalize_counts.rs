@@ -6,7 +6,10 @@ use super::{median_ratio_normalization, total_normalization};
 
 #[derive(ValueEnum, Debug, Clone)]
 pub enum Normalization {
+    /// Median ratio of sgRNA geometric means (unstable at high zeros)
     MedianRatio,
+
+    /// Total read count per sample scaling (more stable)
     Total,
 }
 

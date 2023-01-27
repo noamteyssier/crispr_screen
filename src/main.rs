@@ -33,23 +33,30 @@ struct Args {
     #[arg(short, long, num_args=1.., required=true)]
     treatments: Vec<String>,
 
-    /// Output Prefix
-    #[arg(short, long, default_value = "results")]
+    /// Output filename prefix
+    ///
+    /// sgRNA results will be written to <prefix>.sgrna_results.tab
+    ///
+    /// gene results will be written to <prefix>.gene_results.tab
+    #[arg(short, long, default_value = "./results")]
     output: String,
 
-    /// Normalization Option
+    /// Count normalization configuration
+    ///
+    /// If high numbers of zeros are encountered the normalization
+    /// method will default to `total` normalization.
     #[arg(short, long, default_value = "median-ratio")]
     norm: Normalization,
 
-    /// Aggregation Option
+    /// Gene aggregation configuration
     #[arg(short = 'g', long, default_value = "rra")]
     agg: GeneAggregationSelection,
 
-    /// Permutations
+    /// Number of permutations to perform in aRRA
     #[arg(short, long, default_value = "100")]
     permutations: usize,
 
-    /// Alpha Threshold
+    /// Alpha threshold for aRRA
     #[arg(short, long, default_value = "0.25")]
     alpha: f64,
 
@@ -57,7 +64,7 @@ struct Args {
     #[arg(long)]
     no_adjust_alpha: bool,
 
-    /// Non-Targeting Control Token
+    /// Non-targeting control token
     #[arg(long, default_value = "non-targeting")]
     ntc_token: String,
 
@@ -65,11 +72,11 @@ struct Args {
     #[arg(short, long)]
     quiet: bool,
 
-    /// Multiple Hypothesis Correction
+    /// Multiple hypothesis correction method
     #[arg(short = 'f', long, default_value = "bh")]
     correction: Adjustment,
 
-    /// Least Squares Model Choice
+    /// Least squares model choice
     #[arg(short, long, default_value = "wols")]
     model_choice: ModelChoice,
 }
