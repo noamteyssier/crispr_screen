@@ -109,7 +109,7 @@ pub fn set_alpha_threshold(
 #[cfg(test)]
 mod testing {
     use super::{calculate_empirical_alpha, encode_index, filter_zeros, mask_zeros, select_ranks};
-    use crate::utils::logging::Logger;
+    use crate::{utils::logging::Logger, aggregation::utils::{select_from_mask, select_from_mask_array}};
     use ndarray::{array, Array1, Array2, Axis};
     use ndarray_rand::{
         rand_distr::{Binomial, Uniform},
@@ -147,6 +147,30 @@ mod testing {
     }
 
     #[test]
+    fn test_select_ranks() {
+        let indices = vec![0, 1, 2, 0, 1, 2];
+        let scores = array![0.5, 0., 0., 0.5, 0., 0.];
+        let selection = select_ranks(0, &indices, &scores);
+        assert_eq!(selection, array![0.5, 0.5]);
+    }
+
+    #[test]
+    fn test_select_from_mask() {
+        let array = vec![0, 1, 2, 3, 4, 5];
+        let mask = vec![0, 2, 4];
+        let selected = select_from_mask(&array, &mask);
+        assert_eq!(selected, vec![0, 2, 4]);
+    }
+
+    #[test]
+    fn test_select_from_mask_array() {
+        let array = Array1::from_vec(vec![0, 1, 2, 3, 4, 5]);
+        let mask = vec![0, 2, 4];
+        let selected = select_from_mask_array(&array, &mask);
+        assert_eq!(selected, array![0, 2, 4]);
+    }
+
+    #[test]
     fn test_mask_zeros() {
         let array = Array1::from_vec(vec![0., 1., 0., 1., 0.]);
         let logger = Logger::new();
@@ -160,6 +184,42 @@ mod testing {
     fn test_filter_zeros() {
         let logger = Logger::new();
         let array = Array2::random((100, 2), Binomial::new(1, 0.2).unwrap()).mapv(|x| x as f64);
+        let means = array.mean_axis(Axis(1)).unwrap();
+        let nonzero = mask_zeros(&means, &logger);
+        let gene_names = (0..100)
+            .map(|x| format!("gene_{x}"))
+            .collect::<Vec<String>>();
+        let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
+        let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+
+        assert_eq!(pgn.len(), nonzero.len());
+        assert_eq!(ppl.len(), nonzero.len());
+        assert_eq!(pph.len(), nonzero.len());
+    }
+
+    #[test]
+    fn test_filter_zeros_empty() {
+        let logger = Logger::new();
+        let array = Array2::random((100, 2), Binomial::new(1, 0.0).unwrap()).mapv(|x| x as f64);
+        let means = array.mean_axis(Axis(1)).unwrap();
+        let nonzero = mask_zeros(&means, &logger);
+        let gene_names = (0..100)
+            .map(|x| format!("gene_{x}"))
+            .collect::<Vec<String>>();
+        let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
+        let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+
+        assert_eq!(pgn.len(), nonzero.len());
+        assert_eq!(ppl.len(), nonzero.len());
+        assert_eq!(pph.len(), nonzero.len());
+    }
+
+    #[test]
+    fn test_filter_zeros_all() {
+        let logger = Logger::new();
+        let array = Array2::random((100, 2), Binomial::new(1, 1.0).unwrap()).mapv(|x| x as f64);
         let means = array.mean_axis(Axis(1)).unwrap();
         let nonzero = mask_zeros(&means, &logger);
         let gene_names = (0..100)
