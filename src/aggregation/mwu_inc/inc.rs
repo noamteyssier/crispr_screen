@@ -35,13 +35,13 @@ pub fn inc(
     logger.num_ntcs(ntc_values.len());
 
     let (scores, pvalues): (Vec<f64>, Vec<f64>) =
-        (0..*encode.iter().max().expect("Unexpected empty encoding"))
+        (0..=*encode.iter().max().expect("Unexpected empty encoding"))
             .filter(|x| *x != ntc_index)
             .map(|x| select_ranks(x, &encode, pvalues))
             .map(|x| mann_whitney_u(&x, &ntc_values))
             .unzip();
 
-    let names = (0..*encode.iter().max().expect("Unexpected empty encoding"))
+    let names = (0..=*encode.iter().max().expect("Unexpected empty encoding"))
         .filter(|x| *x != ntc_index)
         .map(|curr| {
             encode_map
