@@ -25,7 +25,7 @@ fn validate_token(encode_map: &HashMap<usize, String>, token: &str) -> usize {
 /// and so I've kept the same naming for the time being.
 pub fn inc(
     pvalues: &Array1<f64>,
-    genes: &Vec<String>,
+    genes: &[String],
     token: &str,
     logger: &Logger,
 ) -> (Vec<String>, Array1<f64>, Array1<f64>) {
