@@ -54,7 +54,7 @@ impl<'a> SgrnaFrame<'a> {
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.sgrna_names[idx],
                 self.gene_names[idx],
                 self.control[idx],

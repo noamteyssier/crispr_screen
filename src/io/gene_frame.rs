@@ -42,7 +42,7 @@ impl<'a> GeneFrame<'a> {
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                "{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.gene[idx],
                 self.score_low[idx],
                 self.pvalue_low[idx],
