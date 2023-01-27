@@ -48,6 +48,7 @@ pub fn aggregate_fold_changes(
 #[cfg(test)]
 mod testing {
     use hashbrown::HashMap;
+    use ndarray::Array1;
 
     #[test]
     fn test_unique_indices() {
@@ -86,9 +87,6 @@ mod testing {
 
     #[test]
     fn test_aggregate_fold_changes() {
-        use hashbrown::HashMap;
-        use ndarray::Array1;
-
         let gene_names = vec![
             "A".to_string(),
             "B".to_string(),
