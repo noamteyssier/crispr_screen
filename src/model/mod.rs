@@ -12,10 +12,9 @@ use wols::Wols;
 
 #[derive(ValueEnum, Debug, Clone)]
 pub enum ModelChoice {
-
     /// Ordinary least squares
     Ols,
-    
+
     /// Weighted ordinary least squares
     Wols,
 }
