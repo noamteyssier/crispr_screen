@@ -41,7 +41,7 @@ impl AggregationResult {
     fn fdr_adjustment(pvalues: &Array1<f64>, correction: Procedure) -> Array1<f64> {
         Array1::from_vec(adjust(pvalues.as_slice().unwrap(), correction))
     }
-    
+
     fn calculate_log_fold_change(gene_fc: &Array1<f64>) -> Array1<f64> {
         gene_fc.mapv(|x| x.log2())
     }

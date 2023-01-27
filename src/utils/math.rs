@@ -11,7 +11,7 @@ pub fn zscore_transform(array: &Array1<f64>) -> Array1<f64> {
 }
 
 /// Weighted mean of the provided array
-/// 
+///
 /// The weighted arithmetic mean is calculated as:
 /// ```text
 /// m = (x @ w) / w.sum()

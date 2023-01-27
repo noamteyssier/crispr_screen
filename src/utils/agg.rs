@@ -1,6 +1,6 @@
-use std::hash::Hash;
 use hashbrown::HashMap;
 use ndarray::{Array1, Axis};
+use std::hash::Hash;
 
 use super::math::weighted_mean;
 
@@ -22,16 +22,18 @@ pub fn unique_indices<T: Eq + Hash + Clone>(vec: &[T]) -> HashMap<T, Vec<usize>>
 /// * `pvalues` - the pvalues corresponding to the fold change values to be inversely weighted
 /// * `map` - a hashmap of the unique values and their indices
 pub fn weighted_fold_change<T: Eq + Hash + Clone>(
-        fold_change: &Array1<f64>, 
-        pvalues: &Array1<f64>, 
-        map: &HashMap<T, Vec<usize>>
+    fold_change: &Array1<f64>,
+    pvalues: &Array1<f64>,
+    map: &HashMap<T, Vec<usize>>,
 ) -> HashMap<T, f64> {
-    map.iter().map(|(k, v)| {
-        let fc = fold_change.select(Axis(0), v);
-        let weights = 1.0 - pvalues.select(Axis(0), v);
-        let weighted_fc = weighted_mean(&fc, &weights);
-        (k.clone(), weighted_fc)
-    }).collect()
+    map.iter()
+        .map(|(k, v)| {
+            let fc = fold_change.select(Axis(0), v);
+            let weights = 1.0 - pvalues.select(Axis(0), v);
+            let weighted_fc = weighted_mean(&fc, &weights);
+            (k.clone(), weighted_fc)
+        })
+        .collect()
 }
 
 pub fn aggregate_fold_changes(
@@ -66,8 +68,8 @@ mod testing {
 
     #[test]
     fn test_weighted_fold_change() {
-        use ndarray::Array1;
         use hashbrown::HashMap;
+        use ndarray::Array1;
 
         let fc = Array1::from(vec![1., 2., 3., 4.]);
         let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4]);
@@ -76,8 +78,8 @@ mod testing {
         map.insert(2, vec![1, 3]);
 
         let mut expected = HashMap::new();
-        expected.insert(1, (((1.0 * 0.9) + (3.0 * 0.7)))/1.6);
-        expected.insert(2, (((2.0 * 0.8) + (4.0 * 0.6)))/1.4);
+        expected.insert(1, ((1.0 * 0.9) + (3.0 * 0.7)) / 1.6);
+        expected.insert(2, ((2.0 * 0.8) + (4.0 * 0.6)) / 1.4);
 
         assert_eq!(expected, super::weighted_fold_change(&fc, &pvalues, &map));
     }

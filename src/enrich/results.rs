@@ -77,11 +77,11 @@ impl EnrichmentResult {
     pub fn treatment_means(&self) -> &Array1<f64> {
         &self.treatment_means
     }
-    
+
     pub fn fold_change(&self) -> &Array1<f64> {
         &self.fold_change
     }
-    
+
     pub fn log_fold_change(&self) -> &Array1<f64> {
         &self.log_fold_change
     }

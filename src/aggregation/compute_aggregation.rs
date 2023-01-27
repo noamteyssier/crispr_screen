@@ -1,5 +1,8 @@
 use super::{alpha_rra, inc, AggregationResult};
-use crate::{enrich::EnrichmentResult, utils::{logging::Logger, agg::aggregate_fold_changes}};
+use crate::{
+    enrich::EnrichmentResult,
+    utils::{agg::aggregate_fold_changes, logging::Logger},
+};
 use adjustp::Procedure;
 use hashbrown::HashSet;
 use ndarray::{Array1, Array2, Axis};
@@ -99,9 +102,9 @@ pub fn compute_aggregation(
     logger.start_gene_aggregation();
 
     let gene_fc_hashmap = aggregate_fold_changes(
-        gene_names, 
-        sgrna_results.fold_change(), 
-        sgrna_results.pvalues_twosided()
+        gene_names,
+        sgrna_results.fold_change(),
+        sgrna_results.pvalues_twosided(),
     );
 
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
@@ -193,11 +196,13 @@ pub fn compute_aggregation(
 
 #[cfg(test)]
 mod testing {
-    use ndarray::{Array1, Array2, Axis};
-    use ndarray_rand::{RandomExt, rand_distr::{Binomial, Uniform}};
+    use super::{calculate_empirical_alpha, filter_zeros, mask_zeros};
     use crate::utils::logging::Logger;
-    use super::{calculate_empirical_alpha, mask_zeros, filter_zeros};
-
+    use ndarray::{Array1, Array2, Axis};
+    use ndarray_rand::{
+        rand_distr::{Binomial, Uniform},
+        RandomExt,
+    };
 
     #[test]
     fn test_empirical_alpha() {
@@ -220,8 +225,7 @@ mod testing {
     #[test]
     fn test_filter_zeros() {
         let logger = Logger::new();
-        let array = Array2::random((100, 2), Binomial::new(1, 0.2).unwrap())
-            .mapv(|x| x as f64);
+        let array = Array2::random((100, 2), Binomial::new(1, 0.2).unwrap()).mapv(|x| x as f64);
         let means = array.mean_axis(Axis(1)).unwrap();
         let nonzero = mask_zeros(&means, &logger);
         let gene_names = (0..100)
@@ -234,8 +238,5 @@ mod testing {
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
-
-        
-
     }
 }
