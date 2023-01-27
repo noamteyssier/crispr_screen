@@ -5,7 +5,7 @@ mod rra;
 mod utils;
 
 use clap::ValueEnum;
-pub use compute_aggregation::{compute_aggregation, GeneAggregation};
+pub use compute_aggregation::compute_aggregation;
 use mwu_inc::inc;
 pub use results::AggregationResult;
 use rra::alpha_rra;
@@ -19,4 +19,17 @@ pub enum GeneAggregationSelection {
 
     /// INC Method, i.e. Mann-Whitney U-Test
     Inc,
+}
+
+/// Enum describing the different gene aggregation procedures and their associated configurations.
+#[derive(Debug)]
+pub enum GeneAggregation<'a> {
+    AlpaRRA {
+        alpha: f64,
+        npermutations: usize,
+        adjust_alpha: bool,
+    },
+    Inc {
+        token: &'a str,
+    },
 }

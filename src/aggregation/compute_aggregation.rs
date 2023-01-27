@@ -1,7 +1,7 @@
 use super::{
     alpha_rra, inc,
     utils::{filter_zeros, set_alpha_threshold},
-    AggregationResult,
+    AggregationResult, GeneAggregation,
 };
 use crate::{
     enrich::EnrichmentResult,
@@ -9,19 +9,6 @@ use crate::{
 };
 use adjustp::Procedure;
 use ndarray::{Array1, Array2};
-
-/// Enum describing the different gene aggregation procedures and their associated configurations.
-#[derive(Debug)]
-pub enum GeneAggregation<'a> {
-    AlpaRRA {
-        alpha: f64,
-        npermutations: usize,
-        adjust_alpha: bool,
-    },
-    Inc {
-        token: &'a str,
-    },
-}
 
 /// Aggregates the results of the gene aggregation analysis for internal use
 struct InternalAggregationResult {
