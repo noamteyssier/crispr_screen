@@ -53,3 +53,52 @@ pub fn inc(
 
     (names, Array1::from_vec(scores), Array1::from_vec(pvalues))
 }
+
+#[cfg(test)]
+mod testing {
+    use super::validate_token;
+    use hashbrown::HashMap;
+
+    #[test]
+    fn test_validate_token() {
+        let encode_map = vec![
+            (0, "A"),
+            (1, "B"),
+            (2, "C"),
+            (3, "D"),
+            (4, "E"),
+            (5, "F"),
+            (6, "G"),
+        ]
+        .into_iter()
+        .map(|(idx, gene)| (idx, gene.to_string()))
+        .collect::<HashMap<usize, String>>();
+
+        assert_eq!(validate_token(&encode_map, "A"), 0);
+        assert_eq!(validate_token(&encode_map, "B"), 1);
+        assert_eq!(validate_token(&encode_map, "C"), 2);
+        assert_eq!(validate_token(&encode_map, "D"), 3);
+        assert_eq!(validate_token(&encode_map, "E"), 4);
+        assert_eq!(validate_token(&encode_map, "F"), 5);
+        assert_eq!(validate_token(&encode_map, "G"), 6);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_validate_token_fail() {
+        let encode_map = vec![
+            (0, "A"),
+            (1, "B"),
+            (2, "C"),
+            (3, "D"),
+            (4, "E"),
+            (5, "F"),
+            (6, "G"),
+        ]
+        .into_iter()
+        .map(|(idx, gene)| (idx, gene.to_string()))
+        .collect::<HashMap<usize, String>>();
+        validate_token(&encode_map, "H");
+    }
+
+}
