@@ -70,7 +70,6 @@ mod testing {
 
     use crate::aggregation::AggregationResult;
 
-    
     #[test]
     fn test_gene_frame() {
         let gene = vec!["gene1".to_string(), "gene2".to_string()];
@@ -82,14 +81,14 @@ mod testing {
         let procedure = Procedure::BenjaminiHochberg;
 
         let aggregation_results = AggregationResult::new(
-            gene, 
-            gene_fc, 
-            pvalue_low, 
-            pvalue_high, 
-            score_low, 
+            gene,
+            gene_fc,
+            pvalue_low,
+            pvalue_high,
+            score_low,
             score_high,
             procedure,
-            );
+        );
         let gene_frame = super::GeneFrame::new(&aggregation_results);
         assert_eq!(gene_frame.size, 2);
         gene_frame.write("test").unwrap();

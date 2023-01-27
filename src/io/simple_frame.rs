@@ -293,8 +293,8 @@ mod testing {
         assert_eq!(
             frame.get_sgrna_names(),
             &vec![
-                "sgrna_0", "sgrna_1", "sgrna_2", "sgrna_3", "sgrna_4", "sgrna_5", "sgrna_6", "sgrna_7",
-                "sgrna_8", "sgrna_9"
+                "sgrna_0", "sgrna_1", "sgrna_2", "sgrna_3", "sgrna_4", "sgrna_5", "sgrna_6",
+                "sgrna_7", "sgrna_8", "sgrna_9"
             ]
         );
     }
