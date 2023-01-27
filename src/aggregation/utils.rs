@@ -1,6 +1,6 @@
+use crate::utils::logging::Logger;
 use hashbrown::{HashMap, HashSet};
 use ndarray::{Array1, Array2, Axis};
-use crate::utils::logging::Logger;
 
 /// Converts a vector of strings to an integer representation
 pub fn encode_index(genes: &[String]) -> (HashMap<usize, String>, Vec<usize>) {
@@ -47,9 +47,7 @@ pub fn mask_zeros(array: &Array1<f64>, logger: &Logger) -> HashSet<usize> {
 
 /// Select from vector where indices are in the mask
 pub fn select_from_mask<T: Clone>(array: &[T], mask: &[usize]) -> Vec<T> {
-    mask.iter()
-        .map(|x| array[*x].clone())
-        .collect::<Vec<T>>()
+    mask.iter().map(|x| array[*x].clone()).collect::<Vec<T>>()
 }
 
 /// Select from array where indices are in the mask
@@ -108,16 +106,15 @@ pub fn set_alpha_threshold(
     }
 }
 
-
 #[cfg(test)]
 mod testing {
-    use super::{encode_index, select_ranks, mask_zeros, filter_zeros, calculate_empirical_alpha};
-    use ndarray::{Array1, Array2, Axis, array};
+    use super::{calculate_empirical_alpha, encode_index, filter_zeros, mask_zeros, select_ranks};
+    use crate::utils::logging::Logger;
+    use ndarray::{array, Array1, Array2, Axis};
     use ndarray_rand::{
         rand_distr::{Binomial, Uniform},
         RandomExt,
     };
-    use crate::utils::logging::Logger;
 
     #[test]
     fn test_encoding() {
@@ -176,6 +173,4 @@ mod testing {
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
     }
-
-
 }

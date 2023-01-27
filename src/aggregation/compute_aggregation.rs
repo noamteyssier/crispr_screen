@@ -1,4 +1,8 @@
-use super::{alpha_rra, inc, AggregationResult, utils::{set_alpha_threshold, filter_zeros}};
+use super::{
+    alpha_rra, inc,
+    utils::{filter_zeros, set_alpha_threshold},
+    AggregationResult,
+};
 use crate::{
     enrich::EnrichmentResult,
     utils::{agg::aggregate_fold_changes, logging::Logger},
@@ -55,28 +59,20 @@ fn run_rra(
     npermutations: usize,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    let (alpha_low, alpha_high) = set_alpha_threshold(
-        &pvalue_low,
-        &pvalue_high,
-        alpha,
-        adjust_alpha,
-    );
+    let (alpha_low, alpha_high) =
+        set_alpha_threshold(&pvalue_low, &pvalue_high, alpha, adjust_alpha);
     logger.report_rra_alpha(alpha_low, alpha_high);
-    let (genes, gene_scores_low, gene_pvalues_low) = alpha_rra(
-        pvalue_low,
-        gene_names,
-        alpha_low,
-        npermutations,
-        logger,
-    );
-    let (_, gene_scores_high, gene_pvalues_high) = alpha_rra(
-        pvalue_high,
-        gene_names,
-        alpha_high,
-        npermutations,
-        logger,
-    );
-    InternalAggregationResult::new(genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high)
+    let (genes, gene_scores_low, gene_pvalues_low) =
+        alpha_rra(pvalue_low, gene_names, alpha_low, npermutations, logger);
+    let (_, gene_scores_high, gene_pvalues_high) =
+        alpha_rra(pvalue_high, gene_names, alpha_high, npermutations, logger);
+    InternalAggregationResult::new(
+        genes,
+        gene_scores_low,
+        gene_pvalues_low,
+        gene_scores_high,
+        gene_pvalues_high,
+    )
 }
 
 /// Runs the INC gene aggregation procedure
@@ -87,21 +83,16 @@ fn run_inc(
     token: &str,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    let (genes, gene_scores_low, gene_pvalues_low) = inc(
-        pvalue_low,
-        gene_names,
-        token,
-        logger,
-    );
-    let (_, gene_scores_high, gene_pvalues_high) = inc(
-        pvalue_high,
-        gene_names,
-        token,
-        logger,
-    );
-    InternalAggregationResult::new(genes, gene_scores_low, gene_pvalues_low, gene_scores_high, gene_pvalues_high)
+    let (genes, gene_scores_low, gene_pvalues_low) = inc(pvalue_low, gene_names, token, logger);
+    let (_, gene_scores_high, gene_pvalues_high) = inc(pvalue_high, gene_names, token, logger);
+    InternalAggregationResult::new(
+        genes,
+        gene_scores_low,
+        gene_pvalues_low,
+        gene_scores_high,
+        gene_pvalues_high,
+    )
 }
-
 
 /// Computes gene aggregation using the provided method and associated configurations.
 pub fn compute_aggregation(
@@ -128,36 +119,31 @@ pub fn compute_aggregation(
         logger,
     );
 
-    let agg_result = match agg
-    {
+    let agg_result = match agg {
         GeneAggregation::AlpaRRA {
             alpha,
             npermutations,
             adjust_alpha,
-        } => {
-            run_rra(
-                &passing_sgrna_pvalues_low,
-                &passing_sgrna_pvalues_high,
-                &passing_gene_names,
-                *alpha,
-                *adjust_alpha,
-                *npermutations,
-                logger,
-            )
-
-        }
-        GeneAggregation::Inc { token } => {
-            run_inc(
-                &passing_sgrna_pvalues_low,
-                &passing_sgrna_pvalues_high,
-                &passing_gene_names,
-                token,
-                logger,
-            )
-        }
+        } => run_rra(
+            &passing_sgrna_pvalues_low,
+            &passing_sgrna_pvalues_high,
+            &passing_gene_names,
+            *alpha,
+            *adjust_alpha,
+            *npermutations,
+            logger,
+        ),
+        GeneAggregation::Inc { token } => run_inc(
+            &passing_sgrna_pvalues_low,
+            &passing_sgrna_pvalues_high,
+            &passing_gene_names,
+            token,
+            logger,
+        ),
     };
 
-    let gene_fc = agg_result.genes
+    let gene_fc = agg_result
+        .genes
         .iter()
         .map(|x| gene_fc_hashmap.get(x).unwrap_or(&0.0))
         .copied()

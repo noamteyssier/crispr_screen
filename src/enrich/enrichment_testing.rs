@@ -66,7 +66,12 @@ fn select_treatments(array: &Array2<f64>, n_controls: usize) -> Array2<f64> {
 }
 
 /// Maps the enrichment test function over the provided arrays
-fn map_enrichment(treatment_means: &Array1<f64>, param_r: &Array1<f64>, param_p: &Array1<f64>, survival: bool) -> Array1<f64> {
+fn map_enrichment(
+    treatment_means: &Array1<f64>,
+    param_r: &Array1<f64>,
+    param_p: &Array1<f64>,
+    survival: bool,
+) -> Array1<f64> {
     Zip::from(treatment_means)
         .and(param_r)
         .and(param_p)
@@ -80,7 +85,6 @@ pub fn enrichment_testing(
     n_controls: usize,
     correction: Procedure,
 ) -> EnrichmentResult {
-
     // Subset the control and treatments and calculate the median of each sgrna
     let control_means = row_median(&select_controls(normed_matrix, n_controls));
     let treatment_means = row_median(&select_treatments(normed_matrix, n_controls));
@@ -104,12 +108,17 @@ pub fn enrichment_testing(
 mod testing {
     use super::enrichment_test;
 
-
-    fn test_almost<F>(t:f64, r: f64, p: f64, survival: bool, expected: f64, acc: f64, eval: F)
-        where F: Fn(f64, f64, f64, bool) -> f64
+    fn test_almost<F>(t: f64, r: f64, p: f64, survival: bool, expected: f64, acc: f64, eval: F)
+    where
+        F: Fn(f64, f64, f64, bool) -> f64,
     {
         let result = eval(t, r, p, survival);
-        assert!((result - expected).abs() < acc, "Expected {}, got {}", expected, result)
+        assert!(
+            (result - expected).abs() < acc,
+            "Expected {}, got {}",
+            expected,
+            result
+        )
     }
 
     #[test]
@@ -125,7 +134,15 @@ mod testing {
     fn test_enrichment_test_sf() {
         test_almost(0.0, 1.0, 0.3, true, 0.7, 1e-08, enrichment_test);
         test_almost(1.0, 1.0, 0.3, true, 0.49, 1e-08, enrichment_test);
-        test_almost(4.0, 1.0, 0.3, true, 0.1680699999999986, 1e-08, enrichment_test);
+        test_almost(
+            4.0,
+            1.0,
+            0.3,
+            true,
+            0.1680699999999986,
+            1e-08,
+            enrichment_test,
+        );
     }
 
     #[test]
@@ -193,7 +210,9 @@ mod testing {
         let p = ndarray::arr1(&[0.3, 0.3, 0.3]);
         let expected = ndarray::arr1(&[0.3, 0.51, 0.83193]);
         let result = super::map_enrichment(&mean, &r, &p, false);
-        expected.iter().zip(result.iter()).for_each(|(e, r)| assert!((e - r).abs() < 1e-08));
+        expected
+            .iter()
+            .zip(result.iter())
+            .for_each(|(e, r)| assert!((e - r).abs() < 1e-08));
     }
-
 }
