@@ -110,7 +110,7 @@ pub fn set_alpha_threshold(
 mod testing {
     use super::{calculate_empirical_alpha, encode_index, filter_zeros, mask_zeros, select_ranks};
     use crate::{
-        aggregation::utils::{select_from_mask, select_from_mask_array},
+        aggregation::utils::{select_from_mask, select_from_mask_array, set_alpha_threshold},
         utils::logging::Logger,
     };
     use ndarray::{array, Array1, Array2, Axis};
@@ -235,5 +235,28 @@ mod testing {
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
+    }
+
+    #[test]
+    fn test_set_alpha_threshold() {
+        let alpha = 0.25;
+        let empirical_alpha = 0.4;
+        let pvalue_low = Array1::from_vec(vec![0.1, 0.2, 0.25, 0.5, 0.5]);
+        let pvalue_high = Array1::from_vec(vec![0.1, 0.2, 0.25, 0.5, 0.5]);
+
+        let (t_low, t_high) = set_alpha_threshold(&pvalue_low, &pvalue_high, alpha, true);
+        assert_eq!(t_low, empirical_alpha);
+        assert_eq!(t_high, empirical_alpha);
+    }
+
+    #[test]
+    fn test_set_alpha_threshold_no_adjust() {
+        let alpha = 0.25;
+        let pvalue_low = Array1::from_vec(vec![0.1, 0.2, 0.25, 0.5, 0.5]);
+        let pvalue_high = Array1::from_vec(vec![0.1, 0.2, 0.25, 0.5, 0.5]);
+
+        let (t_low, t_high) = set_alpha_threshold(&pvalue_low, &pvalue_high, alpha, false);
+        assert_eq!(t_low, alpha);
+        assert_eq!(t_high, alpha);
     }
 }
