@@ -13,7 +13,7 @@ pub fn mageck(
     frame: &SimpleFrame,
     labels_controls: &[String],
     labels_treatments: &[String],
-    config: Configuration,
+    config: &Configuration,
     logger: &Logger,
 ) -> Result<()> {
     let labels = [labels_controls, labels_treatments].concat();

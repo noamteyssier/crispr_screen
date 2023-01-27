@@ -120,7 +120,7 @@ fn main() -> Result<()> {
         &frame,
         &labels_controls,
         &labels_treatments,
-        config,
+        &config,
         &logger,
     );
 

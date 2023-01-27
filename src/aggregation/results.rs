@@ -43,7 +43,7 @@ impl AggregationResult {
     }
 
     fn calculate_log_fold_change(gene_fc: &Array1<f64>) -> Array1<f64> {
-        gene_fc.mapv(|x| x.log2())
+        gene_fc.mapv(f64::log2)
     }
 
     pub fn genes(&self) -> &Vec<String> {

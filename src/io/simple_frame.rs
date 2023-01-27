@@ -102,7 +102,7 @@ impl SimpleFrame {
             }
         }
 
-        Self::validate_input(headers, &meta_hash, &data_hash)
+        Self::validate_input(headers, meta_hash, data_hash)
     }
 
     fn validate_input(
