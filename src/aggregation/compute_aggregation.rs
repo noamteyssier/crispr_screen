@@ -1,5 +1,5 @@
 use super::{alpha_rra, inc, AggregationResult};
-use crate::{enrich::EnrichmentResult, utils::logging::Logger};
+use crate::{enrich::EnrichmentResult, utils::{logging::Logger, agg::aggregate_fold_changes}};
 use adjustp::Procedure;
 use hashbrown::HashSet;
 use ndarray::{Array1, Array2, Axis};
@@ -98,6 +98,12 @@ pub fn compute_aggregation(
 ) -> AggregationResult {
     logger.start_gene_aggregation();
 
+    let gene_fc_hashmap = aggregate_fold_changes(
+        gene_names, 
+        sgrna_results.fold_change(), 
+        sgrna_results.pvalues_twosided()
+    );
+
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
         normed_matrix,
         gene_names,
@@ -168,8 +174,15 @@ pub fn compute_aggregation(
         }
     };
 
+    let gene_fc = genes
+        .iter()
+        .map(|x| gene_fc_hashmap.get(x).unwrap_or(&0.0))
+        .copied()
+        .collect::<Array1<f64>>();
+
     AggregationResult::new(
         genes,
+        gene_fc,
         gene_pvalues_low,
         gene_pvalues_high,
         gene_scores_low,
