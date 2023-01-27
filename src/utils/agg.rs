@@ -48,6 +48,7 @@ pub fn aggregate_fold_changes(
 #[cfg(test)]
 mod testing {
     use hashbrown::HashMap;
+    use ndarray::Array1;
 
     #[test]
     fn test_unique_indices() {
@@ -82,5 +83,34 @@ mod testing {
         expected.insert(2, ((2.0 * 0.8) + (4.0 * 0.6)) / 1.4);
 
         assert_eq!(expected, super::weighted_fold_change(&fc, &pvalues, &map));
+    }
+
+    #[test]
+    fn test_aggregate_fold_changes() {
+        let gene_names = vec![
+            "A".to_string(),
+            "B".to_string(),
+            "C".to_string(),
+            "D".to_string(),
+            "A".to_string(),
+            "B".to_string(),
+            "C".to_string(),
+            "D".to_string(),
+        ];
+        let fc = Array1::from(vec![1., 2., 3., 4., 5., 6., 7., 8.]);
+        let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]);
+
+        let mut expected = HashMap::new();
+        expected.insert("A".to_string(), ((1.0 * 0.9) + (5.0 * 0.5)) / 1.4);
+        expected.insert("B".to_string(), ((2.0 * 0.8) + (6.0 * 0.4)) / 1.2);
+        expected.insert("C".to_string(), ((3.0 * 0.7) + (7.0 * 0.3)) / 1.0);
+        expected.insert("D".to_string(), ((4.0 * 0.6) + (8.0 * 0.2)) / 0.8);
+
+        let result = super::aggregate_fold_changes(&gene_names, &fc, &pvalues);
+
+        for (k, v) in expected.iter() {
+            let v_hat = result.get(k).unwrap();
+            assert!((v - v_hat).abs() < 1e-8);
+        }
     }
 }

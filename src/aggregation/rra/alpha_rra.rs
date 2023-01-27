@@ -35,7 +35,7 @@ fn gene_rra(
 /// Performs the alpha-RRA algorithm
 pub fn alpha_rra(
     pvalues: &Array1<f64>,
-    genes: &Vec<String>,
+    genes: &[String],
     alpha: f64,
     npermutations: usize,
     logger: &Logger,

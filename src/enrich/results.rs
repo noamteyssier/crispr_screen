@@ -87,7 +87,6 @@ impl EnrichmentResult {
     }
 }
 
-
 #[cfg(test)]
 mod testing {
     use adjustp::Procedure;

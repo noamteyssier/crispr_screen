@@ -25,7 +25,7 @@ fn validate_token(encode_map: &HashMap<usize, String>, token: &str) -> usize {
 /// and so I've kept the same naming for the time being.
 pub fn inc(
     pvalues: &Array1<f64>,
-    genes: &Vec<String>,
+    genes: &[String],
     token: &str,
     logger: &Logger,
 ) -> (Vec<String>, Array1<f64>, Array1<f64>) {
@@ -35,13 +35,13 @@ pub fn inc(
     logger.num_ntcs(ntc_values.len());
 
     let (scores, pvalues): (Vec<f64>, Vec<f64>) =
-        (0..*encode.iter().max().expect("Unexpected empty encoding"))
+        (0..=*encode.iter().max().expect("Unexpected empty encoding"))
             .filter(|x| *x != ntc_index)
             .map(|x| select_ranks(x, &encode, pvalues))
             .map(|x| mann_whitney_u(&x, &ntc_values))
             .unzip();
 
-    let names = (0..*encode.iter().max().expect("Unexpected empty encoding"))
+    let names = (0..=*encode.iter().max().expect("Unexpected empty encoding"))
         .filter(|x| *x != ntc_index)
         .map(|curr| {
             encode_map
@@ -52,4 +52,69 @@ pub fn inc(
         .collect();
 
     (names, Array1::from_vec(scores), Array1::from_vec(pvalues))
+}
+
+#[cfg(test)]
+mod testing {
+    use super::validate_token;
+    use hashbrown::HashMap;
+    use ndarray::Array1;
+
+    #[test]
+    fn test_validate_token() {
+        let encode_map = vec![
+            (0, "A"),
+            (1, "B"),
+            (2, "C"),
+            (3, "D"),
+            (4, "E"),
+            (5, "F"),
+            (6, "G"),
+        ]
+        .into_iter()
+        .map(|(idx, gene)| (idx, gene.to_string()))
+        .collect::<HashMap<usize, String>>();
+
+        assert_eq!(validate_token(&encode_map, "A"), 0);
+        assert_eq!(validate_token(&encode_map, "B"), 1);
+        assert_eq!(validate_token(&encode_map, "C"), 2);
+        assert_eq!(validate_token(&encode_map, "D"), 3);
+        assert_eq!(validate_token(&encode_map, "E"), 4);
+        assert_eq!(validate_token(&encode_map, "F"), 5);
+        assert_eq!(validate_token(&encode_map, "G"), 6);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_validate_token_fail() {
+        let encode_map = vec![
+            (0, "A"),
+            (1, "B"),
+            (2, "C"),
+            (3, "D"),
+            (4, "E"),
+            (5, "F"),
+            (6, "G"),
+        ]
+        .into_iter()
+        .map(|(idx, gene)| (idx, gene.to_string()))
+        .collect::<HashMap<usize, String>>();
+        validate_token(&encode_map, "H");
+    }
+
+    #[test]
+    fn test_inc() {
+        use super::inc;
+        use crate::utils::logging::Logger;
+        let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]);
+        let genes = vec!["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>();
+        let logger = Logger::new();
+        let (names, scores, pvalues) = inc(&pvalues, &genes, "A", &logger);
+        assert_eq!(names, vec!["B", "C", "D", "E", "F", "G", "H", "I"]);
+        assert_eq!(scores, Array1::ones(8));
+        assert_eq!(pvalues, Array1::from_elem(8, 0.8413447460549428));
+    }
 }

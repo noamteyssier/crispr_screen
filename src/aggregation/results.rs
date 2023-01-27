@@ -82,3 +82,42 @@ impl AggregationResult {
         &self.fdr_high
     }
 }
+
+#[cfg(test)]
+mod testing {
+    use super::AggregationResult;
+    use adjustp::Procedure;
+    use ndarray::Array1;
+
+    #[test]
+    fn test_aggregation_result() {
+        let genes = vec!["gene1".to_string(), "gene2".to_string()];
+        let gene_fc = Array1::from(vec![1.0, 2.0]);
+        let pvalues_low = Array1::from(vec![0.1, 0.2]);
+        let pvalues_high = Array1::from(vec![0.3, 0.4]);
+        let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
+        let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
+        let correction = Procedure::BenjaminiHochberg;
+        let result = AggregationResult::new(
+            genes,
+            gene_fc,
+            pvalues_low,
+            pvalues_high,
+            aggregation_score_low,
+            aggregation_score_high,
+            correction,
+        );
+        assert_eq!(
+            result.genes(),
+            &vec!["gene1".to_string(), "gene2".to_string()]
+        );
+        assert_eq!(result.gene_fc(), &Array1::from(vec![1.0, 2.0]));
+        assert_eq!(result.gene_log2_fc(), &Array1::from(vec![0.0, 1.0]));
+        assert_eq!(result.pvalues_low(), &Array1::from(vec![0.1, 0.2]));
+        assert_eq!(result.pvalues_high(), &Array1::from(vec![0.3, 0.4]));
+        assert_eq!(result.score_low(), &Array1::from(vec![0.5, 0.6]));
+        assert_eq!(result.score_high(), &Array1::from(vec![0.7, 0.8]));
+        assert_eq!(result.fdr_low(), &Array1::from(vec![0.2, 0.2]));
+        assert_eq!(result.fdr_high(), &Array1::from(vec![0.4, 0.4]));
+    }
+}
