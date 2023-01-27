@@ -107,7 +107,10 @@ mod testing {
         use super::inc;
         use crate::utils::logging::Logger;
         let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]);
-        let genes = vec!["A", "B", "C", "D", "E", "F", "G", "H", "I"].iter().map(|x| x.to_string()).collect::<Vec<String>>();
+        let genes = vec!["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>();
         let logger = Logger::new();
         let (names, scores, pvalues) = inc(&pvalues, &genes, "A", &logger);
         assert_eq!(names, vec!["B", "C", "D", "E", "F", "G", "H", "I"]);
