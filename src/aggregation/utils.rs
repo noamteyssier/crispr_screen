@@ -109,7 +109,10 @@ pub fn set_alpha_threshold(
 #[cfg(test)]
 mod testing {
     use super::{calculate_empirical_alpha, encode_index, filter_zeros, mask_zeros, select_ranks};
-    use crate::{utils::logging::Logger, aggregation::utils::{select_from_mask, select_from_mask_array}};
+    use crate::{
+        aggregation::utils::{select_from_mask, select_from_mask_array},
+        utils::logging::Logger,
+    };
     use ndarray::{array, Array1, Array2, Axis};
     use ndarray_rand::{
         rand_distr::{Binomial, Uniform},

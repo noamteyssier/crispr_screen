@@ -86,8 +86,8 @@ impl AggregationResult {
 #[cfg(test)]
 mod testing {
     use super::AggregationResult;
-    use ndarray::Array1;
     use adjustp::Procedure;
+    use ndarray::Array1;
 
     #[test]
     fn test_aggregation_result() {
@@ -107,7 +107,10 @@ mod testing {
             aggregation_score_high,
             correction,
         );
-        assert_eq!(result.genes(), &vec!["gene1".to_string(), "gene2".to_string()]);
+        assert_eq!(
+            result.genes(),
+            &vec!["gene1".to_string(), "gene2".to_string()]
+        );
         assert_eq!(result.gene_fc(), &Array1::from(vec![1.0, 2.0]));
         assert_eq!(result.gene_log2_fc(), &Array1::from(vec![0.0, 1.0]));
         assert_eq!(result.pvalues_low(), &Array1::from(vec![0.1, 0.2]));

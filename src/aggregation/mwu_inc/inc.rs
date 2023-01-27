@@ -100,5 +100,4 @@ mod testing {
         .collect::<HashMap<usize, String>>();
         validate_token(&encode_map, "H");
     }
-
 }
