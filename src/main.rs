@@ -42,6 +42,9 @@ struct Args {
     output: String,
 
     /// Count normalization configuration
+    ///
+    /// If high numbers of zeros are encountered the normalization
+    /// method will default to `total` normalization.
     #[arg(short, long, default_value = "median-ratio")]
     norm: Normalization,
 
