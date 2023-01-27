@@ -16,6 +16,7 @@ pub struct GeneFrame<'a> {
     score_high: &'a Array1<f64>,
     pvalue_high: &'a Array1<f64>,
     fdr_high: &'a Array1<f64>,
+    phenotype_score: &'a Array1<f64>,
     size: usize,
 }
 
@@ -32,6 +33,7 @@ impl<'a> GeneFrame<'a> {
             pvalue_high: aggregation_results.pvalues_high(),
             fdr_high: aggregation_results.fdr_high(),
             size: aggregation_results.genes().len(),
+            phenotype_score: aggregation_results.phenotype_score(),
         }
     }
 
@@ -40,13 +42,13 @@ impl<'a> GeneFrame<'a> {
 
         writeln!(
             writer,
-            "gene\tfold_change\tlog_fold_change\tscore_low\tpvalue_low\tfdr_low\tscore_high\tpvalue_high\tfdr_high",
+            "gene\tfold_change\tlog_fold_change\tscore_low\tpvalue_low\tfdr_low\tscore_high\tpvalue_high\tfdr_high\tphenotype_score"
         )?;
 
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
+                "{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.gene[idx],
                 self.gene_fc[idx],
                 self.gene_log2_fc[idx],
@@ -56,6 +58,7 @@ impl<'a> GeneFrame<'a> {
                 self.score_high[idx],
                 self.pvalue_high[idx],
                 self.fdr_high[idx],
+                self.phenotype_score[idx],
             )?;
         }
 
