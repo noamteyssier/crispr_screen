@@ -272,4 +272,30 @@ mod testing {
         );
         assert!(dm.is_err());
     }
+
+    #[test]
+    fn test_gene_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        assert_eq!(
+            frame.get_gene_names(),
+            &vec![
+                "gene_0", "gene_1", "gene_2", "gene_3", "gene_4", "gene_0", "gene_1", "gene_2",
+                "gene_3", "gene_4"
+            ]
+        );
+    }
+
+    #[test]
+    fn test_sgrna_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        assert_eq!(
+            frame.get_sgrna_names(),
+            &vec![
+                "sgrna_0", "sgrna_1", "sgrna_2", "sgrna_3", "sgrna_4", "sgrna_5", "sgrna_6",
+                "sgrna_7", "sgrna_8", "sgrna_9"
+            ]
+        );
+    }
 }
