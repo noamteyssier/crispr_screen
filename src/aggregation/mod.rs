@@ -36,25 +36,37 @@ pub enum GeneAggregation<'a> {
 
 #[cfg(test)]
 mod testing {
+    use super::{GeneAggregation, GeneAggregationSelection};
     use clap::ValueEnum;
-    use super::{GeneAggregationSelection, GeneAggregation};
-    
+
     #[test]
     fn test_enum() {
         let rra = GeneAggregationSelection::RRA;
         let inc = GeneAggregationSelection::Inc;
-        
-        assert_eq!(GeneAggregationSelection::from_str("RRA", true).unwrap(), rra);
-        assert_eq!(GeneAggregationSelection::from_str("Inc", true).unwrap(), inc);
+
+        assert_eq!(
+            GeneAggregationSelection::from_str("RRA", true).unwrap(),
+            rra
+        );
+        assert_eq!(
+            GeneAggregationSelection::from_str("Inc", true).unwrap(),
+            inc
+        );
     }
 
     #[test]
     fn test_enum_case_insensitive() {
         let rra = GeneAggregationSelection::RRA;
         let inc = GeneAggregationSelection::Inc;
-        
-        assert_eq!(GeneAggregationSelection::from_str("rra", true).unwrap(), rra);
-        assert_eq!(GeneAggregationSelection::from_str("inc", true).unwrap(), inc);
+
+        assert_eq!(
+            GeneAggregationSelection::from_str("rra", true).unwrap(),
+            rra
+        );
+        assert_eq!(
+            GeneAggregationSelection::from_str("inc", true).unwrap(),
+            inc
+        );
     }
 
     #[test]
@@ -76,13 +88,22 @@ mod testing {
 
     #[test]
     fn test_enum_gene_aggregation_rra() {
-        let agg = GeneAggregation::AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true };
-        assert_eq!(format!("{:?}", agg), "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true }");
+        let agg = GeneAggregation::AlpaRRA {
+            alpha: 0.5,
+            npermutations: 100,
+            adjust_alpha: true,
+        };
+        assert_eq!(
+            format!("{:?}", agg),
+            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true }"
+        );
     }
 
     #[test]
     fn test_enum_gene_aggregation_inc() {
-        let agg = GeneAggregation::Inc { token: "non-targeting" };
+        let agg = GeneAggregation::Inc {
+            token: "non-targeting",
+        };
         assert_eq!(format!("{:?}", agg), "Inc { token: \"non-targeting\" }");
     }
 }
