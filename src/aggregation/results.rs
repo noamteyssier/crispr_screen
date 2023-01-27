@@ -49,7 +49,11 @@ impl AggregationResult {
         gene_fc.mapv(f64::log2)
     }
 
-    fn calculate_phenotype_score(fdr_low: &Array1<f64>, fdr_high: &Array1<f64>, gene_log2_fc: &Array1<f64>) -> Array1<f64> {
+    fn calculate_phenotype_score(
+        fdr_low: &Array1<f64>,
+        fdr_high: &Array1<f64>,
+        gene_log2_fc: &Array1<f64>,
+    ) -> Array1<f64> {
         Zip::from(fdr_low)
             .and(fdr_high)
             .and(gene_log2_fc)
@@ -137,6 +141,9 @@ mod testing {
         assert_eq!(result.score_high(), &Array1::from(vec![0.7, 0.8]));
         assert_eq!(result.fdr_low(), &Array1::from(vec![0.2, 0.2]));
         assert_eq!(result.fdr_high(), &Array1::from(vec![0.4, 0.4]));
-        assert_eq!(result.phenotype_score(), &Array1::from(vec![0.0, 0.6989700043360187]));
+        assert_eq!(
+            result.phenotype_score(),
+            &Array1::from(vec![0.0, 0.6989700043360187])
+        );
     }
 }
