@@ -62,3 +62,36 @@ impl<'a> GeneFrame<'a> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod testing {
+    use adjustp::Procedure;
+    use ndarray::Array1;
+
+    use crate::aggregation::AggregationResult;
+
+    
+    #[test]
+    fn test_gene_frame() {
+        let gene = vec!["gene1".to_string(), "gene2".to_string()];
+        let gene_fc = Array1::from(vec![1.0, 2.0]);
+        let score_low = Array1::from(vec![0.0, 1.0]);
+        let pvalue_low = Array1::from(vec![0.0, 1.0]);
+        let score_high = Array1::from(vec![0.0, 1.0]);
+        let pvalue_high = Array1::from(vec![0.0, 1.0]);
+        let procedure = Procedure::BenjaminiHochberg;
+
+        let aggregation_results = AggregationResult::new(
+            gene, 
+            gene_fc, 
+            pvalue_low, 
+            pvalue_high, 
+            score_low, 
+            score_high,
+            procedure,
+            );
+        let gene_frame = super::GeneFrame::new(&aggregation_results);
+        assert_eq!(gene_frame.size, 2);
+        gene_frame.write("test").unwrap();
+    }
+}

@@ -72,3 +72,35 @@ impl<'a> SgrnaFrame<'a> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod testing {
+    use adjustp::Procedure;
+
+    use crate::enrich::EnrichmentResult;
+
+
+    #[test]
+    fn test_sgrna_frame() {
+        let sgrna_names = vec!["sgrna1".to_string(), "sgrna2".to_string()];
+        let gene_names = vec!["gene1".to_string(), "gene2".to_string()];
+        let adj_var = vec![0.1, 0.2].into_iter().collect();
+        let control = vec![1.0, 2.0].into_iter().collect();
+        let treatment = vec![3.0, 4.0].into_iter().collect();
+        let pvalue_low = vec![0.1, 0.2].into_iter().collect();
+        let pvalue_high = vec![0.3, 0.4].into_iter().collect();
+        let correction = Procedure::BenjaminiHochberg;
+
+        let enrichment = EnrichmentResult::new(
+            pvalue_low,
+            pvalue_high,
+            control,
+            treatment,
+            correction,
+        );
+
+        let sgrna_frame = super::SgrnaFrame::new(&sgrna_names, &gene_names, &adj_var, &enrichment);
+        assert_eq!(sgrna_frame.size, 2);
+        sgrna_frame.write("test").unwrap();
+    }
+}
