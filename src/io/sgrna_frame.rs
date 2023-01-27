@@ -16,6 +16,8 @@ pub struct SgrnaFrame<'a> {
     pvalue_high: &'a Array1<f64>,
     pvalue_twosided: &'a Array1<f64>,
     fdr: &'a Array1<f64>,
+    fold_change: &'a Array1<f64>,
+    log_fold_change: &'a Array1<f64>,
     size: usize,
 }
 impl<'a> SgrnaFrame<'a> {
@@ -35,6 +37,8 @@ impl<'a> SgrnaFrame<'a> {
             pvalue_high: sgrna_results.pvalues_high(),
             pvalue_twosided: sgrna_results.pvalues_twosided(),
             fdr: sgrna_results.fdr(),
+            fold_change: sgrna_results.fold_change(),
+            log_fold_change: sgrna_results.log_fold_change(),
             size: sgrna_names.len(),
         }
     }
@@ -44,18 +48,20 @@ impl<'a> SgrnaFrame<'a> {
 
         writeln!(
             writer,
-            "sgrna\tgene\tcontrol\ttreatment\tadj_var\tpvalue_low\tpvalue_high\tpvalue_twosided\tfdr",
+            "sgrna\tgene\tcontrol\ttreatment\tadj_var\tfold_change\tlog2_fold_change\tpvalue_low\tpvalue_high\tpvalue_twosided\tfdr",
         )?;
 
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.sgrna_names[idx],
                 self.gene_names[idx],
                 self.control[idx],
                 self.treatment[idx],
                 self.adj_var[idx],
+                self.fold_change[idx],
+                self.log_fold_change[idx],
                 self.pvalue_low[idx],
                 self.pvalue_high[idx],
                 self.pvalue_twosided[idx],

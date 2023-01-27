@@ -46,13 +46,15 @@ impl<'a> Configuration<'a> {
 mod testing {
     use adjustp::Procedure;
 
-    use crate::{norm::Normalization, aggregation::GeneAggregation, model::ModelChoice};
+    use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
 
     use super::Configuration;
 
     fn build_config<'a>() -> Configuration<'a> {
         let normalization = Normalization::MedianRatio;
-        let aggregation = GeneAggregation::Inc { token: "non-targeting" };
+        let aggregation = GeneAggregation::Inc {
+            token: "non-targeting",
+        };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let prefix = "results";
@@ -64,7 +66,7 @@ mod testing {
         let config = build_config();
         match config.normalization() {
             Normalization::MedianRatio => assert!(true),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
@@ -73,7 +75,7 @@ mod testing {
         let config = build_config();
         match config.aggregation() {
             GeneAggregation::Inc { token } => assert_eq!(token, &"non-targeting"),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
@@ -82,16 +84,16 @@ mod testing {
         let config = build_config();
         match config.correction {
             Procedure::BenjaminiHochberg => assert!(true),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
     #[test]
     fn test_model_choice() {
         let config = build_config();
-        match config.model_choice(){
+        match config.model_choice() {
             ModelChoice::Wols => assert!(true),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
@@ -100,5 +102,4 @@ mod testing {
         let config = build_config();
         assert_eq!(config.prefix(), "results");
     }
-
 }

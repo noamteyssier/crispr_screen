@@ -3,6 +3,8 @@ use ndarray::Array1;
 
 pub struct AggregationResult {
     genes: Vec<String>,
+    gene_fc: Array1<f64>,
+    gene_log2_fc: Array1<f64>,
     pvalues_low: Array1<f64>,
     pvalues_high: Array1<f64>,
     aggregation_score_low: Array1<f64>,
@@ -13,6 +15,7 @@ pub struct AggregationResult {
 impl AggregationResult {
     pub fn new(
         genes: Vec<String>,
+        gene_fc: Array1<f64>,
         pvalues_low: Array1<f64>,
         pvalues_high: Array1<f64>,
         aggregation_score_low: Array1<f64>,
@@ -21,8 +24,11 @@ impl AggregationResult {
     ) -> Self {
         let fdr_low = Self::fdr_adjustment(&pvalues_low, correction);
         let fdr_high = Self::fdr_adjustment(&pvalues_high, correction);
+        let gene_log2_fc = Self::calculate_log_fold_change(&gene_fc);
         Self {
             genes,
+            gene_fc,
+            gene_log2_fc,
             pvalues_low,
             pvalues_high,
             aggregation_score_low,
@@ -36,8 +42,20 @@ impl AggregationResult {
         Array1::from_vec(adjust(pvalues.as_slice().unwrap(), correction))
     }
 
+    fn calculate_log_fold_change(gene_fc: &Array1<f64>) -> Array1<f64> {
+        gene_fc.mapv(f64::log2)
+    }
+
     pub fn genes(&self) -> &Vec<String> {
         &self.genes
+    }
+
+    pub fn gene_fc(&self) -> &Array1<f64> {
+        &self.gene_fc
+    }
+
+    pub fn gene_log2_fc(&self) -> &Array1<f64> {
+        &self.gene_log2_fc
     }
 
     pub fn pvalues_low(&self) -> &Array1<f64> {

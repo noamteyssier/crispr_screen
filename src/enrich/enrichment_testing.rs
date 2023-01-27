@@ -23,7 +23,6 @@ fn enrichment_test(t_mean: f64, r: f64, p: f64, use_survival: bool) -> f64 {
 /// All r that is equal to 0.0 is set to 1.0
 fn calculate_r(mean: &Array1<f64>, var: &Array1<f64>) -> Array1<f64> {
     let r = (mean * mean) / (var - mean);
-    // r.mapv(|x| if x > 0. {x} else { 1. })
     r.mapv(|x| if x >= 1. { x } else { 1. })
 }
 
