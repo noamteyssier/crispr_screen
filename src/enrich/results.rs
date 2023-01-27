@@ -86,3 +86,66 @@ impl EnrichmentResult {
         &self.log_fold_change
     }
 }
+
+
+#[cfg(test)]
+mod testing {
+    use adjustp::Procedure;
+    use ndarray::{arr1, Zip};
+    use ndarray_rand::rand_distr::num_traits::Float;
+
+    #[test]
+    fn test_enrichment_result() {
+        let pvalues_low = arr1(&[0.1, 0.2, 0.3, 0.4, 0.5]);
+        let pvalues_high = arr1(&[0.2, 0.3, 0.4, 0.5, 0.6]);
+        let control_means = arr1(&[1., 2., 3., 4., 5.]);
+        let treatment_means = arr1(&[2., 3., 4., 5., 6.]);
+        let correction = Procedure::BenjaminiHochberg;
+        let result = super::EnrichmentResult::new(
+            pvalues_low,
+            pvalues_high,
+            control_means,
+            treatment_means,
+            correction,
+        );
+        assert_eq!(result.pvalues_low(), &arr1(&[0.1, 0.2, 0.3, 0.4, 0.5]));
+        assert_eq!(result.pvalues_high(), &arr1(&[0.2, 0.3, 0.4, 0.5, 0.6]));
+        assert_eq!(result.control_means(), &arr1(&[1., 2., 3., 4., 5.]));
+        assert_eq!(result.treatment_means(), &arr1(&[2., 3., 4., 5., 6.]));
+    }
+
+    #[test]
+    fn test_calculate_twosided() {
+        let pvalues_low = arr1(&[0.1, 0.2, 0.3, 0.4, 0.5]);
+        let pvalues_high = arr1(&[0.2, 0.3, 0.4, 0.5, 0.6]);
+        let twosided = super::EnrichmentResult::calculate_twosided(&pvalues_low, &pvalues_high);
+        assert_eq!(twosided, arr1(&[0.2, 0.4, 0.6, 0.8, 1.0]));
+    }
+
+    #[test]
+    fn test_calculate_fdr() {
+        let pvalues = arr1(&[0.1, 0.2, 0.3, 0.4, 0.5]);
+        let correction = Procedure::BenjaminiHochberg;
+        let fdr = super::EnrichmentResult::calculate_fdr(&pvalues, correction);
+        assert_eq!(fdr, arr1(&[0.5, 0.5, 0.5, 0.5, 0.5]));
+    }
+
+    #[test]
+    fn test_calculate_fold_change() {
+        let control = arr1(&[1., 2., 3., 4., 5.]);
+        let treatment = arr1(&[2., 3., 4., 5., 6.]);
+        let expected = Zip::from(&control)
+            .and(&treatment)
+            .map_collect(|c, t| (t + 1.) / (c + 1.));
+        let fold_change = super::EnrichmentResult::calculate_fold_change(&control, &treatment);
+        assert_eq!(fold_change, expected);
+    }
+
+    #[test]
+    fn test_calculate_log_fold_change() {
+        let fold_change = arr1(&[2., 3., 4., 5., 6.]);
+        let expected = Zip::from(&fold_change).map_collect(|x| x.log2());
+        let log_fold_change = super::EnrichmentResult::calculate_log_fold_change(&fold_change);
+        assert_eq!(log_fold_change, expected);
+    }
+}
