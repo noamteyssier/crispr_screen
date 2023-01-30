@@ -12,3 +12,18 @@ impl Sqmean {
         self.kappa
     }
 }
+
+#[cfg(test)]
+mod testing {
+    use super::*;
+    use ndarray::array;
+
+    #[test]
+    fn test_sqmean() {
+        let log_means = array![1.0, 2.0, 3.0];
+        let log_variances = array![3.0, 5.0, 7.0];
+        let sqmean = Sqmean::fit(&log_means, &log_variances);
+        assert_eq!(sqmean.kappa(), 1.0);
+    }
+
+}
