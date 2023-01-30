@@ -1,4 +1,4 @@
-use super::{ModelChoice, Ols, Wols};
+use super::{ModelChoice, Ols, Wols, Sqmean};
 use crate::utils::{logging::Logger, math::zscore_transform};
 use hashbrown::HashSet;
 use ndarray::Array1;
@@ -36,6 +36,10 @@ impl LoggedOls {
                 // use non-logged means as the weights
                 let wols = Wols::fit(&log_means, &log_variances, &sub_means);
                 (wols.alpha().exp(), wols.beta())
+            },
+            ModelChoice::Sqmean => {
+                let sqmean = Sqmean::fit(&log_means, &log_variances);
+                (sqmean.kappa().exp(), 2.0)
             }
         };
 
