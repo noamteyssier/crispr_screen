@@ -25,5 +25,4 @@ mod testing {
         let sqmean = Sqmean::fit(&log_means, &log_variances);
         assert_eq!(sqmean.kappa(), 1.0);
     }
-
 }
