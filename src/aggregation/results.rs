@@ -58,10 +58,7 @@ impl AggregationResult {
         gene_fc.mapv(f64::log2)
     }
 
-    fn calculate_phenotype_score(
-        fdr: &Array1<f64>,
-        gene_log2_fc: &Array1<f64>,
-    ) -> Array1<f64> {
+    fn calculate_phenotype_score(fdr: &Array1<f64>, gene_log2_fc: &Array1<f64>) -> Array1<f64> {
         Zip::from(fdr)
             .and(gene_log2_fc)
             .map_collect(|fdr, gene_log2_fc| {
