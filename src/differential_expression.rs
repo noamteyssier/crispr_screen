@@ -42,7 +42,6 @@ pub fn mageck(
     // Gene Ranking (Aggregation)
     let aggregation_results = compute_aggregation(
         config.aggregation(),
-        &normed_matrix,
         &sgrna_results,
         gene_names,
         logger,
