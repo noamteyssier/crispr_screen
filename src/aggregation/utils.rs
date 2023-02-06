@@ -1,6 +1,6 @@
 use crate::utils::logging::Logger;
 use hashbrown::{HashMap, HashSet};
-use ndarray::{Array1, Array2, Axis};
+use ndarray::Array1;
 
 /// Converts a vector of strings to an integer representation
 pub fn encode_index(genes: &[String]) -> (HashMap<usize, String>, Vec<usize>) {
@@ -59,14 +59,13 @@ pub fn select_from_mask_array<T: Clone>(array: &Array1<T>, mask: &[usize]) -> Ar
 
 /// Filter `sgRNAs` with zero counts in both samples
 pub fn filter_zeros(
-    normed_matrix: &Array2<f64>,
+    base_means: &Array1<f64>,
     gene_names: &[String],
     sgrna_pvalues_low: &Array1<f64>,
     sgrna_pvalues_high: &Array1<f64>,
     logger: &Logger,
 ) -> (Vec<String>, Array1<f64>, Array1<f64>) {
-    let sgrna_means = normed_matrix.mean_axis(Axis(1)).unwrap();
-    let passing_indices = mask_zeros(&sgrna_means, logger);
+    let passing_indices = mask_zeros(base_means, logger);
     let mut sorted_indices = passing_indices.iter().copied().collect::<Vec<usize>>();
     sorted_indices.sort_unstable();
 
@@ -194,7 +193,7 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
@@ -212,7 +211,7 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
@@ -230,7 +229,7 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&array, &gene_names, &p_low, &p_high, &logger);
+        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());

@@ -8,7 +8,7 @@ use crate::{
     utils::{agg::aggregate_fold_changes, logging::Logger},
 };
 use adjustp::Procedure;
-use ndarray::{Array1, Array2};
+use ndarray::Array1;
 
 /// Aggregates the results of the gene aggregation analysis for internal use
 struct InternalAggregationResult {
@@ -84,7 +84,6 @@ fn run_inc(
 /// Computes gene aggregation using the provided method and associated configurations.
 pub fn compute_aggregation(
     agg: &GeneAggregation,
-    normed_matrix: &Array2<f64>,
     sgrna_results: &EnrichmentResult,
     gene_names: &[String],
     logger: &Logger,
@@ -99,7 +98,7 @@ pub fn compute_aggregation(
     );
 
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
-        normed_matrix,
+        sgrna_results.base_means(),
         gene_names,
         sgrna_results.pvalues_low(),
         sgrna_results.pvalues_high(),

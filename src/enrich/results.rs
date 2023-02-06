@@ -5,6 +5,7 @@ pub struct EnrichmentResult {
     pvalues_high: Array1<f64>,
     pvalues_twosided: Array1<f64>,
     fdr: Array1<f64>,
+    base_means: Array1<f64>,
     control_means: Array1<f64>,
     treatment_means: Array1<f64>,
     fold_change: Array1<f64>,
@@ -20,6 +21,7 @@ impl EnrichmentResult {
     ) -> Self {
         let fold_change = Self::calculate_fold_change(&control_means, &treatment_means);
         let log_fold_change = Self::calculate_log_fold_change(&fold_change);
+        let base_means = Self::calculate_base_mean(&control_means, &treatment_means);
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
         let fdr = Self::calculate_fdr(&pvalues_twosided, correction);
         Self {
@@ -29,6 +31,7 @@ impl EnrichmentResult {
             fdr,
             control_means,
             treatment_means,
+            base_means,
             fold_change,
             log_fold_change,
         }
@@ -54,6 +57,10 @@ impl EnrichmentResult {
         fold_change.map(|x| x.log2())
     }
 
+    fn calculate_base_mean(control: &Array1<f64>, treatment: &Array1<f64>) -> Array1<f64> {
+        (control + treatment) / 2.
+    }
+
     pub fn pvalues_low(&self) -> &Array1<f64> {
         &self.pvalues_low
     }
@@ -68,6 +75,10 @@ impl EnrichmentResult {
 
     pub fn fdr(&self) -> &Array1<f64> {
         &self.fdr
+    }
+
+    pub fn base_means(&self) -> &Array1<f64> {
+        &self.base_means
     }
 
     pub fn control_means(&self) -> &Array1<f64> {
@@ -146,5 +157,16 @@ mod testing {
         let expected = Zip::from(&fold_change).map_collect(|x| x.log2());
         let log_fold_change = super::EnrichmentResult::calculate_log_fold_change(&fold_change);
         assert_eq!(log_fold_change, expected);
+    }
+
+    #[test]
+    fn test_calculate_base_mean() {
+        let control = arr1(&[1., 2., 3., 4., 5.]);
+        let treatment = arr1(&[2., 3., 4., 5., 6.]);
+        let expected = Zip::from(&control)
+            .and(&treatment)
+            .map_collect(|c, t| (c + t) / 2.);
+        let base_mean = super::EnrichmentResult::calculate_base_mean(&control, &treatment);
+        assert_eq!(base_mean, expected);
     }
 }
