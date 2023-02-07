@@ -125,6 +125,18 @@ impl Logger {
         }
     }
 
+    pub fn report_inc_low_threshold(&self, threshold: f64) {
+        if self.verbose {
+            Self::write_to_stderr("Low Pvalue Threshold       : ", threshold);
+        }
+    }
+
+    pub fn report_inc_high_threshold(&self, threshold: f64) {
+        if self.verbose {
+            Self::write_to_stderr("High Pvalue Threshold      : ", threshold);
+        }
+    }
+
     pub fn convert_normalization(&self) {
         if self.verbose {
             eprintln!(
