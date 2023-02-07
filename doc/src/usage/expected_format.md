@@ -45,6 +45,7 @@ table whose columns are of the following form:
 |--------|-------------|
 | **sgrna** | The sgRNA name provided in the first column of the `count_table`. |
 | **gene** | The gene name provided in the second column of the `count_table`. |
+| **base** | The normalized/aggregated count of the sgRNA across all samples. |
 | **control** | The normalized/aggregated count of the sgRNA for the controls. |
 | **treatment** | The normalized/aggregated count of the sgRNA for the treatment. |
 | **adj_var** | The adjusted variance for the sgRNA determined by the least squares fit. |
@@ -71,5 +72,13 @@ table whose columns are of the following form:
 | **score_high** | The minimum p-value observed in the RRA of the U-score observed in the INC for the gene being enriched. |
 | **pvalue_high** | The aggregated p-value for an enrichment of the gene. |
 | **fdr_high** | The false discovery rate for an enrichment of the gene. |
+| **pvalue** | The minimum pvalue observed with either test. |
 | **fdr** | The minimum false discovery rate observed with either test. |
 | **phenotype_score** | The -log10 FDR multiplied by the log2 fold change of the gene. |
+
+> Note: If you ran `crispr_screen` with `INC`
+>
+> The FDR in this case will be the **empirical false discovery rate** given the non-targeting controls.
+> As a result it will **not** be strictly monotonic with the p-values.
+> I recommend working with the pvalues in this case and paying attention to the calculated thresholds
+> of the FDR given in the workflow log.

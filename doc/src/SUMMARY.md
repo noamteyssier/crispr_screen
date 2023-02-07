@@ -1,7 +1,9 @@
 # Summary
 
-- [Introduction](./introduction.md)
-- [Installation](./install.md)
+[Introduction](./introduction.md)
+[Installation](./install.md)
+
+---
 - [Usage](./usage.md)
   - [Quick Start](./usage/quick_start.md)
   - [Formats](./usage/expected_format.md)
