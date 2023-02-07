@@ -2,6 +2,13 @@
 name = "crispr_screen"
 version = "0.1.11"
 edition = "2021"
+description = "A fast and configurable differential expression analysis tool for CRISPR screens"
+license = "MIT"
+documentation = "https://docs.rs/crispr_screen"
+repository = "https://github.com/noamteyssier/crispr_screen"
+homepage = "https://noamteyssier.github.io/crispr_screen/"
+keywords = ["cli", "CRISPR", "bioinformatics", "differential-expression", "sgRNA"]
+categories = ["command-line-utilities", "science"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
