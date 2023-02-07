@@ -55,7 +55,7 @@ fn run_rra(
     logger: &Logger,
 ) -> InternalAggregationResult {
     let (alpha_low, alpha_high) =
-        set_alpha_threshold(&pvalue_low, &pvalue_high, alpha, adjust_alpha);
+        set_alpha_threshold(pvalue_low, pvalue_high, alpha, adjust_alpha);
     logger.report_rra_alpha(alpha_low, alpha_high);
 
     // Calculates the RRA score for the depleted pvalues
@@ -63,7 +63,7 @@ fn run_rra(
     let permutation_sizes_low = alpha_rra_low
         .permutation_vectors()
         .keys()
-        .cloned()
+        .copied()
         .collect::<Vec<usize>>();
     logger.permutation_sizes(&permutation_sizes_low);
     let result_low = alpha_rra_low
@@ -75,7 +75,7 @@ fn run_rra(
     let permutation_sizes_high = alpha_rra_high
         .permutation_vectors()
         .keys()
-        .cloned()
+        .copied()
         .collect::<Vec<usize>>();
     logger.permutation_sizes(&permutation_sizes_high);
     let result_high = alpha_rra_high

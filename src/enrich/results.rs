@@ -29,9 +29,9 @@ impl EnrichmentResult {
             pvalues_high,
             pvalues_twosided,
             fdr,
+            base_means,
             control_means,
             treatment_means,
-            base_means,
             fold_change,
             log_fold_change,
         }
