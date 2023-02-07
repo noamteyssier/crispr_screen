@@ -69,11 +69,11 @@ struct Args {
     ntc_token: String,
 
     /// FDR-threshold for inc
-    #[arg(short='A', long, default_value = "0.1")]
+    #[arg(short = 'A', long, default_value = "0.1")]
     inc_fdr: f64,
 
     /// sgRNA group size of pseudogenes to create for INC
-    #[arg(short='G', long, default_value = "5")]
+    #[arg(short = 'G', long, default_value = "5")]
     inc_group_size: usize,
 
     /// Do not write logging information

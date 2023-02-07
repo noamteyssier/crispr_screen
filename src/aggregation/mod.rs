@@ -104,6 +104,9 @@ mod testing {
             fdr: 0.05,
             group_size: 3,
         };
-        assert_eq!(format!("{:?}", agg), "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3 }");
+        assert_eq!(
+            format!("{:?}", agg),
+            "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3 }"
+        );
     }
 }

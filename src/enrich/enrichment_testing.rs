@@ -55,12 +55,12 @@ fn row_median(array: &Array2<f64>) -> Array1<f64> {
     array.map_axis(Axis(1), |x| median(&x))
 }
 
-/// Selects the first n_controls columns from an array
+/// Selects the first `n_controls` columns from an array
 fn select_controls(array: &Array2<f64>, n_controls: usize) -> Array2<f64> {
     array.slice(s![.., ..n_controls]).to_owned()
 }
 
-/// Selects the last n_treatments columns from an array
+/// Selects the last `n_treatments` columns from an array
 fn select_treatments(array: &Array2<f64>, n_controls: usize) -> Array2<f64> {
     array.slice(s![.., n_controls..]).to_owned()
 }

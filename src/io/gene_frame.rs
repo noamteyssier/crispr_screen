@@ -74,8 +74,8 @@ impl<'a> GeneFrame<'a> {
 
 #[cfg(test)]
 mod testing {
-    use ndarray::array;
     use crate::aggregation::AggregationResult;
+    use ndarray::array;
 
     #[test]
     fn test_gene_frame() {
