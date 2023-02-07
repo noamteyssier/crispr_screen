@@ -150,11 +150,11 @@ impl Logger {
 
 #[cfg(test)]
 mod testing {
-    
+
     use super::Logger;
+    use crate::aggregation::GeneAggregation;
     use crate::model::ModelChoice;
     use crate::norm::Normalization;
-    use crate::aggregation::GeneAggregation;
     use adjustp::Procedure;
 
     #[test]
@@ -164,7 +164,11 @@ mod testing {
         logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
         logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
         logger.norm_method(&Normalization::MedianRatio);
-        logger.aggregation_method(&GeneAggregation::Inc { token: "ntc", fdr: 0.05, group_size: 5 });
+        logger.aggregation_method(&GeneAggregation::Inc {
+            token: "ntc",
+            fdr: 0.05,
+            group_size: 5,
+        });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();
         logger.num_outliers(1);
@@ -187,7 +191,11 @@ mod testing {
         logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
         logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
         logger.norm_method(&Normalization::MedianRatio);
-        logger.aggregation_method(&GeneAggregation::Inc { token: "ntc", fdr: 0.05, group_size: 5 });
+        logger.aggregation_method(&GeneAggregation::Inc {
+            token: "ntc",
+            fdr: 0.05,
+            group_size: 5,
+        });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();
         logger.num_outliers(1);

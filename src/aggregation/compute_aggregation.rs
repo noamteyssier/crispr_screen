@@ -60,15 +60,27 @@ fn run_rra(
 
     // Calculates the RRA score for the depleted pvalues
     let alpha_rra_low = AlphaRRA::new(gene_names, alpha_low, npermutations, correction);
-    let permutation_sizes_low = alpha_rra_low.permutation_vectors().keys().cloned().collect::<Vec<usize>>();
+    let permutation_sizes_low = alpha_rra_low
+        .permutation_vectors()
+        .keys()
+        .cloned()
+        .collect::<Vec<usize>>();
     logger.permutation_sizes(&permutation_sizes_low);
-    let result_low = alpha_rra_low.run(pvalue_low).expect("Error in RRA fit for depleted pvalues");
+    let result_low = alpha_rra_low
+        .run(pvalue_low)
+        .expect("Error in RRA fit for depleted pvalues");
 
     // Calculates the RRA score for the enriched pvalues
     let alpha_rra_high = AlphaRRA::new(gene_names, alpha_high, npermutations, correction);
-    let permutation_sizes_high = alpha_rra_high.permutation_vectors().keys().cloned().collect::<Vec<usize>>();
+    let permutation_sizes_high = alpha_rra_high
+        .permutation_vectors()
+        .keys()
+        .cloned()
+        .collect::<Vec<usize>>();
     logger.permutation_sizes(&permutation_sizes_high);
-    let result_high = alpha_rra_high.run(pvalue_high).expect("Error in RRA fit for enriched pvalues");
+    let result_high = alpha_rra_high
+        .run(pvalue_high)
+        .expect("Error in RRA fit for enriched pvalues");
 
     InternalAggregationResult::new(
         result_low.names().to_vec(),
@@ -102,7 +114,9 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
-    ).fit().expect("Error calculating INC on low pvalues");
+    )
+    .fit()
+    .expect("Error calculating INC on low pvalues");
     logger.report_inc_low_threshold(result_low.threshold());
 
     let result_high = Inc::new(
@@ -114,7 +128,9 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
-    ).fit().expect("Error calculating INC on high pvalues");
+    )
+    .fit()
+    .expect("Error calculating INC on high pvalues");
     logger.report_inc_high_threshold(result_high.threshold());
 
     InternalAggregationResult::new(
@@ -168,7 +184,11 @@ pub fn compute_aggregation(
             correction,
             logger,
         ),
-        GeneAggregation::Inc { token, fdr, group_size } => run_inc(
+        GeneAggregation::Inc {
+            token,
+            fdr,
+            group_size,
+        } => run_inc(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
             &passing_gene_names,

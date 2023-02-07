@@ -76,11 +76,15 @@ mod testing {
     fn test_aggregation() {
         let config = build_config();
         match config.aggregation() {
-            GeneAggregation::Inc { token, fdr, group_size } => {
+            GeneAggregation::Inc {
+                token,
+                fdr,
+                group_size,
+            } => {
                 assert_eq!(token, &"non-targeting");
                 assert_eq!(fdr, &0.05);
                 assert_eq!(group_size, &5);
-            },
+            }
             _ => assert!(false),
         }
     }
