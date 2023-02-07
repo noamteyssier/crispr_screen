@@ -1,14 +1,10 @@
 mod compute_aggregation;
-mod mwu_inc;
 mod results;
-mod rra;
 mod utils;
 
 use clap::ValueEnum;
 pub use compute_aggregation::compute_aggregation;
-use mwu_inc::inc;
 pub use results::AggregationResult;
-use rra::alpha_rra;
 
 /// Enum describing aggregation procedure selection
 #[derive(ValueEnum, Clone, Debug, PartialEq)]
