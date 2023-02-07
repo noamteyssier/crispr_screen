@@ -16,6 +16,7 @@ pub struct GeneFrame<'a> {
     score_high: &'a Array1<f64>,
     pvalue_high: &'a Array1<f64>,
     fdr_high: &'a Array1<f64>,
+    pvalue: &'a Array1<f64>,
     fdr: &'a Array1<f64>,
     phenotype_score: &'a Array1<f64>,
     size: usize,
@@ -33,6 +34,7 @@ impl<'a> GeneFrame<'a> {
             score_high: aggregation_results.score_high(),
             pvalue_high: aggregation_results.pvalues_high(),
             fdr_high: aggregation_results.fdr_high(),
+            pvalue: aggregation_results.pvalue(),
             fdr: aggregation_results.fdr(),
             size: aggregation_results.genes().len(),
             phenotype_score: aggregation_results.phenotype_score(),
@@ -44,13 +46,13 @@ impl<'a> GeneFrame<'a> {
 
         writeln!(
             writer,
-            "gene\tfold_change\tlog_fold_change\tscore_low\tpvalue_low\tfdr_low\tscore_high\tpvalue_high\tfdr_high\tfdr\tphenotype_score"
+            "gene\tfold_change\tlog_fold_change\tscore_low\tpvalue_low\tfdr_low\tscore_high\tpvalue_high\tfdr_high\tpvalue\tfdr\tphenotype_score"
         )?;
 
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
+                "{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.gene[idx],
                 self.gene_fc[idx],
                 self.gene_log2_fc[idx],
@@ -60,6 +62,7 @@ impl<'a> GeneFrame<'a> {
                 self.score_high[idx],
                 self.pvalue_high[idx],
                 self.fdr_high[idx],
+                self.pvalue[idx],
                 self.fdr[idx],
                 self.phenotype_score[idx],
             )?;
@@ -71,29 +74,29 @@ impl<'a> GeneFrame<'a> {
 
 #[cfg(test)]
 mod testing {
-    use adjustp::Procedure;
-    use ndarray::Array1;
-
+    use ndarray::array;
     use crate::aggregation::AggregationResult;
 
     #[test]
     fn test_gene_frame() {
         let gene = vec!["gene1".to_string(), "gene2".to_string()];
-        let gene_fc = Array1::from(vec![1.0, 2.0]);
-        let score_low = Array1::from(vec![0.0, 1.0]);
-        let pvalue_low = Array1::from(vec![0.0, 1.0]);
-        let score_high = Array1::from(vec![0.0, 1.0]);
-        let pvalue_high = Array1::from(vec![0.0, 1.0]);
-        let procedure = Procedure::BenjaminiHochberg;
+        let gene_fc = array![1.0, 2.0];
+        let score_low = array![0.0, 1.0];
+        let pvalue_low = array![0.0, 1.0];
+        let fdr_low = array![0.0, 1.0];
+        let score_high = array![0.0, 1.0];
+        let pvalue_high = array![0.0, 1.0];
+        let fdr_high = array![0.0, 1.0];
 
         let aggregation_results = AggregationResult::new(
             gene,
             gene_fc,
             pvalue_low,
             pvalue_high,
+            fdr_low,
+            fdr_high,
             score_low,
             score_high,
-            procedure,
         );
         let gene_frame = super::GeneFrame::new(&aggregation_results);
         assert_eq!(gene_frame.size, 2);
