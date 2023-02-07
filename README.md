@@ -96,3 +96,11 @@ The two accepted options are `rra` and `inc`.
 ```bash
 crispr_screen -i <count_table> -c <control_label> -t <treatment_label> -g inc
 ```
+
+## References
+
+- [Li et al 2014](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0554-4)
+- [MAGeCK-iNC](https://kampmannlab.ucsf.edu/mageck-inc)
+- [Kampmann et al 2013](https://pubmed.ncbi.nlm.nih.gov/23739767/)
+- [Kampmann et al 2014](https://pubmed.ncbi.nlm.nih.gov/24992097/)
+- [Kolde et al 2012](https://pubmed.ncbi.nlm.nih.gov/22247279/)
