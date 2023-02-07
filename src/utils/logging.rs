@@ -147,3 +147,59 @@ impl Logger {
         }
     }
 }
+
+#[cfg(test)]
+mod testing {
+    
+    use super::Logger;
+    use crate::model::ModelChoice;
+    use crate::norm::Normalization;
+    use crate::aggregation::GeneAggregation;
+    use adjustp::Procedure;
+
+    #[test]
+    fn test_logger() {
+        let logger = Logger::new();
+        logger.start_mageck();
+        logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
+        logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
+        logger.norm_method(&Normalization::MedianRatio);
+        logger.aggregation_method(&GeneAggregation::Inc { token: "ntc", fdr: 0.05, group_size: 5 });
+        logger.correction(Procedure::Bonferroni);
+        logger.start_mean_variance();
+        logger.num_outliers(1);
+        logger.num_zeros(1);
+        logger.num_varied(1);
+        logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
+        logger.start_gene_aggregation();
+        logger.report_rra_alpha(1.0, 1.0);
+        logger.permutation_sizes(&vec![1, 2, 3]);
+        logger.report_inc_params("NTC", 1, 1.0, 1);
+        logger.report_inc_low_threshold(1.0);
+        logger.report_inc_high_threshold(1.0);
+        logger.convert_normalization();
+    }
+
+    #[test]
+    fn test_logger_quiet() {
+        let logger = Logger::new_silent();
+        logger.start_mageck();
+        logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
+        logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
+        logger.norm_method(&Normalization::MedianRatio);
+        logger.aggregation_method(&GeneAggregation::Inc { token: "ntc", fdr: 0.05, group_size: 5 });
+        logger.correction(Procedure::Bonferroni);
+        logger.start_mean_variance();
+        logger.num_outliers(1);
+        logger.num_zeros(1);
+        logger.num_varied(1);
+        logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
+        logger.start_gene_aggregation();
+        logger.report_rra_alpha(1.0, 1.0);
+        logger.permutation_sizes(&vec![1, 2, 3]);
+        logger.report_inc_params("NTC", 1, 1.0, 1);
+        logger.report_inc_low_threshold(1.0);
+        logger.report_inc_high_threshold(1.0);
+        logger.convert_normalization();
+    }
+}
