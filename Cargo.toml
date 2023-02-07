@@ -7,7 +7,7 @@ license = "MIT"
 documentation = "https://docs.rs/crispr_screen"
 repository = "https://github.com/noamteyssier/crispr_screen"
 homepage = "https://noamteyssier.github.io/crispr_screen/"
-keywords = ["cli", "CRISPR", "bioinformatics", "differential-expression", "sgRNA"]
+keywords = ["cli", "CRISPR", "bioinformatics", "degs", "sgRNA"]
 categories = ["command-line-utilities", "science"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
