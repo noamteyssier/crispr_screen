@@ -54,6 +54,8 @@ mod testing {
         let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::Inc {
             token: "non-targeting",
+            fdr: 0.05,
+            group_size: 5,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
@@ -74,7 +76,11 @@ mod testing {
     fn test_aggregation() {
         let config = build_config();
         match config.aggregation() {
-            GeneAggregation::Inc { token } => assert_eq!(token, &"non-targeting"),
+            GeneAggregation::Inc { token, fdr, group_size } => {
+                assert_eq!(token, &"non-targeting");
+                assert_eq!(fdr, &0.05);
+                assert_eq!(group_size, &5);
+            },
             _ => assert!(false),
         }
     }

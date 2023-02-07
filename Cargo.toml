@@ -1,17 +1,19 @@
 [package]
 name = "crispr_screen"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 adjustp = "0.1.1"
+alpha-rra = "0.1.5"
 anyhow = "1.0.59"
 clap = { version = "4.1.1", features = ["derive"] }
 colored = "2.0.0"
 csv = "1.1.6"
 hashbrown = "0.12.3"
+intc = "0.1.4"
 ndarray = "0.15.6"
 ndarray-linalg = { version = "0.16.0", features = ["intel-mkl"] }
 ndarray-rand = "0.14.0"
