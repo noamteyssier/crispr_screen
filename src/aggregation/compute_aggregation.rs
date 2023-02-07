@@ -7,30 +7,38 @@ use crate::{
     utils::{agg::aggregate_fold_changes, logging::Logger},
 };
 use adjustp::Procedure;
+use alpha_rra::AlphaRRA;
+use intc::Inc;
 use ndarray::Array1;
 
 /// Aggregates the results of the gene aggregation analysis for internal use
 struct InternalAggregationResult {
     genes: Vec<String>,
-    gene_scores_low: Array1<f64>,
-    gene_pvalues_low: Array1<f64>,
-    gene_scores_high: Array1<f64>,
-    gene_pvalues_high: Array1<f64>,
+    scores_low: Array1<f64>,
+    pvalues_low: Array1<f64>,
+    correction_low: Array1<f64>,
+    scores_high: Array1<f64>,
+    pvalues_high: Array1<f64>,
+    correction_high: Array1<f64>,
 }
 impl InternalAggregationResult {
     pub fn new(
         genes: Vec<String>,
-        gene_scores_low: Array1<f64>,
-        gene_pvalues_low: Array1<f64>,
-        gene_scores_high: Array1<f64>,
-        gene_pvalues_high: Array1<f64>,
+        scores_low: Array1<f64>,
+        pvalues_low: Array1<f64>,
+        correction_low: Array1<f64>,
+        scores_high: Array1<f64>,
+        pvalues_high: Array1<f64>,
+        correction_high: Array1<f64>,
     ) -> Self {
         Self {
             genes,
-            gene_scores_low,
-            gene_pvalues_low,
-            gene_scores_high,
-            gene_pvalues_high,
+            scores_low,
+            pvalues_low,
+            correction_low,
+            scores_high,
+            pvalues_high,
+            correction_high,
         }
     }
 }
@@ -176,10 +184,11 @@ pub fn compute_aggregation(
     AggregationResult::new(
         agg_result.genes,
         gene_fc,
-        agg_result.gene_pvalues_low,
-        agg_result.gene_pvalues_high,
-        agg_result.gene_scores_low,
-        agg_result.gene_scores_high,
-        correction,
+        agg_result.pvalues_low,
+        agg_result.pvalues_high,
+        agg_result.correction_low,
+        agg_result.correction_high,
+        agg_result.scores_low,
+        agg_result.scores_high,
     )
 }
