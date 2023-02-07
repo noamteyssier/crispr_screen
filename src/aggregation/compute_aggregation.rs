@@ -1,5 +1,4 @@
 use super::{
-    alpha_rra, inc,
     utils::{filter_zeros, set_alpha_threshold},
     AggregationResult, GeneAggregation,
 };
@@ -44,21 +43,33 @@ fn run_rra(
     alpha: f64,
     adjust_alpha: bool,
     npermutations: usize,
+    correction: Procedure,
     logger: &Logger,
 ) -> InternalAggregationResult {
     let (alpha_low, alpha_high) =
         set_alpha_threshold(&pvalue_low, &pvalue_high, alpha, adjust_alpha);
     logger.report_rra_alpha(alpha_low, alpha_high);
-    let (genes, gene_scores_low, gene_pvalues_low) =
-        alpha_rra(pvalue_low, gene_names, alpha_low, npermutations, logger);
-    let (_, gene_scores_high, gene_pvalues_high) =
-        alpha_rra(pvalue_high, gene_names, alpha_high, npermutations, logger);
+
+    // Calculates the RRA score for the depleted pvalues
+    let alpha_rra_low = AlphaRRA::new(gene_names, alpha_low, npermutations, correction);
+    let permutation_sizes_low = alpha_rra_low.permutation_vectors().keys().cloned().collect::<Vec<usize>>();
+    logger.permutation_sizes(&permutation_sizes_low);
+    let result_low = alpha_rra_low.run(pvalue_low).expect("Error in RRA fit for depleted pvalues");
+
+    // Calculates the RRA score for the enriched pvalues
+    let alpha_rra_high = AlphaRRA::new(gene_names, alpha_high, npermutations, correction);
+    let permutation_sizes_high = alpha_rra_high.permutation_vectors().keys().cloned().collect::<Vec<usize>>();
+    logger.permutation_sizes(&permutation_sizes_high);
+    let result_high = alpha_rra_high.run(pvalue_high).expect("Error in RRA fit for enriched pvalues");
+
     InternalAggregationResult::new(
-        genes,
-        gene_scores_low,
-        gene_pvalues_low,
-        gene_scores_high,
-        gene_pvalues_high,
+        result_low.names().to_vec(),
+        result_low.scores().to_owned(),
+        result_low.pvalues().to_owned(),
+        result_low.adj_pvalues().to_owned(),
+        result_high.scores().to_owned(),
+        result_high.pvalues().to_owned(),
+        result_high.adj_pvalues().to_owned(),
     )
 }
 
@@ -68,16 +79,42 @@ fn run_inc(
     pvalue_high: &Array1<f64>,
     gene_names: &[String],
     token: &str,
+    fdr: f64,
+    group_size: usize,
+    num_genes: usize,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    let (genes, gene_scores_low, gene_pvalues_low) = inc(pvalue_low, gene_names, token, logger);
-    let (_, gene_scores_high, gene_pvalues_high) = inc(pvalue_high, gene_names, token, logger);
+    logger.report_inc_params(token, num_genes, fdr, group_size);
+    let result_low = Inc::new(
+        pvalue_low,
+        gene_names,
+        token,
+        num_genes,
+        group_size,
+        fdr,
+        intc::mwu::Alternative::Less,
+        true,
+    ).fit().expect("Error calculating INC on low pvalues");
+
+    let result_high = Inc::new(
+        pvalue_high,
+        gene_names,
+        token,
+        num_genes,
+        group_size,
+        fdr,
+        intc::mwu::Alternative::Less,
+        true,
+    ).fit().expect("Error calculating INC on high pvalues");
+
     InternalAggregationResult::new(
-        genes,
-        gene_scores_low,
-        gene_pvalues_low,
-        gene_scores_high,
-        gene_pvalues_high,
+        result_low.genes().to_vec(),
+        result_low.u_scores().to_owned(),
+        result_low.u_pvalues().to_owned(),
+        result_low.fdr().to_owned(),
+        result_high.u_scores().to_owned(),
+        result_high.u_pvalues().to_owned(),
+        result_high.fdr().to_owned(),
     )
 }
 
@@ -96,6 +133,7 @@ pub fn compute_aggregation(
         sgrna_results.fold_change(),
         sgrna_results.pvalues_twosided(),
     );
+    let num_genes = gene_fc_hashmap.len();
 
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
         sgrna_results.base_means(),
