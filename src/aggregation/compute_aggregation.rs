@@ -103,6 +103,7 @@ fn run_inc(
         intc::mwu::Alternative::Less,
         true,
     ).fit().expect("Error calculating INC on low pvalues");
+    logger.report_inc_low_threshold(result_low.threshold());
 
     let result_high = Inc::new(
         pvalue_high,
@@ -114,6 +115,7 @@ fn run_inc(
         intc::mwu::Alternative::Less,
         true,
     ).fit().expect("Error calculating INC on high pvalues");
+    logger.report_inc_high_threshold(result_high.threshold());
 
     InternalAggregationResult::new(
         result_low.genes().to_vec(),
