@@ -163,13 +163,17 @@ pub fn compute_aggregation(
             *alpha,
             *adjust_alpha,
             *npermutations,
+            correction,
             logger,
         ),
-        GeneAggregation::Inc { token } => run_inc(
+        GeneAggregation::Inc { token, fdr, group_size } => run_inc(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
             &passing_gene_names,
             token,
+            *fdr,
+            *group_size,
+            num_genes,
             logger,
         ),
     };

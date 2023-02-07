@@ -31,6 +31,8 @@ pub enum GeneAggregation<'a> {
     },
     Inc {
         token: &'a str,
+        fdr: f64,
+        group_size: usize,
     },
 }
 
@@ -103,7 +105,9 @@ mod testing {
     fn test_enum_gene_aggregation_inc() {
         let agg = GeneAggregation::Inc {
             token: "non-targeting",
+            fdr: 0.05,
+            group_size: 3,
         };
-        assert_eq!(format!("{:?}", agg), "Inc { token: \"non-targeting\" }");
+        assert_eq!(format!("{:?}", agg), "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3 }");
     }
 }
