@@ -1,5 +1,5 @@
-use ndarray::{Array1, Array2, Axis};
 use super::inverse;
+use ndarray::{Array1, Array2, Axis};
 
 /// An implementation of [Weighted Least Squares](https://en.wikipedia.org/wiki/Weighted_least_squares) using a Matrix/Vector Formulation
 #[derive(Debug)]

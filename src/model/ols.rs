@@ -1,5 +1,5 @@
-use ndarray::{Array1, Array2, Axis};
 use super::inverse;
+use ndarray::{Array1, Array2, Axis};
 
 /// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares#Matrix/vector_formulation) using a Matrix/Vector Formulation
 #[derive(Debug)]

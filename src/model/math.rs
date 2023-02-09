@@ -1,8 +1,7 @@
 use ndarray::Array2;
 
-
 /// Determininant of a 2x2 matrix
-/// 
+///
 /// Calculated as a * d - b * c
 pub fn determinant(m: &Array2<f64>) -> f64 {
     assert_eq!(m.shape(), &[2, 2]);
