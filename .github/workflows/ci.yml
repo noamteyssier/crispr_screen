@@ -34,7 +34,7 @@ jobs:
       - name: Install nextest
         uses: taiki-e/install-action@nextest
       - name: Test
-        run: cargo nextest run
+        run: cargo nextest run --release
 
   coverage:
     name: Coverage
