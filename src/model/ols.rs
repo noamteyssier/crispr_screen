@@ -1,5 +1,5 @@
 use ndarray::{Array1, Array2, Axis};
-use ndarray_linalg::solve::Inverse;
+use super::inverse;
 
 /// An implementation of [Ordinary Least Squares](https://en.wikipedia.org/wiki/Ordinary_least_squares#Matrix/vector_formulation) using a Matrix/Vector Formulation
 #[derive(Debug)]
@@ -29,7 +29,7 @@ impl Ols {
         // B = inv(XtX)XtY
         let xt = mat_x.t();
         let xtx = xt.dot(&mat_x);
-        let inv_xtx = Inverse::inv(&xtx).expect("Unable to computer inverse matrix in OLS");
+        let inv_xtx = inverse(&xtx);
 
         // drop an axis from the solution for a 1D vector
         let solution = inv_xtx.dot(&xt).dot(&mat_y).remove_axis(Axis(1));
