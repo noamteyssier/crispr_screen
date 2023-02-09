@@ -54,8 +54,7 @@ fn run_rra(
     correction: Procedure,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    let (alpha_low, alpha_high) =
-        set_alpha_threshold(pvalue_low, pvalue_high, alpha, adjust_alpha);
+    let (alpha_low, alpha_high) = set_alpha_threshold(pvalue_low, pvalue_high, alpha, adjust_alpha);
     logger.report_rra_alpha(alpha_low, alpha_high);
 
     // Calculates the RRA score for the depleted pvalues

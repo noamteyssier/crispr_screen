@@ -1,5 +1,5 @@
+use super::inverse;
 use ndarray::{Array1, Array2, Axis};
-use ndarray_linalg::solve::Inverse;
 
 /// An implementation of [Weighted Least Squares](https://en.wikipedia.org/wiki/Weighted_least_squares) using a Matrix/Vector Formulation
 #[derive(Debug)]
@@ -38,7 +38,7 @@ impl Wols {
         let xt = mat_x.t();
         let xtw = xt.dot(&mat_w);
         let xtwx = xtw.dot(&mat_x);
-        let inv_xtwx = Inverse::inv(&xtwx).expect("Unable to computer inverse matrix in OLS");
+        let inv_xtwx = inverse(&xtwx);
 
         // drop an axis from the solution for a 1D vector
         let solution = inv_xtwx.dot(&xtw).dot(&mat_y).remove_axis(Axis(1));
