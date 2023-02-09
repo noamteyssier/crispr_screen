@@ -22,7 +22,6 @@ csv = "1.1.6"
 hashbrown = "0.12.3"
 intc = "0.1.4"
 ndarray = "0.15.6"
-ndarray-linalg = { version = "0.16.0", features = ["intel-mkl"] }
 ndarray-rand = "0.14.0"
 ndarray-stats = "0.5.0"
 noisy_float = "0.2.0"
