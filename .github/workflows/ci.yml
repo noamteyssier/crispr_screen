@@ -16,11 +16,15 @@ jobs:
         run: exit 0
 
   build:
-    runs-on: ubuntu-latest
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
+      - uses: actions/checkout@v3
+      - name: Build
+        run: cargo build --verbose
 
   test:
     name: Test
