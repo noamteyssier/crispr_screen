@@ -126,7 +126,7 @@ impl SimpleFrame {
         if !self.valid_headers(labels) {
             bail!("Invalid headers provided")
         }
-        if labels.len() != self.data.keys().len() {
+        if labels.len() > self.data.keys().len() {
             bail!("Provided count matrix is of unexpected shape!\nMust be [sgrna, gene, samples ... ]")
         }
 
@@ -241,6 +241,22 @@ mod testing {
             )
             .unwrap();
         assert_eq!(dm.shape(), &[10, 4]);
+    }
+
+    #[test]
+    fn test_simple_frame_subset() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+
+        let dm = frame
+            .data_matrix(
+                &vec!["low_1", "high_1"]
+                    .into_iter()
+                    .map(|x| x.to_owned())
+                    .collect::<Vec<String>>(),
+            )
+            .unwrap();
+        assert_eq!(dm.shape(), &[10, 2]);
     }
 
     #[test]
