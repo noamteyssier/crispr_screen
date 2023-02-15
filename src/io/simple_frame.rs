@@ -165,6 +165,7 @@ impl SimpleFrame {
 mod testing {
     use super::SimpleFrame;
     use ndarray_rand::rand::random;
+    use ndarray::s;
 
     fn example_dataset() -> String {
         let mut s = String::with_capacity(1000);
@@ -248,7 +249,7 @@ mod testing {
         let datastream = example_dataset();
         let frame = SimpleFrame::from_string(&datastream).unwrap();
 
-        let dm = frame
+        let dm_sub = frame
             .data_matrix(
                 &vec!["low_1", "high_1"]
                     .into_iter()
@@ -256,7 +257,32 @@ mod testing {
                     .collect::<Vec<String>>(),
             )
             .unwrap();
-        assert_eq!(dm.shape(), &[10, 2]);
+        assert_eq!(dm_sub.shape(), &[10, 2]);
+    }
+
+    #[test]
+    fn test_simple_frame_ordering() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+
+        let dm_rev = frame
+            .data_matrix(
+                &vec!["high_1", "low_1"]
+                    .into_iter()
+                    .map(|x| x.to_owned())
+                    .collect::<Vec<String>>(),
+            )
+            .unwrap();
+        let dm_fwd = frame
+            .data_matrix(
+                &vec!["low_1", "high_1"]
+                    .into_iter()
+                    .map(|x| x.to_owned())
+                    .collect::<Vec<String>>(),
+            )
+            .unwrap();
+        assert_eq!(dm_rev.slice(s![.., 0]), dm_fwd.slice(s![.., 1]));
+        assert_eq!(dm_rev.slice(s![.., 1]), dm_fwd.slice(s![.., 0]));
     }
 
     #[test]
