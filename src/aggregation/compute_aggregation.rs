@@ -1,5 +1,5 @@
 use super::{
-    utils::{filter_zeros, set_alpha_threshold},
+    utils::{filter_zeros, set_alpha_threshold, num_unique},
     AggregationResult, GeneAggregation,
 };
 use crate::{
@@ -14,6 +14,7 @@ use ndarray::Array1;
 /// Aggregates the results of the gene aggregation analysis for internal use
 struct InternalAggregationResult {
     genes: Vec<String>,
+    logfc: Array1<f64>,
     scores_low: Array1<f64>,
     pvalues_low: Array1<f64>,
     correction_low: Array1<f64>,
@@ -24,6 +25,7 @@ struct InternalAggregationResult {
 impl InternalAggregationResult {
     pub fn new(
         genes: Vec<String>,
+        logfc: Array1<f64>,
         scores_low: Array1<f64>,
         pvalues_low: Array1<f64>,
         correction_low: Array1<f64>,
@@ -33,6 +35,7 @@ impl InternalAggregationResult {
     ) -> Self {
         Self {
             genes,
+            logfc,
             scores_low,
             pvalues_low,
             correction_low,
@@ -47,6 +50,7 @@ impl InternalAggregationResult {
 fn run_rra(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,
+    logfc: &Array1<f64>,
     gene_names: &[String],
     alpha: f64,
     adjust_alpha: bool,
@@ -81,8 +85,21 @@ fn run_rra(
         .run(pvalue_high)
         .expect("Error in RRA fit for enriched pvalues");
 
+    let pvalues_twosided = pvalue_low.iter().zip(pvalue_high.iter()).map(|(x, y)| x.min(*y)).collect();
+
+    let gene_fc_hashmap = aggregate_fold_changes(
+        gene_names,
+        logfc,
+        &pvalues_twosided,
+    );
+    let gene_fc = gene_names
+        .iter()
+        .map(|gene| gene_fc_hashmap.get(gene).unwrap().to_owned())
+        .collect();
+
     InternalAggregationResult::new(
         result_low.names().to_vec(),
+        gene_fc,
         result_low.scores().to_owned(),
         result_low.pvalues().to_owned(),
         result_low.adj_pvalues().to_owned(),
@@ -96,7 +113,9 @@ fn run_rra(
 fn run_inc(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,
+    log2_fold_change: &Array1<f64>,
     gene_names: &[String],
+    // product: &Array1<f64>,
     token: &str,
     fdr: f64,
     group_size: usize,
@@ -106,6 +125,7 @@ fn run_inc(
     logger.report_inc_params(token, num_genes, fdr, group_size);
     let result_low = Inc::new(
         pvalue_low,
+        log2_fold_change,
         gene_names,
         token,
         num_genes,
@@ -113,6 +133,7 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
+        Some(42),
     )
     .fit()
     .expect("Error calculating INC on low pvalues");
@@ -120,13 +141,15 @@ fn run_inc(
 
     let result_high = Inc::new(
         pvalue_high,
+        log2_fold_change,
         gene_names,
         token,
         num_genes,
         group_size,
         fdr,
-        intc::mwu::Alternative::Less,
+        intc::mwu::Alternative::Greater,
         true,
+        Some(42),
     )
     .fit()
     .expect("Error calculating INC on high pvalues");
@@ -134,6 +157,7 @@ fn run_inc(
 
     InternalAggregationResult::new(
         result_low.genes().to_vec(),
+        result_low.logfc().to_owned(),
         result_low.u_scores().to_owned(),
         result_low.u_pvalues().to_owned(),
         result_low.fdr().to_owned(),
@@ -153,12 +177,7 @@ pub fn compute_aggregation(
 ) -> AggregationResult {
     logger.start_gene_aggregation();
 
-    let gene_fc_hashmap = aggregate_fold_changes(
-        gene_names,
-        sgrna_results.fold_change(),
-        sgrna_results.pvalues_twosided(),
-    );
-    let num_genes = gene_fc_hashmap.len();
+    let num_genes = num_unique(gene_names);
 
     let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
         sgrna_results.base_means(),
@@ -176,6 +195,7 @@ pub fn compute_aggregation(
         } => run_rra(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
+            sgrna_results.log_fold_change(),
             &passing_gene_names,
             *alpha,
             *adjust_alpha,
@@ -190,6 +210,7 @@ pub fn compute_aggregation(
         } => run_inc(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
+            sgrna_results.log_fold_change(),
             &passing_gene_names,
             token,
             *fdr,
@@ -199,16 +220,11 @@ pub fn compute_aggregation(
         ),
     };
 
-    let gene_fc = agg_result
-        .genes
-        .iter()
-        .map(|x| gene_fc_hashmap.get(x).unwrap_or(&0.0))
-        .copied()
-        .collect::<Array1<f64>>();
+    let fold_change = agg_result.logfc.iter().map(|x| x.exp2()).collect::<Array1<f64>>();
 
     AggregationResult::new(
         agg_result.genes,
-        gene_fc,
+        fold_change,
         agg_result.pvalues_low,
         agg_result.pvalues_high,
         agg_result.correction_low,

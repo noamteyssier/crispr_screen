@@ -74,6 +74,11 @@ pub fn set_alpha_threshold(
     }
 }
 
+/// Calculates the number of unique values in a vector
+pub fn num_unique(names: &[String]) -> usize {
+    names.iter().collect::<HashSet<_>>().len()
+}
+
 #[cfg(test)]
 mod testing {
     use super::{calculate_empirical_alpha, filter_zeros, mask_zeros};
