@@ -85,12 +85,9 @@ fn run_rra(
         .run(pvalue_high)
         .expect("Error in RRA fit for enriched pvalues");
 
-    let pvalues_twosided = pvalue_low.iter().zip(pvalue_high.iter()).map(|(x, y)| x.min(*y)).collect();
-
     let gene_fc_hashmap = aggregate_fold_changes(
         gene_names,
         logfc,
-        &pvalues_twosided,
     );
     let gene_fc = gene_names
         .iter()
