@@ -86,9 +86,10 @@ fn run_rra(
         .expect("Error in RRA fit for enriched pvalues");
 
     let gene_fc_hashmap = aggregate_fold_changes(gene_names, logfc);
-    let gene_fc = gene_names
+    let gene_fc = result_low.names()
         .iter()
-        .map(|gene| gene_fc_hashmap.get(gene).unwrap().to_owned())
+        .map(|gene| gene_fc_hashmap.get(gene).unwrap_or(&0.0))
+        .copied()
         .collect();
 
     InternalAggregationResult::new(
