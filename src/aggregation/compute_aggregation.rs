@@ -112,7 +112,6 @@ fn run_inc(
     pvalue_high: &Array1<f64>,
     log2_fold_change: &Array1<f64>,
     gene_names: &[String],
-    // product: &Array1<f64>,
     token: &str,
     fdr: f64,
     group_size: usize,
@@ -130,6 +129,7 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
+        Some(Direction::Less),
         Some(42),
     )
     .fit()
@@ -144,8 +144,9 @@ fn run_inc(
         num_genes,
         group_size,
         fdr,
-        intc::mwu::Alternative::Greater,
+        intc::mwu::Alternative::Less,
         true,
+        Some(Direction::Greater),
         Some(42),
     )
     .fit()
@@ -217,7 +218,10 @@ pub fn compute_aggregation(
         ),
     };
 
-    let fold_change = agg_result.logfc.iter().map(|x| x.exp2()).collect::<Array1<f64>>();
+    let fold_change = agg_result.logfc
+        .iter()
+        .map(|x| x.exp2())
+        .collect::<Array1<f64>>();
 
     AggregationResult::new(
         agg_result.genes,
