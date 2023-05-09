@@ -113,9 +113,17 @@ fn run_inc(
     fdr: f64,
     group_size: usize,
     num_genes: usize,
+    use_product: bool,
     logger: &Logger,
 ) -> InternalAggregationResult {
     logger.report_inc_params(token, num_genes, fdr, group_size);
+    
+    let (dir_low, dir_high) = if use_product {
+        (Some(Direction::Less), Some(Direction::Greater))
+    } else {
+        (None, None)
+    };
+
     let result_low = Inc::new(
         pvalue_low,
         log2_fold_change,
@@ -126,12 +134,12 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
-        Some(Direction::Less),
+        dir_low,
         Some(42),
     )
     .fit()
     .expect("Error calculating INC on low pvalues");
-    logger.report_inc_low_threshold(result_low.threshold());
+    logger.report_inc_low_threshold(result_low.threshold(), use_product);
 
     let result_high = Inc::new(
         pvalue_high,
@@ -143,12 +151,12 @@ fn run_inc(
         fdr,
         intc::mwu::Alternative::Less,
         true,
-        Some(Direction::Greater),
+        dir_high,
         Some(42),
     )
     .fit()
     .expect("Error calculating INC on high pvalues");
-    logger.report_inc_high_threshold(result_high.threshold());
+    logger.report_inc_high_threshold(result_high.threshold(), use_product);
 
     InternalAggregationResult::new(
         result_low.genes().to_vec(),
@@ -202,6 +210,7 @@ pub fn compute_aggregation(
             token,
             fdr,
             group_size,
+            use_product,
         } => run_inc(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
@@ -211,6 +220,7 @@ pub fn compute_aggregation(
             *fdr,
             *group_size,
             num_genes,
+            *use_product,
             logger,
         ),
     };

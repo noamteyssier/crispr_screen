@@ -29,6 +29,7 @@ pub enum GeneAggregation<'a> {
         token: &'a str,
         fdr: f64,
         group_size: usize,
+        use_product: bool,
     },
 }
 
