@@ -8,7 +8,7 @@ use crate::{
 };
 use adjustp::Procedure;
 use alpha_rra::AlphaRRA;
-use intc::Inc;
+use intc::{Inc, fdr::Direction};
 use ndarray::Array1;
 
 /// Aggregates the results of the gene aggregation analysis for internal use
