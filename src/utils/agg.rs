@@ -67,10 +67,10 @@ mod testing {
         let fc = Array1::from(vec![1., 2., 3., 4., 5., 6., 7., 8.]);
 
         let mut expected = HashMap::new();
-        expected.insert("A".to_string(), (1.0 + 5.0 ) / 2.);
-        expected.insert("B".to_string(), (2.0 + 6.0 ) / 2.);
-        expected.insert("C".to_string(), (3.0 + 7.0 ) / 2.);
-        expected.insert("D".to_string(), (4.0 + 8.0 ) / 2.);
+        expected.insert("A".to_string(), (1.0 + 5.0) / 2.);
+        expected.insert("B".to_string(), (2.0 + 6.0) / 2.);
+        expected.insert("C".to_string(), (3.0 + 7.0) / 2.);
+        expected.insert("D".to_string(), (4.0 + 8.0) / 2.);
 
         let result = super::aggregate_fold_changes(&gene_names, &fc);
 
