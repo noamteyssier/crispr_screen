@@ -76,6 +76,10 @@ struct Args {
     #[arg(short = 'G', long, default_value = "5")]
     inc_group_size: usize,
 
+    /// Calculate FDR threshold using p-values instead of product-score in INC
+    #[arg(long)]
+    inc_pvalues: bool,
+
     /// Do not write logging information
     #[arg(short, long)]
     quiet: bool,
@@ -110,6 +114,7 @@ fn main() -> Result<()> {
             token: &args.ntc_token,
             fdr: args.inc_fdr,
             group_size: args.inc_group_size,
+            use_product: !args.inc_pvalues,
         },
     };
 
