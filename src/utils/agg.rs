@@ -39,10 +39,17 @@ pub fn weighted_fold_change<T: Eq + Hash + Clone>(
 pub fn aggregate_fold_changes(
     gene_names: &[String],
     fold_changes: &Array1<f64>,
-    pvalues: &Array1<f64>,
 ) -> HashMap<String, f64> {
-    let map = unique_indices(gene_names);
-    weighted_fold_change(fold_changes, pvalues, &map)
+    let index_map = unique_indices(gene_names);
+    index_map
+        .iter()
+        .map(|(k, v)| {
+            let fc = fold_changes.select(Axis(0), v);
+            (k.clone(), fc.mean().unwrap())
+        })
+        .collect()
+    
+    // weighted_fold_change(fold_changes, pvalues, &map)
 }
 
 #[cfg(test)]
@@ -98,7 +105,6 @@ mod testing {
             "D".to_string(),
         ];
         let fc = Array1::from(vec![1., 2., 3., 4., 5., 6., 7., 8.]);
-        let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]);
 
         let mut expected = HashMap::new();
         expected.insert("A".to_string(), ((1.0 * 0.9) + (5.0 * 0.5)) / 1.4);
@@ -106,7 +112,7 @@ mod testing {
         expected.insert("C".to_string(), ((3.0 * 0.7) + (7.0 * 0.3)) / 1.0);
         expected.insert("D".to_string(), ((4.0 * 0.6) + (8.0 * 0.2)) / 0.8);
 
-        let result = super::aggregate_fold_changes(&gene_names, &fc, &pvalues);
+        let result = super::aggregate_fold_changes(&gene_names, &fc);
 
         for (k, v) in expected.iter() {
             let v_hat = result.get(k).unwrap();
