@@ -2,8 +2,6 @@ use hashbrown::HashMap;
 use ndarray::{Array1, Axis};
 use std::hash::Hash;
 
-use super::math::weighted_mean;
-
 /// recovers the indices of all unique values in a vector and returns a hashmap of the unique values and their indices
 /// # Arguments
 /// * `vec` - the vector to be searched and hashed
@@ -14,26 +12,6 @@ pub fn unique_indices<T: Eq + Hash + Clone>(vec: &[T]) -> HashMap<T, Vec<usize>>
         map.entry(x.clone()).or_insert(Vec::new()).push(i);
     }
     map
-}
-
-/// calculates the weighted fold change for each unique value in a vector
-/// # Arguments
-/// * `fold_change` - the fold change values
-/// * `pvalues` - the pvalues corresponding to the fold change values to be inversely weighted
-/// * `map` - a hashmap of the unique values and their indices
-pub fn weighted_fold_change<T: Eq + Hash + Clone>(
-    fold_change: &Array1<f64>,
-    pvalues: &Array1<f64>,
-    map: &HashMap<T, Vec<usize>>,
-) -> HashMap<T, f64> {
-    map.iter()
-        .map(|(k, v)| {
-            let fc = fold_change.select(Axis(0), v);
-            let weights = 1.0 - pvalues.select(Axis(0), v);
-            let weighted_fc = weighted_mean(&fc, &weights);
-            (k.clone(), weighted_fc)
-        })
-        .collect()
 }
 
 pub fn aggregate_fold_changes(
