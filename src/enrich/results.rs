@@ -107,7 +107,6 @@ impl EnrichmentResult {
     pub fn product(&self) -> &Array1<f64> {
         &self.product
     }
-
 }
 
 #[cfg(test)]

@@ -1,5 +1,5 @@
 use super::{
-    utils::{filter_zeros, set_alpha_threshold, num_unique},
+    utils::{filter_zeros, num_unique, set_alpha_threshold},
     AggregationResult, GeneAggregation,
 };
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
 };
 use adjustp::Procedure;
 use alpha_rra::AlphaRRA;
-use intc::{Inc, fdr::Direction};
+use intc::{fdr::Direction, Inc};
 use ndarray::Array1;
 
 /// Aggregates the results of the gene aggregation analysis for internal use
@@ -85,10 +85,7 @@ fn run_rra(
         .run(pvalue_high)
         .expect("Error in RRA fit for enriched pvalues");
 
-    let gene_fc_hashmap = aggregate_fold_changes(
-        gene_names,
-        logfc,
-    );
+    let gene_fc_hashmap = aggregate_fold_changes(gene_names, logfc);
     let gene_fc = gene_names
         .iter()
         .map(|gene| gene_fc_hashmap.get(gene).unwrap().to_owned())
@@ -218,7 +215,8 @@ pub fn compute_aggregation(
         ),
     };
 
-    let fold_change = agg_result.logfc
+    let fold_change = agg_result
+        .logfc
         .iter()
         .map(|x| x.exp2())
         .collect::<Array1<f64>>();

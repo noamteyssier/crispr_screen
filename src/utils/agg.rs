@@ -48,7 +48,7 @@ pub fn aggregate_fold_changes(
             (k.clone(), fc.mean().unwrap())
         })
         .collect()
-    
+
     // weighted_fold_change(fold_changes, pvalues, &map)
 }
 
