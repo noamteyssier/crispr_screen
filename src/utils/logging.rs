@@ -125,15 +125,23 @@ impl Logger {
         }
     }
 
-    pub fn report_inc_low_threshold(&self, threshold: f64) {
+    pub fn report_inc_low_threshold(&self, threshold: f64, use_product: bool) {
         if self.verbose {
-            Self::write_to_stderr("Low Pvalue Threshold       : ", threshold);
+            if use_product {
+                Self::write_to_stderr("Low Product Threshold      : ", threshold);
+            } else {
+                Self::write_to_stderr("Low Pvalue Threshold       : ", threshold);
+            }
         }
     }
 
-    pub fn report_inc_high_threshold(&self, threshold: f64) {
+    pub fn report_inc_high_threshold(&self, threshold: f64, use_product: bool) {
         if self.verbose {
-            Self::write_to_stderr("High Pvalue Threshold      : ", threshold);
+            if use_product {
+                Self::write_to_stderr("High Product Threshold     : ", threshold);
+            } else {
+                Self::write_to_stderr("High Pvalue Threshold      : ", threshold);
+            }
         }
     }
 
@@ -168,6 +176,7 @@ mod testing {
             token: "ntc",
             fdr: 0.05,
             group_size: 5,
+            use_product: true,
         });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();
@@ -179,8 +188,10 @@ mod testing {
         logger.report_rra_alpha(1.0, 1.0);
         logger.permutation_sizes(&vec![1, 2, 3]);
         logger.report_inc_params("NTC", 1, 1.0, 1);
-        logger.report_inc_low_threshold(1.0);
-        logger.report_inc_high_threshold(1.0);
+        logger.report_inc_low_threshold(1.0, false);
+        logger.report_inc_high_threshold(1.0, false);
+        logger.report_inc_low_threshold(1.0, true);
+        logger.report_inc_high_threshold(1.0, true);
         logger.convert_normalization();
     }
 
@@ -195,6 +206,7 @@ mod testing {
             token: "ntc",
             fdr: 0.05,
             group_size: 5,
+            use_product: false,
         });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();
@@ -206,8 +218,10 @@ mod testing {
         logger.report_rra_alpha(1.0, 1.0);
         logger.permutation_sizes(&vec![1, 2, 3]);
         logger.report_inc_params("NTC", 1, 1.0, 1);
-        logger.report_inc_low_threshold(1.0);
-        logger.report_inc_high_threshold(1.0);
+        logger.report_inc_low_threshold(1.0, false);
+        logger.report_inc_high_threshold(1.0, false);
+        logger.report_inc_low_threshold(1.0, true);
+        logger.report_inc_high_threshold(1.0, true);
         logger.convert_normalization();
     }
 }
