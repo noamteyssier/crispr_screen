@@ -24,12 +24,4 @@ mod testing {
         assert!(z.mean() < Some(1e-6));
         assert!(z.std(0.) - 1. < 1e-6);
     }
-
-    #[test]
-    fn test_weighted_mean() {
-        let x = Array1::from(vec![1., 2., 3., 4.]);
-        let w = Array1::from(vec![1., 2., 3., 4.]);
-        let mean = super::weighted_mean(&x, &w);
-        assert_eq!(mean, 3.);
-    }
 }

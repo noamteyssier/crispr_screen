@@ -53,24 +53,6 @@ mod testing {
     }
 
     #[test]
-    fn test_weighted_fold_change() {
-        use hashbrown::HashMap;
-        use ndarray::Array1;
-
-        let fc = Array1::from(vec![1., 2., 3., 4.]);
-        let pvalues = Array1::from(vec![0.1, 0.2, 0.3, 0.4]);
-        let mut map = HashMap::new();
-        map.insert(1, vec![0, 2]);
-        map.insert(2, vec![1, 3]);
-
-        let mut expected = HashMap::new();
-        expected.insert(1, ((1.0 * 0.9) + (3.0 * 0.7)) / 1.6);
-        expected.insert(2, ((2.0 * 0.8) + (4.0 * 0.6)) / 1.4);
-
-        assert_eq!(expected, super::weighted_fold_change(&fc, &pvalues, &map));
-    }
-
-    #[test]
     fn test_aggregate_fold_changes() {
         let gene_names = vec![
             "A".to_string(),
@@ -85,10 +67,10 @@ mod testing {
         let fc = Array1::from(vec![1., 2., 3., 4., 5., 6., 7., 8.]);
 
         let mut expected = HashMap::new();
-        expected.insert("A".to_string(), ((1.0 * 0.9) + (5.0 * 0.5)) / 1.4);
-        expected.insert("B".to_string(), ((2.0 * 0.8) + (6.0 * 0.4)) / 1.2);
-        expected.insert("C".to_string(), ((3.0 * 0.7) + (7.0 * 0.3)) / 1.0);
-        expected.insert("D".to_string(), ((4.0 * 0.6) + (8.0 * 0.2)) / 0.8);
+        expected.insert("A".to_string(), (1.0 + 5.0 ) / 2.);
+        expected.insert("B".to_string(), (2.0 + 6.0 ) / 2.);
+        expected.insert("C".to_string(), (3.0 + 7.0 ) / 2.);
+        expected.insert("D".to_string(), (4.0 + 8.0 ) / 2.);
 
         let result = super::aggregate_fold_changes(&gene_names, &fc);
 

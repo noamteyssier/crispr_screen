@@ -56,6 +56,7 @@ mod testing {
             token: "non-targeting",
             fdr: 0.05,
             group_size: 5,
+            use_product: true,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
@@ -80,6 +81,7 @@ mod testing {
                 token,
                 fdr,
                 group_size,
+                use_product,
             } => {
                 assert_eq!(token, &"non-targeting");
                 assert_eq!(fdr, &0.05);
