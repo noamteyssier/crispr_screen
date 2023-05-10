@@ -7,6 +7,7 @@ pub struct Configuration<'a> {
     aggregation: GeneAggregation<'a>,
     correction: Procedure,
     model_choice: ModelChoice,
+    seed: u64,
     prefix: &'a str,
 }
 impl<'a> Configuration<'a> {
@@ -15,6 +16,7 @@ impl<'a> Configuration<'a> {
         aggregation: GeneAggregation<'a>,
         correction: Procedure,
         model_choice: ModelChoice,
+        seed: u64,
         prefix: &'a str,
     ) -> Self {
         Self {
@@ -22,6 +24,7 @@ impl<'a> Configuration<'a> {
             aggregation,
             correction,
             model_choice,
+            seed,
             prefix,
         }
     }
@@ -36,6 +39,9 @@ impl<'a> Configuration<'a> {
     }
     pub fn model_choice(&self) -> &ModelChoice {
         &self.model_choice
+    }
+    pub fn seed(&self) -> u64 {
+        self.seed
     }
     pub fn prefix(&self) -> &str {
         self.prefix
@@ -60,8 +66,9 @@ mod testing {
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let seed = 0;
         let prefix = "results";
-        Configuration::new(normalization, aggregation, correction, model_choice, prefix)
+        Configuration::new(normalization, aggregation, correction, model_choice, seed, prefix)
     }
 
     #[test]

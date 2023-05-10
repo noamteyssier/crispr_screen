@@ -91,6 +91,10 @@ struct Args {
     /// Least squares model choice
     #[arg(short, long, default_value = "wols")]
     model_choice: ModelChoice,
+
+    /// Set the seed of the run
+    #[arg(short, long, default_value = "42")]
+    seed: u64,
 }
 
 fn main() -> Result<()> {
@@ -132,7 +136,7 @@ fn main() -> Result<()> {
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new(args.norm, agg, correction, args.model_choice, &args.output);
+    let config = Configuration::new(args.norm, agg, correction, args.model_choice, args.seed, &args.output);
 
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;

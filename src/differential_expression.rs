@@ -46,6 +46,7 @@ pub fn mageck(
         gene_names,
         logger,
         config.correction(),
+        config.seed(),
     );
 
     // Build sgRNA DataFrame

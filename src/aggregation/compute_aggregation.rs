@@ -116,6 +116,7 @@ fn run_inc(
     group_size: usize,
     num_genes: usize,
     use_product: bool,
+    seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
     logger.report_inc_params(token, num_genes, fdr, group_size);
@@ -137,7 +138,7 @@ fn run_inc(
         intc::mwu::Alternative::Less,
         true,
         dir_low,
-        Some(42),
+        Some(seed),
     )
     .fit()
     .expect("Error calculating INC on low pvalues");
@@ -154,7 +155,7 @@ fn run_inc(
         intc::mwu::Alternative::Less,
         true,
         dir_high,
-        Some(42),
+        Some(seed),
     )
     .fit()
     .expect("Error calculating INC on high pvalues");
@@ -179,6 +180,7 @@ pub fn compute_aggregation(
     gene_names: &[String],
     logger: &Logger,
     correction: Procedure,
+    seed: u64,
 ) -> AggregationResult {
     logger.start_gene_aggregation();
 
@@ -223,6 +225,7 @@ pub fn compute_aggregation(
             *group_size,
             num_genes,
             *use_product,
+            seed,
             logger,
         ),
     };
