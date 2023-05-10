@@ -141,7 +141,8 @@ mod testing {
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
         let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph, ppf) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
@@ -161,7 +162,8 @@ mod testing {
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
         let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph, ppf) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
@@ -181,7 +183,8 @@ mod testing {
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
         let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph, ppf) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());

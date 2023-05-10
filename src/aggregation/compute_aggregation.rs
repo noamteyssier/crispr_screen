@@ -186,7 +186,12 @@ pub fn compute_aggregation(
 
     let num_genes = num_unique(gene_names);
 
-    let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high, passing_sgrna_logfc) = filter_zeros(
+    let (
+        passing_gene_names,
+        passing_sgrna_pvalues_low,
+        passing_sgrna_pvalues_high,
+        passing_sgrna_logfc,
+    ) = filter_zeros(
         sgrna_results.base_means(),
         gene_names,
         sgrna_results.pvalues_low(),
