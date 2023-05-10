@@ -68,7 +68,14 @@ mod testing {
         let model_choice = ModelChoice::Wols;
         let seed = 0;
         let prefix = "results";
-        Configuration::new(normalization, aggregation, correction, model_choice, seed, prefix)
+        Configuration::new(
+            normalization,
+            aggregation,
+            correction,
+            model_choice,
+            seed,
+            prefix,
+        )
     }
 
     #[test]

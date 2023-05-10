@@ -136,7 +136,14 @@ fn main() -> Result<()> {
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new(args.norm, agg, correction, args.model_choice, args.seed, &args.output);
+    let config = Configuration::new(
+        args.norm,
+        agg,
+        correction,
+        args.model_choice,
+        args.seed,
+        &args.output,
+    );
 
     let labels_controls = args.controls;
     let labels_treatments = args.treatments;
