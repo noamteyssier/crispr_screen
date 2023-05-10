@@ -100,6 +100,7 @@ mod testing {
                 assert_eq!(token, &"non-targeting");
                 assert_eq!(fdr, &0.05);
                 assert_eq!(group_size, &5);
+                assert_eq!(use_product, &true);
             }
             _ => assert!(false),
         }
