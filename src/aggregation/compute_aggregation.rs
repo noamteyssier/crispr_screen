@@ -186,11 +186,12 @@ pub fn compute_aggregation(
 
     let num_genes = num_unique(gene_names);
 
-    let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high) = filter_zeros(
+    let (passing_gene_names, passing_sgrna_pvalues_low, passing_sgrna_pvalues_high, passing_sgrna_logfc) = filter_zeros(
         sgrna_results.base_means(),
         gene_names,
         sgrna_results.pvalues_low(),
         sgrna_results.pvalues_high(),
+        sgrna_results.log_fold_change(),
         logger,
     );
 
@@ -202,7 +203,7 @@ pub fn compute_aggregation(
         } => run_rra(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
-            sgrna_results.log_fold_change(),
+            &passing_sgrna_logfc,
             &passing_gene_names,
             *alpha,
             *adjust_alpha,
@@ -218,7 +219,7 @@ pub fn compute_aggregation(
         } => run_inc(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
-            sgrna_results.log_fold_change(),
+            &passing_sgrna_logfc,
             &passing_gene_names,
             token,
             *fdr,
