@@ -3,7 +3,7 @@ use colored::Colorize;
 use hashbrown::HashSet;
 use std::fmt::Debug;
 
-use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization, io::HitList};
 
 pub struct Logger {
     verbose: bool,
@@ -152,6 +152,15 @@ impl Logger {
                 "Warning".bold().yellow(),
                 "Numeric instability found in median-ratio normalization. Performing total normalization instead.".bold()
                 );
+        }
+    }
+
+    pub fn hit_list(&self, hit_list: &HitList) {
+        if self.verbose {
+            eprintln!("\n{}", "Hits".bold().underline());
+            Self::write_to_stderr("Number of Hits             : ", hit_list.num_total());
+            Self::write_to_stderr("Number Upregulated Hits    : ", hit_list.num_enrichments());
+            Self::write_to_stderr("Number Downregulated Hits  : ", hit_list.num_depletions());
         }
     }
 }
