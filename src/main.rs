@@ -35,9 +35,11 @@ struct Args {
 
     /// Output filename prefix
     ///
-    /// sgRNA results will be written to <prefix>.sgrna_results.tab
+    /// sgRNA results will be written to <prefix>.sgrna_results.tsv
     ///
-    /// gene results will be written to <prefix>.gene_results.tab
+    /// gene results will be written to <prefix>.gene_results.tsv
+    ///
+    /// hits will be written to <prefix>.hits.tsv
     #[arg(short, long, default_value = "./results")]
     output: String,
 

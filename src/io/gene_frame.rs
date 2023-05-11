@@ -42,7 +42,7 @@ impl<'a> GeneFrame<'a> {
     }
 
     pub fn write(&self, prefix: &str) -> Result<()> {
-        let mut writer = File::create(format!("{prefix}.gene_results.tab")).map(BufWriter::new)?;
+        let mut writer = File::create(format!("{prefix}.gene_results.tsv")).map(BufWriter::new)?;
 
         writeln!(
             writer,

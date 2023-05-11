@@ -142,7 +142,7 @@ impl HitList {
     }
 
     pub fn write(&self, prefix: &str) -> Result<()> {
-        let mut writer = File::create(format!("{}.hit_list.tsv", prefix)).map(BufWriter::new)?;
+        let mut writer = File::create(format!("{}.hits.tsv", prefix)).map(BufWriter::new)?;
         match self.method {
             MethodEnum::RRA { fdr: _ } => {
                 writeln!(writer, "gene\tlog2fc\tpvalue\tphenotype_score\tfdr")?;
