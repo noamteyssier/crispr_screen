@@ -11,3 +11,4 @@ Cargo.lock
 
 # Ignore testing tables
 *.tab
+*.tsv
