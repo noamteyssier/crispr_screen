@@ -1,7 +1,7 @@
 use crate::{
     aggregation::compute_aggregation,
     enrich::enrichment_testing,
-    io::{GeneFrame, SgrnaFrame, SimpleFrame, HitList},
+    io::{GeneFrame, HitList, SgrnaFrame, SimpleFrame},
     model::model_mean_variance,
     norm::normalize_counts,
     utils::{config::Configuration, logging::Logger},

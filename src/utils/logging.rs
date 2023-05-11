@@ -3,7 +3,7 @@ use colored::Colorize;
 use hashbrown::HashSet;
 use std::fmt::Debug;
 
-use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization, io::HitList};
+use crate::{aggregation::GeneAggregation, io::HitList, model::ModelChoice, norm::Normalization};
 
 pub struct Logger {
     verbose: bool,

@@ -1,9 +1,15 @@
-use std::{fs::File, io::{BufWriter, Write}};
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
 
+use crate::{
+    aggregation::{AggregationResult, GeneAggregation},
+    utils::config::Configuration,
+};
 use anyhow::Result;
 use hashbrown::HashSet;
 use ndarray::{Array1, Axis};
-use crate::{aggregation::{AggregationResult, GeneAggregation}, utils::config::Configuration};
 
 #[derive(Clone, Copy)]
 pub enum MethodEnum {
@@ -14,7 +20,12 @@ pub enum MethodEnum {
 impl MethodEnum {
     pub fn new(result: &AggregationResult, config: &Configuration) -> Self {
         match config.aggregation() {
-            GeneAggregation::Inc { token: _, fdr: _, group_size: _, use_product } => {
+            GeneAggregation::Inc {
+                token: _,
+                fdr: _,
+                group_size: _,
+                use_product,
+            } => {
                 if *use_product {
                     Self::IncProduct {
                         score_low: result.threshold_low().unwrap(),
@@ -26,12 +37,13 @@ impl MethodEnum {
                         pvalue_high: result.threshold_high().unwrap(),
                     }
                 }
-            },
-            GeneAggregation::AlpaRRA { alpha: _, npermutations: _, adjust_alpha: _, fdr } => {
-                Self::RRA {
-                    fdr: *fdr,
-                }
-            },
+            }
+            GeneAggregation::AlpaRRA {
+                alpha: _,
+                npermutations: _,
+                adjust_alpha: _,
+                fdr,
+            } => Self::RRA { fdr: *fdr },
         }
     }
 }
@@ -75,37 +87,49 @@ impl HitList {
         }
     }
 
-    fn generate_mask(
-        method: MethodEnum,
-        result: &AggregationResult,
-    ) -> Vec<usize> {
+    fn generate_mask(method: MethodEnum, result: &AggregationResult) -> Vec<usize> {
         match method {
-            MethodEnum::RRA { fdr } => {
-                Self::index_threshold(result.fdr(), fdr, Direction::Less)
-            },
-            MethodEnum::IncProduct { score_low, score_high } => {
-                let mask_low = Self::index_threshold(result.phenotype_score(), score_low, Direction::Less);
-                let mask_high = Self::index_threshold(result.phenotype_score(), score_high, Direction::Greater);
-                let mask: HashSet<usize> = HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
+            MethodEnum::RRA { fdr } => Self::index_threshold(result.fdr(), fdr, Direction::Less),
+            MethodEnum::IncProduct {
+                score_low,
+                score_high,
+            } => {
+                let mask_low =
+                    Self::index_threshold(result.phenotype_score(), score_low, Direction::Less);
+                let mask_high =
+                    Self::index_threshold(result.phenotype_score(), score_high, Direction::Greater);
+                let mask: HashSet<usize> =
+                    HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
                 mask.into_iter().collect()
-            },
-            MethodEnum::IncPvalue { pvalue_low, pvalue_high } => {
+            }
+            MethodEnum::IncPvalue {
+                pvalue_low,
+                pvalue_high,
+            } => {
                 let mask_low = Self::index_threshold(result.pvalue(), pvalue_low, Direction::Less);
-                let mask_high = Self::index_threshold(result.pvalue(), pvalue_high, Direction::Less);
-                let mask: HashSet<usize> = HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
+                let mask_high =
+                    Self::index_threshold(result.pvalue(), pvalue_high, Direction::Less);
+                let mask: HashSet<usize> =
+                    HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
                 mask.into_iter().collect()
-            },
+            }
         }
     }
 
-    fn index_threshold(
-        array: &Array1<f64>,
-        threshold: f64,
-        lt: Direction,
-    ) -> Vec<usize> {
+    fn index_threshold(array: &Array1<f64>, threshold: f64, lt: Direction) -> Vec<usize> {
         match lt {
-            Direction::Less => array.iter().enumerate().filter(|(_, &x)| x <= threshold).map(|(i, _)| i).collect(),
-            Direction::Greater => array.iter().enumerate().filter(|(_, &x)| x >= threshold).map(|(i, _)| i).collect()
+            Direction::Less => array
+                .iter()
+                .enumerate()
+                .filter(|(_, &x)| x <= threshold)
+                .map(|(i, _)| i)
+                .collect(),
+            Direction::Greater => array
+                .iter()
+                .enumerate()
+                .filter(|(_, &x)| x >= threshold)
+                .map(|(i, _)| i)
+                .collect(),
         }
     }
 
@@ -121,10 +145,7 @@ impl HitList {
         let mut writer = File::create(format!("{}.hit_list.tsv", prefix)).map(BufWriter::new)?;
         match self.method {
             MethodEnum::RRA { fdr: _ } => {
-                writeln!(
-                    writer,
-                    "gene\tlog2fc\tpvalue\tphenotype_score\tfdr"
-                )?;
+                writeln!(writer, "gene\tlog2fc\tpvalue\tphenotype_score\tfdr")?;
 
                 for idx in 0..self.size {
                     writeln!(
@@ -137,21 +158,15 @@ impl HitList {
                         self.fdr.as_ref().unwrap()[idx]
                     )?;
                 }
-            },
+            }
             _ => {
-                writeln!(
-                    writer,
-                    "gene\tlog2fc\tpvalue\tphenotype_score"
-                )?;
+                writeln!(writer, "gene\tlog2fc\tpvalue\tphenotype_score")?;
 
                 for idx in 0..self.size {
                     writeln!(
                         writer,
                         "{}\t{}\t{}\t{}",
-                        self.gene[idx],
-                        self.log2fc[idx],
-                        self.pvalues[idx],
-                        self.phenotype[idx],
+                        self.gene[idx], self.log2fc[idx], self.pvalues[idx], self.phenotype[idx],
                     )?;
                 }
             }
