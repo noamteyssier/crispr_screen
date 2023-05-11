@@ -1,6 +1,6 @@
 [package]
 name = "crispr_screen"
-version = "0.1.15"
+version = "0.1.16"
 edition = "2021"
 description = "A fast and configurable differential expression analysis tool for CRISPR screens"
 license = "MIT"
