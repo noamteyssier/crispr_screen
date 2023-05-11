@@ -1,7 +1,7 @@
 use crate::{
     aggregation::compute_aggregation,
     enrich::enrichment_testing,
-    io::{GeneFrame, HitList, SgrnaFrame, SimpleFrame},
+    io::{GeneFrame, HitList, SgrnaFrame, SimpleFrame, Screenviz},
     model::model_mean_variance,
     norm::normalize_counts,
     utils::{config::Configuration, logging::Logger},
@@ -61,6 +61,10 @@ pub fn mageck(
     let hit_list = HitList::new(&aggregation_results, config);
     logger.hit_list(&hit_list);
     hit_list.write(config.prefix())?;
+
+    // Write screenviz config
+    let screenviz = Screenviz::new(&aggregation_results, config);
+    screenviz.write(config.prefix())?;
 
     Ok(())
 }
