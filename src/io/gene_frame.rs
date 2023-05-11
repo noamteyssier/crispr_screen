@@ -87,6 +87,8 @@ mod testing {
         let score_high = array![0.0, 1.0];
         let pvalue_high = array![0.0, 1.0];
         let fdr_high = array![0.0, 1.0];
+        let threshold_low = 0.0;
+        let threshold_high = 1.0;
 
         let aggregation_results = AggregationResult::new(
             gene,
@@ -97,6 +99,8 @@ mod testing {
             fdr_high,
             score_low,
             score_high,
+            Some(threshold_low),
+            Some(threshold_high),
         );
         let gene_frame = super::GeneFrame::new(&aggregation_results);
         assert_eq!(gene_frame.size, 2);
