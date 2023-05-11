@@ -1,7 +1,14 @@
-use std::{fmt::{Display, Formatter}, fs::File, io::{BufWriter, Write}};
+use std::{
+    fmt::{Display, Formatter},
+    fs::File,
+    io::{BufWriter, Write},
+};
 
+use crate::{
+    aggregation::{AggregationResult, GeneAggregation},
+    utils::config::Configuration,
+};
 use anyhow::Result;
-use crate::{aggregation::{AggregationResult, GeneAggregation}, utils::config::Configuration};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Method {
@@ -33,10 +40,18 @@ pub struct Screenviz {
 impl Screenviz {
     pub fn new(results: &AggregationResult, config: &Configuration) -> Self {
         let method = match config.aggregation() {
-            GeneAggregation::AlpaRRA { alpha: _, npermutations: _, adjust_alpha: _, fdr: _ } => {
-                Method::AlphaRRA
-            },
-            GeneAggregation::Inc { token: _, fdr: _, group_size: _, use_product } => {
+            GeneAggregation::AlpaRRA {
+                alpha: _,
+                npermutations: _,
+                adjust_alpha: _,
+                fdr: _,
+            } => Method::AlphaRRA,
+            GeneAggregation::Inc {
+                token: _,
+                fdr: _,
+                group_size: _,
+                use_product,
+            } => {
                 if *use_product {
                     Method::IncProd
                 } else {
@@ -48,10 +63,18 @@ impl Screenviz {
         let x = "log_fold_change".to_string();
         let y = "pvalue".to_string();
         let z = match config.aggregation() {
-            GeneAggregation::AlpaRRA { alpha: _, npermutations: _, adjust_alpha: _, fdr: _ } => {
-                "fdr".to_string()
-            },
-            GeneAggregation::Inc { token: _, fdr: _, group_size: _, use_product } => {
+            GeneAggregation::AlpaRRA {
+                alpha: _,
+                npermutations: _,
+                adjust_alpha: _,
+                fdr: _,
+            } => "fdr".to_string(),
+            GeneAggregation::Inc {
+                token: _,
+                fdr: _,
+                group_size: _,
+                use_product,
+            } => {
                 if *use_product {
                     "phenotype_score".to_string()
                 } else {
@@ -61,12 +84,18 @@ impl Screenviz {
         };
 
         let (threshold, threshold_low, threshold_high) = match config.aggregation() {
-            GeneAggregation::AlpaRRA { alpha: _, npermutations: _, adjust_alpha: _, fdr } => {
-                (Some(*fdr), None, None)
-            },
-            GeneAggregation::Inc { token: _, fdr: _, group_size: _, use_product: _ } => {
-                (None, results.threshold_low(), results.threshold_high())
-            }
+            GeneAggregation::AlpaRRA {
+                alpha: _,
+                npermutations: _,
+                adjust_alpha: _,
+                fdr,
+            } => (Some(*fdr), None, None),
+            GeneAggregation::Inc {
+                token: _,
+                fdr: _,
+                group_size: _,
+                use_product: _,
+            } => (None, results.threshold_low(), results.threshold_high()),
         };
 
         let ntc_token = if let Some(_) = threshold_low {
@@ -74,7 +103,6 @@ impl Screenviz {
         } else {
             None
         };
-
 
         Self {
             method,
@@ -99,7 +127,7 @@ impl Screenviz {
                 writeln!(writer, "y: {}", self.y)?;
                 writeln!(writer, "z: {}", self.z)?;
                 writeln!(writer, "threshold: {}", self.threshold.unwrap())?;
-            },
+            }
             _ => {
                 writeln!(writer, "method: {}", self.method)?;
                 writeln!(writer, "gene: {}", self.gene)?;
@@ -109,7 +137,7 @@ impl Screenviz {
                 writeln!(writer, "threshold_low: {}", self.threshold_low.unwrap())?;
                 writeln!(writer, "threshold_high: {}", self.threshold_high.unwrap())?;
                 writeln!(writer, "ntc_token: {}", self.ntc_token.as_ref().unwrap())?;
-            },
+            }
         }
 
         Ok(())
@@ -121,7 +149,7 @@ mod testing {
     use adjustp::Procedure;
     use ndarray::Array1;
 
-    use crate::{norm::Normalization, model::ModelChoice};
+    use crate::{model::ModelChoice, norm::Normalization};
 
     use super::*;
 
@@ -214,7 +242,6 @@ mod testing {
             threshold_low,
             threshold_high,
         )
-
     }
 
     fn build_results_incprod() -> AggregationResult {
