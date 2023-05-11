@@ -68,9 +68,9 @@ struct Args {
     #[arg(long, default_value = "non-targeting")]
     ntc_token: String,
 
-    /// FDR-threshold for inc
-    #[arg(short = 'A', long, default_value = "0.1")]
-    inc_fdr: f64,
+    /// FDR-threshold to use in INC + RRA when thresholding
+    #[arg(short = 'F', long, default_value = "0.1")]
+    fdr: f64,
 
     /// sgRNA group size of pseudogenes to create for INC
     #[arg(short = 'G', long, default_value = "5")]
@@ -113,10 +113,11 @@ fn main() -> Result<()> {
             alpha: args.alpha,
             npermutations: args.permutations,
             adjust_alpha: !args.no_adjust_alpha,
+            fdr: args.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
             token: &args.ntc_token,
-            fdr: args.inc_fdr,
+            fdr: args.fdr,
             group_size: args.inc_group_size,
             use_product: args.inc_product,
         },
