@@ -24,6 +24,7 @@ pub enum GeneAggregation<'a> {
         alpha: f64,
         npermutations: usize,
         adjust_alpha: bool,
+        fdr: f64,
     },
     Inc {
         token: &'a str,
@@ -91,10 +92,11 @@ mod testing {
             alpha: 0.5,
             npermutations: 100,
             adjust_alpha: true,
+            fdr: 0.05,
         };
         assert_eq!(
             format!("{:?}", agg),
-            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true }"
+            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true, fdr: 0.05 }"
         );
     }
 

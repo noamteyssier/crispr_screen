@@ -21,6 +21,8 @@ struct InternalAggregationResult {
     scores_high: Array1<f64>,
     pvalues_high: Array1<f64>,
     correction_high: Array1<f64>,
+    threshold_low: Option<f64>,
+    threshold_high: Option<f64>,
 }
 impl InternalAggregationResult {
     pub fn new(
@@ -32,6 +34,8 @@ impl InternalAggregationResult {
         scores_high: Array1<f64>,
         pvalues_high: Array1<f64>,
         correction_high: Array1<f64>,
+        threshold_low: Option<f64>,
+        threshold_high: Option<f64>,
     ) -> Self {
         Self {
             genes,
@@ -42,6 +46,8 @@ impl InternalAggregationResult {
             scores_high,
             pvalues_high,
             correction_high,
+            threshold_low,
+            threshold_high,
         }
     }
 }
@@ -102,6 +108,8 @@ fn run_rra(
         result_high.scores().to_owned(),
         result_high.pvalues().to_owned(),
         result_high.adj_pvalues().to_owned(),
+        None,
+        None,
     )
 }
 
@@ -170,6 +178,8 @@ fn run_inc(
         result_high.u_scores().to_owned(),
         result_high.u_pvalues().to_owned(),
         result_high.fdr().to_owned(),
+        Some(result_low.threshold()),
+        Some(result_high.threshold()),
     )
 }
 
@@ -205,6 +215,7 @@ pub fn compute_aggregation(
             alpha,
             npermutations,
             adjust_alpha,
+            fdr: _,
         } => run_rra(
             &passing_sgrna_pvalues_low,
             &passing_sgrna_pvalues_high,
@@ -251,5 +262,7 @@ pub fn compute_aggregation(
         agg_result.correction_high,
         agg_result.scores_low,
         agg_result.scores_high,
+        agg_result.threshold_low,
+        agg_result.threshold_high,
     )
 }

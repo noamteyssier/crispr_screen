@@ -13,6 +13,8 @@ pub struct AggregationResult {
     pvalue: Array1<f64>,
     fdr: Array1<f64>,
     phenotype_score: Array1<f64>,
+    threshold_low: Option<f64>,
+    threshold_high: Option<f64>,
 }
 impl AggregationResult {
     pub fn new(
@@ -24,6 +26,8 @@ impl AggregationResult {
         fdr_high: Array1<f64>,
         aggregation_score_low: Array1<f64>,
         aggregation_score_high: Array1<f64>,
+        threshold_low: Option<f64>,
+        threshold_high: Option<f64>,
     ) -> Self {
         let pvalue = Self::select_pvalue(&pvalues_low, &pvalues_high);
         let fdr = Self::select_fdr(&fdr_low, &fdr_high);
@@ -42,6 +46,8 @@ impl AggregationResult {
             pvalue,
             fdr,
             phenotype_score,
+            threshold_low,
+            threshold_high,
         }
     }
 
@@ -117,6 +123,14 @@ impl AggregationResult {
     pub fn phenotype_score(&self) -> &Array1<f64> {
         &self.phenotype_score
     }
+
+    pub fn threshold_low(&self) -> Option<f64> {
+        self.threshold_low
+    }
+
+    pub fn threshold_high(&self) -> Option<f64> {
+        self.threshold_high
+    }
 }
 
 #[cfg(test)]
@@ -134,6 +148,8 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
+        let threshold_low = None;
+        let threshold_high = None;
         let result = AggregationResult::new(
             genes,
             gene_fc,
@@ -143,6 +159,8 @@ mod testing {
             fdr_high,
             aggregation_score_low,
             aggregation_score_high,
+            threshold_low,
+            threshold_high,
         );
         assert_eq!(
             result.genes(),
