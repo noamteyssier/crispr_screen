@@ -38,7 +38,7 @@ The above command will still work as expected for the following table:
 
 ### sgRNA Results
 
-The sgRNA results dataframe (written to `<args.output>.sgrna_results.tab`) is a
+The sgRNA results dataframe (written to `<args.output>.sgrna_results.tsv`) is a
 table whose columns are of the following form:
 
 | Column | Description |
@@ -58,7 +58,7 @@ table whose columns are of the following form:
 
 ### Gene Results
 
-The gene results dataframe (written to `<args.output>.gene_results.tab`) is a
+The gene results dataframe (written to `<args.output>.gene_results.tsv`) is a
 table whose columns are of the following form:
 
 | Column | Description |
@@ -82,3 +82,16 @@ table whose columns are of the following form:
 > As a result it will **not** be strictly monotonic with the p-values.
 > I recommend working with the pvalues in this case and paying attention to the calculated thresholds
 > of the FDR given in the workflow log.
+
+### Hit Results
+
+The hits dataframe (written to `<args.output>.hits.tsv`) is a
+table whose columns are of the following form:
+
+| Column | Description |
+|--------|-------------|
+| **gene** | The gene name provided in the second column of the `count_table`. |
+| **log2fc** | The log2 aggregated fold change of the treatment from the controls. |
+| **pvalue** | The minimum p-value observed in the aggregation test (minimum of both sides). |
+| **phenotype_score** | The product of the `log2fc` and the `-log10(pvalue)`. |
+| **fdr** | The calculated false discovery rate (only shown if running $\alpha$-RRA). |

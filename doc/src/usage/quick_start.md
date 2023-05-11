@@ -22,10 +22,12 @@ crispr_screen \
 
 ## Output Files
 
-This will create **two results files**:
+This will create **three results files**:
 
-1. `results.sgrna_results.tab`
-2. `results.gene_results.tab`
+1. `results.sgrna_results.tsv`
+2. `results.gene_results.tsv`
+3. `results.hits.tsv`
 
 With differential expression statistics for each respectively
+and a table for just the genes that are found to be significant
 (for descriptions of files see [formats](./expected_format.md)).
