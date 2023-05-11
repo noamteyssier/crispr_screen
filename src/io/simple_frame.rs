@@ -164,8 +164,8 @@ impl SimpleFrame {
 #[cfg(test)]
 mod testing {
     use super::SimpleFrame;
-    use ndarray_rand::rand::random;
     use ndarray::s;
+    use ndarray_rand::rand::random;
 
     fn example_dataset() -> String {
         let mut s = String::with_capacity(1000);

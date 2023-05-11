@@ -1,7 +1,7 @@
 use crate::{
     aggregation::compute_aggregation,
     enrich::enrichment_testing,
-    io::{GeneFrame, SgrnaFrame, SimpleFrame},
+    io::{GeneFrame, HitList, SgrnaFrame, SimpleFrame},
     model::model_mean_variance,
     norm::normalize_counts,
     utils::{config::Configuration, logging::Logger},
@@ -46,6 +46,7 @@ pub fn mageck(
         gene_names,
         logger,
         config.correction(),
+        config.seed(),
     );
 
     // Build sgRNA DataFrame
@@ -55,6 +56,11 @@ pub fn mageck(
     // Build Gene DataFrame
     let gene_frame = GeneFrame::new(&aggregation_results);
     gene_frame.write(config.prefix())?;
+
+    // Write hit list
+    let hit_list = HitList::new(&aggregation_results, config);
+    logger.hit_list(&hit_list);
+    hit_list.write(config.prefix())?;
 
     Ok(())
 }

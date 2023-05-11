@@ -24,11 +24,13 @@ pub enum GeneAggregation<'a> {
         alpha: f64,
         npermutations: usize,
         adjust_alpha: bool,
+        fdr: f64,
     },
     Inc {
         token: &'a str,
         fdr: f64,
         group_size: usize,
+        use_product: bool,
     },
 }
 
@@ -90,10 +92,11 @@ mod testing {
             alpha: 0.5,
             npermutations: 100,
             adjust_alpha: true,
+            fdr: 0.05,
         };
         assert_eq!(
             format!("{:?}", agg),
-            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true }"
+            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true, fdr: 0.05 }"
         );
     }
 
@@ -103,10 +106,11 @@ mod testing {
             token: "non-targeting",
             fdr: 0.05,
             group_size: 3,
+            use_product: true,
         };
         assert_eq!(
             format!("{:?}", agg),
-            "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3 }"
+            "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3, use_product: true }"
         );
     }
 }

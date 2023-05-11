@@ -10,6 +10,7 @@ pub struct EnrichmentResult {
     treatment_means: Array1<f64>,
     fold_change: Array1<f64>,
     log_fold_change: Array1<f64>,
+    product: Array1<f64>,
 }
 impl EnrichmentResult {
     pub fn new(
@@ -24,6 +25,7 @@ impl EnrichmentResult {
         let base_means = Self::calculate_base_mean(&control_means, &treatment_means);
         let pvalues_twosided = Self::calculate_twosided(&pvalues_low, &pvalues_high);
         let fdr = Self::calculate_fdr(&pvalues_twosided, correction);
+        let product = Self::calculate_product(&log_fold_change, &pvalues_twosided);
         Self {
             pvalues_low,
             pvalues_high,
@@ -34,6 +36,7 @@ impl EnrichmentResult {
             treatment_means,
             fold_change,
             log_fold_change,
+            product,
         }
     }
 
@@ -59,6 +62,10 @@ impl EnrichmentResult {
 
     fn calculate_base_mean(control: &Array1<f64>, treatment: &Array1<f64>) -> Array1<f64> {
         (control + treatment) / 2.
+    }
+
+    fn calculate_product(fold_change: &Array1<f64>, pvalues: &Array1<f64>) -> Array1<f64> {
+        fold_change * pvalues.map(|x| -x.log10())
     }
 
     pub fn pvalues_low(&self) -> &Array1<f64> {
@@ -95,6 +102,10 @@ impl EnrichmentResult {
 
     pub fn log_fold_change(&self) -> &Array1<f64> {
         &self.log_fold_change
+    }
+
+    pub fn product(&self) -> &Array1<f64> {
+        &self.product
     }
 }
 

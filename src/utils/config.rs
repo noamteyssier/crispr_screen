@@ -7,6 +7,7 @@ pub struct Configuration<'a> {
     aggregation: GeneAggregation<'a>,
     correction: Procedure,
     model_choice: ModelChoice,
+    seed: u64,
     prefix: &'a str,
 }
 impl<'a> Configuration<'a> {
@@ -15,6 +16,7 @@ impl<'a> Configuration<'a> {
         aggregation: GeneAggregation<'a>,
         correction: Procedure,
         model_choice: ModelChoice,
+        seed: u64,
         prefix: &'a str,
     ) -> Self {
         Self {
@@ -22,6 +24,7 @@ impl<'a> Configuration<'a> {
             aggregation,
             correction,
             model_choice,
+            seed,
             prefix,
         }
     }
@@ -36,6 +39,9 @@ impl<'a> Configuration<'a> {
     }
     pub fn model_choice(&self) -> &ModelChoice {
         &self.model_choice
+    }
+    pub fn seed(&self) -> u64 {
+        self.seed
     }
     pub fn prefix(&self) -> &str {
         self.prefix
@@ -56,11 +62,20 @@ mod testing {
             token: "non-targeting",
             fdr: 0.05,
             group_size: 5,
+            use_product: true,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let seed = 0;
         let prefix = "results";
-        Configuration::new(normalization, aggregation, correction, model_choice, prefix)
+        Configuration::new(
+            normalization,
+            aggregation,
+            correction,
+            model_choice,
+            seed,
+            prefix,
+        )
     }
 
     #[test]
@@ -80,10 +95,12 @@ mod testing {
                 token,
                 fdr,
                 group_size,
+                use_product,
             } => {
                 assert_eq!(token, &"non-targeting");
                 assert_eq!(fdr, &0.05);
                 assert_eq!(group_size, &5);
+                assert_eq!(use_product, &true);
             }
             _ => assert!(false),
         }

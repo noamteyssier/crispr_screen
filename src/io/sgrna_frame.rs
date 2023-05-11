@@ -19,6 +19,7 @@ pub struct SgrnaFrame<'a> {
     fdr: &'a Array1<f64>,
     fold_change: &'a Array1<f64>,
     log_fold_change: &'a Array1<f64>,
+    product: &'a Array1<f64>,
     size: usize,
 }
 impl<'a> SgrnaFrame<'a> {
@@ -42,6 +43,7 @@ impl<'a> SgrnaFrame<'a> {
             fold_change: sgrna_results.fold_change(),
             log_fold_change: sgrna_results.log_fold_change(),
             size: sgrna_names.len(),
+            product: sgrna_results.product(),
         }
     }
 
@@ -50,13 +52,13 @@ impl<'a> SgrnaFrame<'a> {
 
         writeln!(
             writer,
-            "sgrna\tgene\tbase\tcontrol\ttreatment\tadj_var\tfold_change\tlog2_fold_change\tpvalue_low\tpvalue_high\tpvalue_twosided\tfdr",
+            "sgrna\tgene\tbase\tcontrol\ttreatment\tadj_var\tfold_change\tlog2_fold_change\tpvalue_low\tpvalue_high\tpvalue_twosided\tfdr\tproduct",
         )?;
 
         for idx in 0..self.size {
             writeln!(
                 writer,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:e}\t{:e}\t{:e}\t{:e}",
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:e}\t{:e}\t{:e}\t{:e}\t{:e}",
                 self.sgrna_names[idx],
                 self.gene_names[idx],
                 self.base[idx],
@@ -68,7 +70,8 @@ impl<'a> SgrnaFrame<'a> {
                 self.pvalue_low[idx],
                 self.pvalue_high[idx],
                 self.pvalue_twosided[idx],
-                self.fdr[idx]
+                self.fdr[idx],
+                self.product[idx],
             )?;
         }
 

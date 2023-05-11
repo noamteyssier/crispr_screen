@@ -32,8 +32,9 @@ pub fn filter_zeros(
     gene_names: &[String],
     sgrna_pvalues_low: &Array1<f64>,
     sgrna_pvalues_high: &Array1<f64>,
+    sgrna_log_fold_change: &Array1<f64>,
     logger: &Logger,
-) -> (Vec<String>, Array1<f64>, Array1<f64>) {
+) -> (Vec<String>, Array1<f64>, Array1<f64>, Array1<f64>) {
     let passing_indices = mask_zeros(base_means, logger);
     let mut sorted_indices = passing_indices.iter().copied().collect::<Vec<usize>>();
     sorted_indices.sort_unstable();
@@ -41,11 +42,13 @@ pub fn filter_zeros(
     let passing_gene_names = select_from_mask(gene_names, &sorted_indices);
     let passing_sgrna_pvalues_low = select_from_mask_array(sgrna_pvalues_low, &sorted_indices);
     let passing_sgrna_pvalues_high = select_from_mask_array(sgrna_pvalues_high, &sorted_indices);
+    let passing_log_fold_change = select_from_mask_array(sgrna_log_fold_change, &sorted_indices);
 
     (
         passing_gene_names,
         passing_sgrna_pvalues_low,
         passing_sgrna_pvalues_high,
+        passing_log_fold_change,
     )
 }
 
@@ -72,6 +75,11 @@ pub fn set_alpha_threshold(
     } else {
         (alpha, alpha)
     }
+}
+
+/// Calculates the number of unique values in a vector
+pub fn num_unique(names: &[String]) -> usize {
+    names.iter().collect::<HashSet<_>>().len()
 }
 
 #[cfg(test)]
@@ -132,11 +140,14 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
+        let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
+        assert_eq!(ppf.len(), nonzero.len());
     }
 
     #[test]
@@ -150,11 +161,14 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
+        let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
+        assert_eq!(ppf.len(), nonzero.len());
     }
 
     #[test]
@@ -168,11 +182,14 @@ mod testing {
             .collect::<Vec<String>>();
         let p_low = Array1::random(100, Uniform::new(0.0, 1.0));
         let p_high = Array1::random(100, Uniform::new(0.0, 1.0));
-        let (pgn, ppl, pph) = filter_zeros(&means, &gene_names, &p_low, &p_high, &logger);
+        let logfc = Array1::random(100, Uniform::new(0.0, 1.0));
+        let (pgn, ppl, pph, ppf) =
+            filter_zeros(&means, &gene_names, &p_low, &p_high, &logfc, &logger);
 
         assert_eq!(pgn.len(), nonzero.len());
         assert_eq!(ppl.len(), nonzero.len());
         assert_eq!(pph.len(), nonzero.len());
+        assert_eq!(ppf.len(), nonzero.len());
     }
 
     #[test]
