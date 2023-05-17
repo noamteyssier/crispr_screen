@@ -20,7 +20,7 @@ clap = { version = "4.1.1", features = ["derive"] }
 colored = "2.0.0"
 csv = "1.1.6"
 hashbrown = "0.12.3"
-intc = "0.2.0"
+intc = "0.2.1"
 ndarray = "0.15.6"
 ndarray-rand = "0.14.0"
 ndarray-stats = "0.5.0"
@@ -28,3 +28,4 @@ noisy_float = "0.2.0"
 rayon = "1.5.3"
 statrs = "0.16.0"
 thiserror = "1.0.38"
+
