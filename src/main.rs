@@ -82,6 +82,10 @@ struct Args {
     #[arg(long)]
     inc_product: bool,
 
+    /// Number of draws to use in INC algorithm
+    #[arg(long, default_value = "500")]
+    n_draws: usize,
+
     /// Do not write logging information
     #[arg(short, long)]
     quiet: bool,
@@ -122,6 +126,7 @@ fn main() -> Result<()> {
             fdr: args.fdr,
             group_size: args.inc_group_size,
             use_product: args.inc_product,
+            n_draws: args.n_draws,
         },
     };
 
