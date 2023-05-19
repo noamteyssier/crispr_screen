@@ -83,7 +83,7 @@ struct Args {
     inc_product: bool,
 
     /// Number of draws to use in INC algorithm
-    #[arg(long, default_value = "500")]
+    #[arg(long, default_value = "100")]
     n_draws: usize,
 
     /// Do not write logging information
