@@ -116,12 +116,13 @@ impl Logger {
         }
     }
 
-    pub fn report_inc_params(&self, ntc_token: &str, n_genes: usize, fdr: f64, group_size: usize) {
+    pub fn report_inc_params(&self, ntc_token: &str, n_genes: usize, fdr: f64, group_size: usize, n_draws: usize) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
             Self::write_to_stderr("Number of Pseudogenes      : ", n_genes);
             Self::write_to_stderr("FDR                        : ", fdr);
             Self::write_to_stderr("Group Size                 : ", group_size);
+            Self::write_to_stderr("Number of Draws            : ", n_draws);
         }
     }
 
@@ -186,6 +187,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: true,
+            n_draws: 100,
         });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();
@@ -216,6 +218,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: false,
+            n_draws: 100,
         });
         logger.correction(Procedure::Bonferroni);
         logger.start_mean_variance();

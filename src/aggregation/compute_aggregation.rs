@@ -128,7 +128,7 @@ fn run_inc(
     seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    logger.report_inc_params(token, num_genes, fdr, group_size);
+    logger.report_inc_params(token, num_genes, fdr, group_size, n_draws);
 
     let (dir_low, dir_high) = if use_product {
         (Some(Direction::Less), Some(Direction::Greater))

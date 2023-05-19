@@ -185,6 +185,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: true,
+            n_draws: 100,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
@@ -207,6 +208,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: false,
+            n_draws: 100,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
