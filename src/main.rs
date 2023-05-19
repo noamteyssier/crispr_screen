@@ -101,6 +101,10 @@ struct Args {
     /// Set the seed of the run
     #[arg(short, long, default_value = "42")]
     seed: u64,
+
+    /// Number of threads to use (defaults to all available)
+    #[arg(short = 'T', long)]
+    threads: Option<usize>,
 }
 
 fn main() -> Result<()> {
@@ -112,6 +116,14 @@ fn main() -> Result<()> {
     } else {
         panic!("Provided Input Does Not Exist: {}", args.input)
     };
+
+    // set rayon threads
+    if let Some(t) = args.threads {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(t)
+            .build_global()
+            .unwrap();
+    }
 
     // assign and parameterize gene aggregation method
     let agg = match args.agg {
