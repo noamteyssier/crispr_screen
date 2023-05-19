@@ -30,6 +30,7 @@ pub enum GeneAggregation<'a> {
         token: &'a str,
         fdr: f64,
         group_size: usize,
+        n_draws: usize,
         use_product: bool,
     },
 }
@@ -106,11 +107,12 @@ mod testing {
             token: "non-targeting",
             fdr: 0.05,
             group_size: 3,
+            n_draws: 100,
             use_product: true,
         };
         assert_eq!(
             format!("{:?}", agg),
-            "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3, use_product: true }"
+            "Inc { token: \"non-targeting\", fdr: 0.05, group_size: 3, n_draws: 100, use_product: true }"
         );
     }
 }
