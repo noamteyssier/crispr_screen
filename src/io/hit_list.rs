@@ -14,10 +14,16 @@ use ndarray::{Array1, Axis};
 #[derive(Clone, Copy)]
 pub enum MethodEnum {
     /// Threshold set by product score
-    IncProduct { threshold_low: f64, threshold_high: f64 },
+    IncProduct {
+        threshold_low: f64,
+        threshold_high: f64,
+    },
 
     /// Threshold set by pvalue
-    IncPvalue { threshold_low: f64, threshold_high: f64 },
+    IncPvalue {
+        threshold_low: f64,
+        threshold_high: f64,
+    },
 
     /// Threshold set by fdr
     RRA { fdr: f64 },
@@ -102,8 +108,11 @@ impl HitList {
             } => {
                 let mask_low =
                     Self::index_threshold(result.phenotype_score(), threshold_low, Direction::Less);
-                let mask_high =
-                    Self::index_threshold(result.phenotype_score(), threshold_high, Direction::Greater);
+                let mask_high = Self::index_threshold(
+                    result.phenotype_score(),
+                    threshold_high,
+                    Direction::Greater,
+                );
                 let mask: HashSet<usize> =
                     HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
                 mask.into_iter().collect()
@@ -112,7 +121,7 @@ impl HitList {
                 threshold_low,
                 threshold_high,
             } => {
-                let mask_low = 
+                let mask_low =
                     Self::index_threshold(result.pvalues_low(), threshold_low, Direction::Less);
                 let mask_high =
                     Self::index_threshold(result.pvalues_high(), threshold_high, Direction::Less);
