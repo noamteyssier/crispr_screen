@@ -50,6 +50,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product,
             } => {
                 if *use_product {
@@ -73,6 +74,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product,
             } => {
                 if *use_product {
@@ -94,6 +96,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product: _,
             } => (None, results.threshold_low(), results.threshold_high()),
         };
@@ -182,6 +185,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: true,
+            n_draws: 100,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
@@ -204,6 +208,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: false,
+            n_draws: 100,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;

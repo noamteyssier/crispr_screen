@@ -63,6 +63,7 @@ mod testing {
             fdr: 0.05,
             group_size: 5,
             use_product: true,
+            n_draws: 100,
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
@@ -96,11 +97,13 @@ mod testing {
                 fdr,
                 group_size,
                 use_product,
+                n_draws,
             } => {
                 assert_eq!(token, &"non-targeting");
                 assert_eq!(fdr, &0.05);
                 assert_eq!(group_size, &5);
                 assert_eq!(use_product, &true);
+                assert_eq!(n_draws, &100);
             }
             _ => assert!(false),
         }

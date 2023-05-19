@@ -82,6 +82,10 @@ struct Args {
     #[arg(long)]
     inc_product: bool,
 
+    /// Number of draws to use in INC algorithm
+    #[arg(long, default_value = "100")]
+    n_draws: usize,
+
     /// Do not write logging information
     #[arg(short, long)]
     quiet: bool,
@@ -97,6 +101,10 @@ struct Args {
     /// Set the seed of the run
     #[arg(short, long, default_value = "42")]
     seed: u64,
+
+    /// Number of threads to use (defaults to all available)
+    #[arg(short = 'T', long)]
+    threads: Option<usize>,
 }
 
 fn main() -> Result<()> {
@@ -108,6 +116,14 @@ fn main() -> Result<()> {
     } else {
         panic!("Provided Input Does Not Exist: {}", args.input)
     };
+
+    // set rayon threads
+    if let Some(t) = args.threads {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(t)
+            .build_global()
+            .unwrap();
+    }
 
     // assign and parameterize gene aggregation method
     let agg = match args.agg {
@@ -122,6 +138,7 @@ fn main() -> Result<()> {
             fdr: args.fdr,
             group_size: args.inc_group_size,
             use_product: args.inc_product,
+            n_draws: args.n_draws,
         },
     };
 

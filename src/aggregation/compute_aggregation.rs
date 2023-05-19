@@ -122,12 +122,13 @@ fn run_inc(
     token: &str,
     fdr: f64,
     group_size: usize,
+    n_draws: usize,
     num_genes: usize,
     use_product: bool,
     seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    logger.report_inc_params(token, num_genes, fdr, group_size);
+    logger.report_inc_params(token, num_genes, fdr, group_size, n_draws);
 
     let (dir_low, dir_high) = if use_product {
         (Some(Direction::Less), Some(Direction::Greater))
@@ -142,6 +143,7 @@ fn run_inc(
         token,
         num_genes,
         group_size,
+        n_draws,
         fdr,
         intc::mwu::Alternative::Less,
         true,
@@ -159,6 +161,7 @@ fn run_inc(
         token,
         num_genes,
         group_size,
+        n_draws,
         fdr,
         intc::mwu::Alternative::Less,
         true,
@@ -231,6 +234,7 @@ pub fn compute_aggregation(
             token,
             fdr,
             group_size,
+            n_draws,
             use_product,
         } => run_inc(
             &passing_sgrna_pvalues_low,
@@ -240,6 +244,7 @@ pub fn compute_aggregation(
             token,
             *fdr,
             *group_size,
+            *n_draws,
             num_genes,
             *use_product,
             seed,
