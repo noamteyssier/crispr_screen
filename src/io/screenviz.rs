@@ -50,6 +50,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product,
             } => {
                 if *use_product {
@@ -73,6 +74,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product,
             } => {
                 if *use_product {
@@ -94,6 +96,7 @@ impl Screenviz {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product: _,
             } => (None, results.threshold_low(), results.threshold_high()),
         };

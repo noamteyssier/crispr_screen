@@ -13,8 +13,13 @@ use ndarray::{Array1, Axis};
 
 #[derive(Clone, Copy)]
 pub enum MethodEnum {
-    IncProduct { score_low: f64, score_high: f64 },
-    IncPvalue { pvalue_low: f64, pvalue_high: f64 },
+    /// Threshold set by product score
+    IncProduct { threshold_low: f64, threshold_high: f64 },
+
+    /// Threshold set by pvalue
+    IncPvalue { threshold_low: f64, threshold_high: f64 },
+
+    /// Threshold set by fdr
     RRA { fdr: f64 },
 }
 impl MethodEnum {
@@ -24,17 +29,18 @@ impl MethodEnum {
                 token: _,
                 fdr: _,
                 group_size: _,
+                n_draws: _,
                 use_product,
             } => {
                 if *use_product {
                     Self::IncProduct {
-                        score_low: result.threshold_low().unwrap(),
-                        score_high: result.threshold_high().unwrap(),
+                        threshold_low: result.threshold_low().unwrap(),
+                        threshold_high: result.threshold_high().unwrap(),
                     }
                 } else {
                     Self::IncPvalue {
-                        pvalue_low: result.threshold_low().unwrap(),
-                        pvalue_high: result.threshold_high().unwrap(),
+                        threshold_low: result.threshold_low().unwrap(),
+                        threshold_high: result.threshold_high().unwrap(),
                     }
                 }
             }
@@ -91,24 +97,25 @@ impl HitList {
         match method {
             MethodEnum::RRA { fdr } => Self::index_threshold(result.fdr(), fdr, Direction::Less),
             MethodEnum::IncProduct {
-                score_low,
-                score_high,
+                threshold_low,
+                threshold_high,
             } => {
                 let mask_low =
-                    Self::index_threshold(result.phenotype_score(), score_low, Direction::Less);
+                    Self::index_threshold(result.phenotype_score(), threshold_low, Direction::Less);
                 let mask_high =
-                    Self::index_threshold(result.phenotype_score(), score_high, Direction::Greater);
+                    Self::index_threshold(result.phenotype_score(), threshold_high, Direction::Greater);
                 let mask: HashSet<usize> =
                     HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
                 mask.into_iter().collect()
             }
             MethodEnum::IncPvalue {
-                pvalue_low,
-                pvalue_high,
+                threshold_low,
+                threshold_high,
             } => {
-                let mask_low = Self::index_threshold(result.pvalue(), pvalue_low, Direction::Less);
+                let mask_low = 
+                    Self::index_threshold(result.pvalues_low(), threshold_low, Direction::Less);
                 let mask_high =
-                    Self::index_threshold(result.pvalue(), pvalue_high, Direction::Less);
+                    Self::index_threshold(result.pvalues_high(), threshold_high, Direction::Less);
                 let mask: HashSet<usize> =
                     HashSet::from_iter(mask_low.iter().chain(mask_high.iter()).cloned());
                 mask.into_iter().collect()
