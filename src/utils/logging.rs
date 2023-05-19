@@ -198,7 +198,7 @@ mod testing {
         logger.start_gene_aggregation();
         logger.report_rra_alpha(1.0, 1.0);
         logger.permutation_sizes(&vec![1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);
@@ -229,7 +229,7 @@ mod testing {
         logger.start_gene_aggregation();
         logger.report_rra_alpha(1.0, 1.0);
         logger.permutation_sizes(&vec![1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);
