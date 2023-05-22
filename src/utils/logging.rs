@@ -116,7 +116,14 @@ impl Logger {
         }
     }
 
-    pub fn report_inc_params(&self, ntc_token: &str, n_genes: usize, fdr: f64, group_size: usize, n_draws: usize) {
+    pub fn report_inc_params(
+        &self,
+        ntc_token: &str,
+        n_genes: usize,
+        fdr: f64,
+        group_size: usize,
+        n_draws: usize,
+    ) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
             Self::write_to_stderr("Number of Pseudogenes      : ", n_genes);
