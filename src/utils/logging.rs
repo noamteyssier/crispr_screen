@@ -146,6 +146,12 @@ impl Logger {
         }
     }
 
+    pub fn report_inc_ntc_std(&self, ntc_std: f64) {
+        if self.verbose {
+            Self::write_to_stderr("NTC Log2FC Std. Dev.       : ", ntc_std);
+        }
+    }
+
     pub fn convert_normalization(&self) {
         if self.verbose {
             eprintln!(
