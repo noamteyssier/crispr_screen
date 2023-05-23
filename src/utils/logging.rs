@@ -116,7 +116,14 @@ impl Logger {
         }
     }
 
-    pub fn report_inc_params(&self, ntc_token: &str, n_genes: usize, fdr: f64, group_size: usize, n_draws: usize) {
+    pub fn report_inc_params(
+        &self,
+        ntc_token: &str,
+        n_genes: usize,
+        fdr: f64,
+        group_size: usize,
+        n_draws: usize,
+    ) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
             Self::write_to_stderr("Number of Pseudogenes      : ", n_genes);
@@ -143,6 +150,12 @@ impl Logger {
             } else {
                 Self::write_to_stderr("High Pvalue Threshold      : ", threshold);
             }
+        }
+    }
+
+    pub fn report_inc_ntc_std(&self, ntc_std: f64) {
+        if self.verbose {
+            Self::write_to_stderr("NTC Log2FC Std. Dev.       : ", ntc_std);
         }
     }
 

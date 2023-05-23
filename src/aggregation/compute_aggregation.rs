@@ -172,6 +172,8 @@ fn run_inc(
     .expect("Error calculating INC on high pvalues");
     logger.report_inc_high_threshold(result_high.threshold(), use_product);
 
+    logger.report_inc_ntc_std(result_low.null_stddev());
+
     InternalAggregationResult::new(
         result_low.genes().to_vec(),
         result_low.logfc().to_owned(),
