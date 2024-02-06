@@ -160,6 +160,10 @@ pub enum Commands {
         /// Misc arguments
         #[clap(flatten)]
         misc: MiscArgs,
+
+        /// Skip performing gene aggregation
+        #[clap(long)]
+        skip_agg: bool,
     },
 
     /// Perform just the gene aggregation given sgRNA results

@@ -28,6 +28,7 @@ fn test(
     rra: RraArgs,
     inc: IncArgs,
     misc: MiscArgs,
+    skip_agg: bool,
 ) -> Result<()> {
     // validate input path
     let path = if Path::new(&input_args.input).exists() {
@@ -94,6 +95,7 @@ fn test(
         &labels_treatments,
         &config,
         &logger,
+        skip_agg,
     );
 
     match mageck_results {
@@ -177,7 +179,8 @@ fn main() -> Result<()> {
             rra,
             inc,
             misc,
-        } => test(input, prefix, diff_args, agg, rra, inc, misc),
+            skip_agg,
+        } => test(input, prefix, diff_args, agg, rra, inc, misc, skip_agg),
         Commands::Agg {
             input,
             prefix,

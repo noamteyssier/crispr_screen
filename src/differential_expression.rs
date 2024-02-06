@@ -15,6 +15,7 @@ pub fn mageck(
     labels_treatments: &[String],
     config: &Configuration,
     logger: &Logger,
+    skip_agg: bool,
 ) -> Result<()> {
     let labels = [labels_controls, labels_treatments].concat();
     let count_matrix = frame.data_matrix(&labels)?;
@@ -39,32 +40,36 @@ pub fn mageck(
     let sgrna_results =
         enrichment_testing(&normed_matrix, &adj_var, n_controls, config.correction());
 
-    // Gene Ranking (Aggregation)
-    let aggregation_results = compute_aggregation(
-        config.aggregation(),
-        &sgrna_results,
-        gene_names,
-        logger,
-        config.correction(),
-        config.seed(),
-    );
-
     // Build sgRNA DataFrame
     let sgrna_frame = SgrnaFrame::new(sgrna_names, gene_names, &adj_var, &sgrna_results);
     sgrna_frame.write(config.prefix())?;
 
-    // Build Gene DataFrame
-    let gene_frame = GeneFrame::new(&aggregation_results);
-    gene_frame.write(config.prefix())?;
+    if skip_agg {
+        Ok(())
+    } else {
+        // Gene Ranking (Aggregation)
+        let aggregation_results = compute_aggregation(
+            config.aggregation(),
+            &sgrna_results,
+            gene_names,
+            logger,
+            config.correction(),
+            config.seed(),
+        );
 
-    // Write hit list
-    let hit_list = HitList::new(&aggregation_results, config);
-    logger.hit_list(&hit_list);
-    hit_list.write(config.prefix())?;
+        // Build Gene DataFrame
+        let gene_frame = GeneFrame::new(&aggregation_results);
+        gene_frame.write(config.prefix())?;
 
-    // Write screenviz config
-    let screenviz = Screenviz::new(&aggregation_results, config);
-    screenviz.write(config.prefix())?;
+        // Write hit list
+        let hit_list = HitList::new(&aggregation_results, config);
+        logger.hit_list(&hit_list);
+        hit_list.write(config.prefix())?;
 
-    Ok(())
+        // Write screenviz config
+        let screenviz = Screenviz::new(&aggregation_results, config);
+        screenviz.write(config.prefix())?;
+
+        Ok(())
+    }
 }
