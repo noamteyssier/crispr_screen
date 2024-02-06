@@ -10,10 +10,6 @@ homepage = "https://noamteyssier.github.io/crispr_screen/"
 keywords = ["cli", "CRISPR", "bioinformatics", "degs", "sgRNA"]
 categories = ["command-line-utilities", "science"]
 
-[[bin]]
-name = "cscreen"
-path = "src/main.rs"
-
 [dependencies]
 adjustp = "0.1.5"
 alpha-rra = "0.1.5"
