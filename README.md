@@ -50,7 +50,7 @@ crispr_screen --help
 Here is the command layout for a basic run with only these arguments:
 
 ```bash
-crispr_screen -i <count_table> -c <control_label> -t <treatment_label>
+crispr_screen test -i <count_table> -c <control_label> -t <treatment_label>
 ```
 
 ### Basic Run with a Single Control and Multiple Treatments
@@ -60,7 +60,7 @@ arguments to the same flag.
 In this case I am providing two treatment labels for the same `-t` flag.
 
 ```bash
-crispr_screen -i <count_table> -c <control_label> -t <treatment_label_a> <treatment_label_b>
+crispr_screen test -i <count_table> -c <control_label> -t <treatment_label_a> <treatment_label_b>
 ```
 
 ### Basic Run with a Specified Output Prefix
@@ -71,7 +71,7 @@ but you can specificy your own output prefix (i.e. replacing `results`)
 with the `-o` flag.
 
 ```bash
-crispr_screen -i <count_table> -c <control_label> -t <treatment_label> -o my_prefix
+crispr_screen test -i <count_table> -c <control_label> -t <treatment_label> -o my_prefix
 ```
 
 ### Alternative Normalization Strategies
@@ -82,7 +82,7 @@ You can specify which one you'd like to use with the `-n` flag.
 The two accepted options are `median-ratio` and `total`.
 
 ```bash
-crispr_screen -i <count_table> -c <control_label> -t <treatment_label> -n total
+crispr_screen test -i <count_table> -c <control_label> -t <treatment_label> -n total
 ```
 
 ### Alternative Gene-Aggregation Strategies
@@ -94,7 +94,7 @@ However, you can specify which one you'd like to use with the `-g` flag.
 The two accepted options are `rra` and `inc`.
 
 ```bash
-crispr_screen -i <count_table> -c <control_label> -t <treatment_label> -g inc
+crispr_screen test -i <count_table> -c <control_label> -t <treatment_label> -g inc
 ```
 
 ## References

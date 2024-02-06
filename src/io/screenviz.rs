@@ -101,11 +101,7 @@ impl Screenviz {
             } => (None, results.threshold_low(), results.threshold_high()),
         };
 
-        let ntc_token = if let Some(_) = threshold_low {
-            Some("pseudogene".to_string())
-        } else {
-            None
-        };
+        let ntc_token = threshold_low.map(|_| "pseudogene".to_string());
 
         Self {
             method,

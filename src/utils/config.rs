@@ -28,6 +28,21 @@ impl<'a> Configuration<'a> {
             prefix,
         }
     }
+    pub fn new_agg(
+        aggregation: GeneAggregation<'a>,
+        correction: Procedure,
+        seed: u64,
+        prefix: &'a str,
+    ) -> Self {
+        Self {
+            normalization: Normalization::default(),
+            aggregation,
+            correction,
+            model_choice: ModelChoice::default(),
+            seed,
+            prefix,
+        }
+    }
     pub fn normalization(&self) -> &Normalization {
         &self.normalization
     }
@@ -82,10 +97,7 @@ mod testing {
     #[test]
     fn test_normalization() {
         let config = build_config();
-        match config.normalization() {
-            Normalization::MedianRatio => assert!(true),
-            _ => assert!(false),
-        }
+        assert_eq!(config.normalization(), &Normalization::MedianRatio);
     }
 
     #[test]
@@ -105,26 +117,20 @@ mod testing {
                 assert_eq!(use_product, &true);
                 assert_eq!(n_draws, &100);
             }
-            _ => assert!(false),
+            _ => panic!(),
         }
     }
 
     #[test]
     fn test_correction() {
         let config = build_config();
-        match config.correction {
-            Procedure::BenjaminiHochberg => assert!(true),
-            _ => assert!(false),
-        }
+        assert_eq!(config.correction(), Procedure::BenjaminiHochberg);
     }
 
     #[test]
     fn test_model_choice() {
         let config = build_config();
-        match config.model_choice() {
-            ModelChoice::Wols => assert!(true),
-            _ => assert!(false),
-        }
+        assert_eq!(*config.model_choice(), ModelChoice::Wols);
     }
 
     #[test]

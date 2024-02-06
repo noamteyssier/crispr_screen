@@ -159,6 +159,22 @@ impl SimpleFrame {
     pub fn get_gene_names(&self) -> &[String] {
         self.meta.get(&self.headers[1]).unwrap()
     }
+
+    pub fn get_f64_column(&self, name: &str) -> Result<Array1<f64>> {
+        if let Some(column) = self.data.get(name) {
+            Ok(Array1::from_vec(column.clone()))
+        } else {
+            bail!("Column not found")
+        }
+    }
+
+    pub fn get_string_column(&self, name: &str) -> Result<Vec<String>> {
+        if let Some(column) = self.meta.get(name) {
+            Ok(column.clone())
+        } else {
+            bail!("Column not found")
+        }
+    }
 }
 
 #[cfg(test)]
@@ -176,10 +192,10 @@ mod testing {
             if idx > 0 {
                 s.push_str(&format!("\t{x}"))
             } else {
-                s.push_str(&format!("{x}"))
+                s.push_str(x)
             }
         });
-        s.push_str("\n");
+        s.push('\n');
 
         (0..num_rows).for_each(|row_id| {
             headers.iter().enumerate().for_each(|(idx, _)| {
@@ -191,7 +207,7 @@ mod testing {
                     s.push_str(&format!("\t{}", random::<f64>()))
                 }
             });
-            s.push_str("\n");
+            s.push('\n');
         });
         s
     }
@@ -205,10 +221,10 @@ mod testing {
             if idx > 0 {
                 s.push_str(&format!("\t{x}"))
             } else {
-                s.push_str(&format!("{x}"))
+                s.push_str(x)
             }
         });
-        s.push_str("\n");
+        s.push('\n');
 
         (0..num_rows).for_each(|row_id| {
             headers.iter().enumerate().for_each(|(idx, _)| {
@@ -218,7 +234,7 @@ mod testing {
                     s.push_str(&format!("\t{}", random::<f64>()))
                 }
             });
-            s.push_str("\n");
+            s.push('\n');
         });
         s
     }

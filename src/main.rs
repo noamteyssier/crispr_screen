@@ -1,124 +1,45 @@
 use adjustp::Procedure;
 use anyhow::Result;
 use clap::Parser;
+use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs, SgrnaColumns};
 use io::SimpleFrame;
-use model::ModelChoice;
+use run_aggregation::run_aggregation;
 use std::path::Path;
 
-mod aggregation;
-mod differential_expression;
-mod enrich;
-mod io;
-mod model;
-mod norm;
-mod utils;
+pub mod aggregation;
+pub mod cli;
+pub mod differential_expression;
+pub mod enrich;
+pub mod io;
+pub mod model;
+pub mod norm;
+pub mod run_aggregation;
+pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
-use norm::Normalization;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Filepath of the input count matrix
-    #[arg(short, long)]
-    input: String,
-
-    /// Labels for Control Samples
-    #[arg(short, long, num_args=1.., required=true)]
-    controls: Vec<String>,
-
-    /// Labels for Treatment Samples
-    #[arg(short, long, num_args=1.., required=true)]
-    treatments: Vec<String>,
-
-    /// Output filename prefix
-    ///
-    /// sgRNA results will be written to <prefix>.sgrna_results.tsv
-    ///
-    /// gene results will be written to <prefix>.gene_results.tsv
-    ///
-    /// hits will be written to <prefix>.hits.tsv
-    #[arg(short, long, default_value = "./results")]
-    output: String,
-
-    /// Count normalization configuration
-    ///
-    /// If high numbers of zeros are encountered the normalization
-    /// method will default to `total` normalization.
-    #[arg(short, long, default_value = "median-ratio")]
-    norm: Normalization,
-
-    /// Gene aggregation configuration
-    #[arg(short = 'g', long, default_value = "rra")]
+#[allow(clippy::too_many_arguments)]
+fn test(
+    input_args: InputArgs,
+    prefix: String,
+    diff_args: DiffAbundanceArgs,
     agg: GeneAggregationSelection,
-
-    /// Number of permutations to perform in aRRA
-    #[arg(short, long, default_value = "100")]
-    permutations: usize,
-
-    /// Alpha threshold for aRRA
-    #[arg(short, long, default_value = "0.25")]
-    alpha: f64,
-
-    /// Do not adjust alpha threshold for RRA.
-    #[arg(long)]
-    no_adjust_alpha: bool,
-
-    /// Non-targeting control token
-    #[arg(long, default_value = "non-targeting")]
-    ntc_token: String,
-
-    /// FDR-threshold to use in INC + RRA when thresholding
-    #[arg(short = 'F', long, default_value = "0.1")]
-    fdr: f64,
-
-    /// sgRNA group size of pseudogenes to create for INC
-    #[arg(short = 'G', long, default_value = "5")]
-    inc_group_size: usize,
-
-    /// Calculate FDR threshold using product-score in INC instead of the MWU p-values
-    #[arg(long)]
-    inc_product: bool,
-
-    /// Number of draws to use in INC algorithm
-    #[arg(long, default_value = "100")]
-    n_draws: usize,
-
-    /// Do not write logging information
-    #[arg(short, long)]
-    quiet: bool,
-
-    /// Multiple hypothesis correction method
-    #[arg(short = 'f', long, default_value = "bh")]
-    correction: Adjustment,
-
-    /// Least squares model choice
-    #[arg(short, long, default_value = "wols")]
-    model_choice: ModelChoice,
-
-    /// Set the seed of the run
-    #[arg(short, long, default_value = "42")]
-    seed: u64,
-
-    /// Number of threads to use (defaults to all available)
-    #[arg(short = 'T', long)]
-    threads: Option<usize>,
-}
-
-fn main() -> Result<()> {
-    let args = Args::parse();
-
+    rra: RraArgs,
+    inc: IncArgs,
+    misc: MiscArgs,
+    skip_agg: bool,
+) -> Result<()> {
     // validate input path
-    let path = if Path::new(&args.input).exists() {
-        args.input
+    let path = if Path::new(&input_args.input).exists() {
+        input_args.input
     } else {
-        panic!("Provided Input Does Not Exist: {}", args.input)
+        panic!("Provided Input Does Not Exist: {}", input_args.input)
     };
 
     // set rayon threads
-    if let Some(t) = args.threads {
+    if let Some(t) = misc.threads {
         rayon::ThreadPoolBuilder::new()
             .num_threads(t)
             .build_global()
@@ -126,47 +47,47 @@ fn main() -> Result<()> {
     }
 
     // assign and parameterize gene aggregation method
-    let agg = match args.agg {
+    let agg = match agg {
         GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
-            alpha: args.alpha,
-            npermutations: args.permutations,
-            adjust_alpha: !args.no_adjust_alpha,
-            fdr: args.fdr,
+            alpha: rra.alpha,
+            npermutations: rra.permutations,
+            adjust_alpha: !rra.no_adjust_alpha,
+            fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
-            token: &args.ntc_token,
-            fdr: args.fdr,
-            group_size: args.inc_group_size,
-            use_product: args.inc_product,
-            n_draws: args.n_draws,
+            token: &inc.ntc_token,
+            group_size: inc.inc_group_size,
+            use_product: inc.inc_product,
+            n_draws: inc.n_draws,
+            fdr: misc.fdr,
         },
     };
 
     // create logger based on quiet option
-    let logger = if args.quiet {
+    let logger = if misc.quiet {
         Logger::new_silent()
     } else {
         Logger::new()
     };
 
     // create multiple hypothesis correction from option
-    let correction = match args.correction {
+    let correction = match misc.correction {
         Adjustment::Bf => Procedure::Bonferroni,
         Adjustment::Bh => Procedure::BenjaminiHochberg,
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
     let config = Configuration::new(
-        args.norm,
+        diff_args.norm,
         agg,
         correction,
-        args.model_choice,
-        args.seed,
-        &args.output,
+        diff_args.model_choice,
+        misc.seed,
+        &prefix,
     );
 
-    let labels_controls = args.controls;
-    let labels_treatments = args.treatments;
+    let labels_controls = input_args.controls;
+    let labels_treatments = input_args.treatments;
     let frame = SimpleFrame::from_filepath(&path)?;
 
     let mageck_results = mageck(
@@ -175,6 +96,7 @@ fn main() -> Result<()> {
         &labels_treatments,
         &config,
         &logger,
+        skip_agg,
     );
 
     match mageck_results {
@@ -183,5 +105,91 @@ fn main() -> Result<()> {
             Ok(())
         }
         Ok(_) => Ok(()),
+    }
+}
+
+fn aggregate(
+    input: String,
+    prefix: String,
+    columns: SgrnaColumns,
+    agg: GeneAggregationSelection,
+    rra: RraArgs,
+    inc: IncArgs,
+    misc: MiscArgs,
+) -> Result<()> {
+    // validate input path
+    let path = if Path::new(&input).exists() {
+        input
+    } else {
+        panic!("Provided Input Does Not Exist: {}", input)
+    };
+
+    // set rayon threads
+    if let Some(t) = misc.threads {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(t)
+            .build_global()
+            .unwrap();
+    }
+
+    // assign and parameterize gene aggregation method
+    let agg = match agg {
+        GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
+            alpha: rra.alpha,
+            npermutations: rra.permutations,
+            adjust_alpha: !rra.no_adjust_alpha,
+            fdr: misc.fdr,
+        },
+        GeneAggregationSelection::Inc => GeneAggregation::Inc {
+            token: &inc.ntc_token,
+            group_size: inc.inc_group_size,
+            use_product: inc.inc_product,
+            n_draws: inc.n_draws,
+            fdr: misc.fdr,
+        },
+    };
+
+    // create logger based on quiet option
+    let logger = if misc.quiet {
+        Logger::new_silent()
+    } else {
+        Logger::new()
+    };
+
+    // create multiple hypothesis correction from option
+    let correction = match misc.correction {
+        Adjustment::Bf => Procedure::Bonferroni,
+        Adjustment::Bh => Procedure::BenjaminiHochberg,
+        Adjustment::By => Procedure::BenjaminiYekutieli,
+    };
+
+    let config = Configuration::new_agg(agg, correction, misc.seed, &prefix);
+    let frame = SimpleFrame::from_filepath(&path)?;
+
+    run_aggregation(&frame, columns, &config, &logger)
+}
+
+fn main() -> Result<()> {
+    let args = Cli::parse();
+    match args.command {
+        Commands::Test {
+            input,
+            prefix,
+            diff_args,
+            agg,
+            rra,
+            inc,
+            misc,
+            skip_agg,
+        } => test(input, prefix, diff_args, agg, rra, inc, misc, skip_agg),
+        Commands::Agg {
+            input,
+            prefix,
+            columns,
+            agg,
+            rra,
+            inc,
+            misc,
+        } => aggregate(input, prefix, columns, agg, rra, inc, misc),
     }
 }

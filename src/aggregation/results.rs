@@ -17,6 +17,7 @@ pub struct AggregationResult {
     threshold_high: Option<f64>,
 }
 impl AggregationResult {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         genes: Vec<String>,
         gene_fc: Array1<f64>,
