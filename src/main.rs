@@ -1,114 +1,25 @@
 use adjustp::Procedure;
 use anyhow::Result;
 use clap::Parser;
+use cli::Cli;
 use io::SimpleFrame;
-use model::ModelChoice;
 use std::path::Path;
 
-mod aggregation;
-mod differential_expression;
-mod enrich;
-mod io;
-mod model;
-mod norm;
-mod utils;
+pub mod aggregation;
+pub mod cli;
+pub mod differential_expression;
+pub mod enrich;
+pub mod io;
+pub mod model;
+pub mod norm;
+pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
-use norm::Normalization;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Filepath of the input count matrix
-    #[arg(short, long)]
-    input: String,
-
-    /// Labels for Control Samples
-    #[arg(short, long, num_args=1.., required=true)]
-    controls: Vec<String>,
-
-    /// Labels for Treatment Samples
-    #[arg(short, long, num_args=1.., required=true)]
-    treatments: Vec<String>,
-
-    /// Output filename prefix
-    ///
-    /// sgRNA results will be written to <prefix>.sgrna_results.tsv
-    ///
-    /// gene results will be written to <prefix>.gene_results.tsv
-    ///
-    /// hits will be written to <prefix>.hits.tsv
-    #[arg(short, long, default_value = "./results")]
-    output: String,
-
-    /// Count normalization configuration
-    ///
-    /// If high numbers of zeros are encountered the normalization
-    /// method will default to `total` normalization.
-    #[arg(short, long, default_value = "median-ratio")]
-    norm: Normalization,
-
-    /// Gene aggregation configuration
-    #[arg(short = 'g', long, default_value = "rra")]
-    agg: GeneAggregationSelection,
-
-    /// Number of permutations to perform in aRRA
-    #[arg(short, long, default_value = "100")]
-    permutations: usize,
-
-    /// Alpha threshold for aRRA
-    #[arg(short, long, default_value = "0.25")]
-    alpha: f64,
-
-    /// Do not adjust alpha threshold for RRA.
-    #[arg(long)]
-    no_adjust_alpha: bool,
-
-    /// Non-targeting control token
-    #[arg(long, default_value = "non-targeting")]
-    ntc_token: String,
-
-    /// FDR-threshold to use in INC + RRA when thresholding
-    #[arg(short = 'F', long, default_value = "0.1")]
-    fdr: f64,
-
-    /// sgRNA group size of pseudogenes to create for INC
-    #[arg(short = 'G', long, default_value = "5")]
-    inc_group_size: usize,
-
-    /// Calculate FDR threshold using product-score in INC instead of the MWU p-values
-    #[arg(long)]
-    inc_product: bool,
-
-    /// Number of draws to use in INC algorithm
-    #[arg(long, default_value = "100")]
-    n_draws: usize,
-
-    /// Do not write logging information
-    #[arg(short, long)]
-    quiet: bool,
-
-    /// Multiple hypothesis correction method
-    #[arg(short = 'f', long, default_value = "bh")]
-    correction: Adjustment,
-
-    /// Least squares model choice
-    #[arg(short, long, default_value = "wols")]
-    model_choice: ModelChoice,
-
-    /// Set the seed of the run
-    #[arg(short, long, default_value = "42")]
-    seed: u64,
-
-    /// Number of threads to use (defaults to all available)
-    #[arg(short = 'T', long)]
-    threads: Option<usize>,
-}
-
 fn main() -> Result<()> {
-    let args = Args::parse();
+    let args = Cli::parse();
 
     // validate input path
     let path = if Path::new(&args.input).exists() {
