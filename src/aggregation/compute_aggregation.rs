@@ -25,6 +25,7 @@ struct InternalAggregationResult {
     threshold_high: Option<f64>,
 }
 impl InternalAggregationResult {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         genes: Vec<String>,
         logfc: Array1<f64>,
@@ -53,6 +54,7 @@ impl InternalAggregationResult {
 }
 
 /// Runs the RRA gene aggregation procedure
+#[allow(clippy::too_many_arguments)]
 fn run_rra(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,
@@ -114,6 +116,7 @@ fn run_rra(
 }
 
 /// Runs the INC gene aggregation procedure
+#[allow(clippy::too_many_arguments)]
 fn run_inc(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,

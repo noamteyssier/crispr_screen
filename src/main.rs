@@ -20,6 +20,7 @@ use aggregation::{GeneAggregation, GeneAggregationSelection};
 use differential_expression::mageck;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
+#[allow(clippy::too_many_arguments)]
 fn test(
     input_args: InputArgs,
     prefix: String,

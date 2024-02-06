@@ -12,6 +12,7 @@ use hashbrown::HashSet;
 use ndarray::{Array1, Axis};
 
 #[derive(Clone, Copy)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum MethodEnum {
     /// Threshold set by product score
     IncProduct {

@@ -4,7 +4,7 @@ use ndarray::Array2;
 
 use super::{median_ratio_normalization, total_normalization};
 
-#[derive(ValueEnum, Debug, Clone, Default)]
+#[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
 pub enum Normalization {
     /// Median ratio of sgRNA geometric means (unstable at high zeros)
     #[default]

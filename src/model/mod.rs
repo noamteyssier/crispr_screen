@@ -14,7 +14,7 @@ use ols::Ols;
 use sqmean::Sqmean;
 use wols::Wols;
 
-#[derive(ValueEnum, Debug, Clone, Default)]
+#[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq, Copy)]
 pub enum ModelChoice {
     /// Ordinary least squares
     Ols,

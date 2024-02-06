@@ -192,10 +192,10 @@ mod testing {
             if idx > 0 {
                 s.push_str(&format!("\t{x}"))
             } else {
-                s.push_str(&format!("{x}"))
+                s.push_str(x)
             }
         });
-        s.push_str("\n");
+        s.push('\n');
 
         (0..num_rows).for_each(|row_id| {
             headers.iter().enumerate().for_each(|(idx, _)| {
@@ -207,7 +207,7 @@ mod testing {
                     s.push_str(&format!("\t{}", random::<f64>()))
                 }
             });
-            s.push_str("\n");
+            s.push('\n');
         });
         s
     }
@@ -221,10 +221,10 @@ mod testing {
             if idx > 0 {
                 s.push_str(&format!("\t{x}"))
             } else {
-                s.push_str(&format!("{x}"))
+                s.push_str(x)
             }
         });
-        s.push_str("\n");
+        s.push('\n');
 
         (0..num_rows).for_each(|row_id| {
             headers.iter().enumerate().for_each(|(idx, _)| {
@@ -234,7 +234,7 @@ mod testing {
                     s.push_str(&format!("\t{}", random::<f64>()))
                 }
             });
-            s.push_str("\n");
+            s.push('\n');
         });
         s
     }

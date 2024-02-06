@@ -146,7 +146,7 @@ mod testing {
     fn test_mask_varied() {
         let x = array![1., 2., 3., 4., 5.];
         let y = array![2., 3., 0., 3., 5.];
-        let truth = vec![0, 1];
+        let truth = [0, 1];
         let logger = Logger::new();
         let mask = LoggedOls::mask_varied(&x, &y, &logger);
 

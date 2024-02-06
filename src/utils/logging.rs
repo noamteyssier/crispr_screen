@@ -5,6 +5,7 @@ use std::fmt::Debug;
 
 use crate::{aggregation::GeneAggregation, io::HitList, model::ModelChoice, norm::Normalization};
 
+#[derive(Default)]
 pub struct Logger {
     verbose: bool,
 }
@@ -192,8 +193,8 @@ mod testing {
     fn test_logger() {
         let logger = Logger::new();
         logger.start_mageck();
-        logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
-        logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
+        logger.num_sgrnas(&["a".to_string(), "b".to_string()]);
+        logger.num_genes(&["a".to_string(), "b".to_string()]);
         logger.norm_method(&Normalization::MedianRatio);
         logger.aggregation_method(&GeneAggregation::Inc {
             token: "ntc",
@@ -210,7 +211,7 @@ mod testing {
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
         logger.report_rra_alpha(1.0, 1.0);
-        logger.permutation_sizes(&vec![1, 2, 3]);
+        logger.permutation_sizes(&[1, 2, 3]);
         logger.report_inc_params("NTC", 1, 1.0, 1, 100);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
@@ -223,8 +224,8 @@ mod testing {
     fn test_logger_quiet() {
         let logger = Logger::new_silent();
         logger.start_mageck();
-        logger.num_sgrnas(&vec!["a".to_string(), "b".to_string()]);
-        logger.num_genes(&vec!["a".to_string(), "b".to_string()]);
+        logger.num_sgrnas(&["a".to_string(), "b".to_string()]);
+        logger.num_genes(&["a".to_string(), "b".to_string()]);
         logger.norm_method(&Normalization::MedianRatio);
         logger.aggregation_method(&GeneAggregation::Inc {
             token: "ntc",
@@ -241,7 +242,7 @@ mod testing {
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
         logger.report_rra_alpha(1.0, 1.0);
-        logger.permutation_sizes(&vec![1, 2, 3]);
+        logger.permutation_sizes(&[1, 2, 3]);
         logger.report_inc_params("NTC", 1, 1.0, 1, 100);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
