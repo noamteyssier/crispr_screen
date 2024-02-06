@@ -14,12 +14,13 @@ use ols::Ols;
 use sqmean::Sqmean;
 use wols::Wols;
 
-#[derive(ValueEnum, Debug, Clone)]
+#[derive(ValueEnum, Debug, Clone, Default)]
 pub enum ModelChoice {
     /// Ordinary least squares
     Ols,
 
     /// Weighted ordinary least squares
+    #[default]
     Wols,
 
     /// Squared mean

@@ -159,6 +159,14 @@ impl SimpleFrame {
     pub fn get_gene_names(&self) -> &[String] {
         self.meta.get(&self.headers[1]).unwrap()
     }
+
+    pub fn get_f64_column(&self, name: &str) -> Result<Array1<f64>> {
+        if let Some(column) = self.data.get(name) {
+            Ok(Array1::from_vec(column.clone()))
+        } else {
+            bail!("Column not found")
+        }
+    }
 }
 
 #[cfg(test)]

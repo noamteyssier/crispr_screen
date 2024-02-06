@@ -53,10 +53,6 @@ pub struct RraArgs {
     /// Do not adjust alpha threshold for RRA.
     #[arg(long)]
     pub no_adjust_alpha: bool,
-
-    /// fdr-threshold to use in inc + rra when thresholding
-    #[arg(short = 'f', long, default_value = "0.1")]
-    pub fdr: f64,
 }
 
 #[derive(Parser, Debug)]
@@ -76,14 +72,14 @@ pub struct IncArgs {
     /// Number of draws to use in INC algorithm
     #[arg(long, default_value = "100")]
     pub n_draws: usize,
-
-    /// fdr-threshold to use in inc + rra when thresholding
-    #[arg(short = 'f', long, default_value = "0.1")]
-    pub fdr: f64,
 }
 
 #[derive(Parser, Debug)]
 pub struct MiscArgs {
+    /// fdr-threshold to use in inc + rra when thresholding
+    #[arg(short = 'f', long, default_value = "0.1")]
+    pub fdr: f64,
+
     /// Do not write logging information
     #[arg(short, long)]
     pub quiet: bool,
@@ -99,6 +95,25 @@ pub struct MiscArgs {
     /// Number of threads to use (defaults to all available)
     #[arg(short = 'T', long)]
     pub threads: Option<usize>,
+}
+
+#[derive(Parser, Debug)]
+pub struct SgrnaColumns {
+    /// Column name for the low-side p-value
+    #[arg(long, default_value = "pvalue_low")]
+    pub pvalue_low: String,
+
+    /// Column name for the high-side p-value
+    #[arg(long, default_value = "pvalue_high")]
+    pub pvalue_high: String,
+
+    /// Column name for the mean value of the base samples
+    #[arg(long, default_value = "control")]
+    pub control_mean: String,
+
+    /// Column name for the mean value of the treatment samples
+    #[arg(long, default_value = "treatment")]
+    pub treatment_mean: String,
 }
 
 #[derive(Subcommand, Debug)]
@@ -139,7 +154,9 @@ pub enum Commands {
         misc: MiscArgs,
     },
 
+    /// Perform just the gene aggregation given sgRNA results
     Agg {
+        /// Filepath of the input sgRNA results
         #[clap(short, long)]
         input: String,
 
@@ -166,5 +183,9 @@ pub enum Commands {
         /// Misc arguments
         #[clap(flatten)]
         misc: MiscArgs,
+
+        /// Column names for sgrna results
+        #[clap(flatten)]
+        columns: SgrnaColumns,
     },
 }

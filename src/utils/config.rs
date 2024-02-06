@@ -28,6 +28,21 @@ impl<'a> Configuration<'a> {
             prefix,
         }
     }
+    pub fn new_agg(
+        aggregation: GeneAggregation<'a>,
+        correction: Procedure,
+        seed: u64,
+        prefix: &'a str,
+    ) -> Self {
+        Self {
+            normalization: Normalization::default(),
+            aggregation,
+            correction,
+            model_choice: ModelChoice::default(),
+            seed,
+            prefix,
+        }
+    }
     pub fn normalization(&self) -> &Normalization {
         &self.normalization
     }

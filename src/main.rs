@@ -1,8 +1,9 @@
 use adjustp::Procedure;
 use anyhow::Result;
 use clap::Parser;
-use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs};
+use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs, SgrnaColumns};
 use io::SimpleFrame;
+use run_aggregation::run_aggregation;
 use std::path::Path;
 
 pub mod aggregation;
@@ -12,6 +13,7 @@ pub mod enrich;
 pub mod io;
 pub mod model;
 pub mod norm;
+pub mod run_aggregation;
 pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection};
@@ -48,14 +50,14 @@ fn test(
             alpha: rra.alpha,
             npermutations: rra.permutations,
             adjust_alpha: !rra.no_adjust_alpha,
-            fdr: rra.fdr,
+            fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
             token: &inc.ntc_token,
             group_size: inc.inc_group_size,
             use_product: inc.inc_product,
             n_draws: inc.n_draws,
-            fdr: inc.fdr,
+            fdr: misc.fdr,
         },
     };
 
@@ -103,6 +105,67 @@ fn test(
     }
 }
 
+fn aggregate(
+    input: String,
+    prefix: String,
+    columns: SgrnaColumns,
+    agg: GeneAggregationSelection,
+    rra: RraArgs,
+    inc: IncArgs,
+    misc: MiscArgs,
+) -> Result<()> {
+    // validate input path
+    let path = if Path::new(&input).exists() {
+        input
+    } else {
+        panic!("Provided Input Does Not Exist: {}", input)
+    };
+
+    // set rayon threads
+    if let Some(t) = misc.threads {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(t)
+            .build_global()
+            .unwrap();
+    }
+
+    // assign and parameterize gene aggregation method
+    let agg = match agg {
+        GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
+            alpha: rra.alpha,
+            npermutations: rra.permutations,
+            adjust_alpha: !rra.no_adjust_alpha,
+            fdr: misc.fdr,
+        },
+        GeneAggregationSelection::Inc => GeneAggregation::Inc {
+            token: &inc.ntc_token,
+            group_size: inc.inc_group_size,
+            use_product: inc.inc_product,
+            n_draws: inc.n_draws,
+            fdr: misc.fdr,
+        },
+    };
+
+    // create logger based on quiet option
+    let logger = if misc.quiet {
+        Logger::new_silent()
+    } else {
+        Logger::new()
+    };
+
+    // create multiple hypothesis correction from option
+    let correction = match misc.correction {
+        Adjustment::Bf => Procedure::Bonferroni,
+        Adjustment::Bh => Procedure::BenjaminiHochberg,
+        Adjustment::By => Procedure::BenjaminiYekutieli,
+    };
+
+    let config = Configuration::new_agg(agg, correction, misc.seed, &prefix);
+    let frame = SimpleFrame::from_filepath(&path)?;
+
+    run_aggregation(&frame, columns, &config, &logger)
+}
+
 fn main() -> Result<()> {
     let args = Cli::parse();
     match args.command {
@@ -118,10 +181,11 @@ fn main() -> Result<()> {
         Commands::Agg {
             input,
             prefix,
+            columns,
             agg,
             rra,
             inc,
             misc,
-        } => unimplemented!(),
+        } => aggregate(input, prefix, columns, agg, rra, inc, misc),
     }
 }
