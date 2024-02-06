@@ -18,7 +18,8 @@ pub fn run_aggregation(
     let pvalues_high = frame.get_f64_column(&columns.pvalue_high)?;
     let control_means = frame.get_f64_column(&columns.control_mean)?;
     let treatment_means = frame.get_f64_column(&columns.treatment_mean)?;
-    let gene_names = frame.get_gene_names();
+    let sgrna_names = frame.get_string_column(&columns.sgrna)?;
+    let gene_names = frame.get_string_column(&columns.gene)?;
     let enrichment_result = EnrichmentResult::new(
         pvalues_low,
         pvalues_high,
@@ -27,10 +28,16 @@ pub fn run_aggregation(
         config.correction(),
     );
 
+    logger.start_mageck();
+    logger.num_sgrnas(&sgrna_names);
+    logger.num_genes(&gene_names);
+    logger.aggregation_method(config.aggregation());
+    logger.correction(config.correction());
+
     let aggregation_results = compute_aggregation(
         config.aggregation(),
         &enrichment_result,
-        gene_names,
+        &gene_names,
         logger,
         config.correction(),
         config.seed(),

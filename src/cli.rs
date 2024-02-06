@@ -114,6 +114,14 @@ pub struct SgrnaColumns {
     /// Column name for the mean value of the treatment samples
     #[arg(long, default_value = "treatment")]
     pub treatment_mean: String,
+
+    /// Column name for the sgRNA names
+    #[arg(long, default_value = "sgrna")]
+    pub sgrna: String,
+
+    /// Column name for the gene names
+    #[arg(long, default_value = "gene")]
+    pub gene: String,
 }
 
 #[derive(Subcommand, Debug)]

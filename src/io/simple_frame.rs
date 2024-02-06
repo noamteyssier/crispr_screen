@@ -167,6 +167,14 @@ impl SimpleFrame {
             bail!("Column not found")
         }
     }
+
+    pub fn get_string_column(&self, name: &str) -> Result<Vec<String>> {
+        if let Some(column) = self.meta.get(name) {
+            Ok(column.clone())
+        } else {
+            bail!("Column not found")
+        }
+    }
 }
 
 #[cfg(test)]
