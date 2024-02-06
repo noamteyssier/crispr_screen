@@ -14,7 +14,7 @@ For additional options and descriptions see [arguments](./customized_run.md).
 ## Running [ `crispr_screen` ]
 
 ```bash
-crispr_screen \
+crispr_screen test \
   -i count_table.tsv \
   -c low_1 low_2 \
   -t high_1 high_2

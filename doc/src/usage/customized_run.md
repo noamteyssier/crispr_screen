@@ -1,5 +1,18 @@
 # Command Arguments
 
+## Subcommands
+
+`crispr_screen` has two subcommands:
+  1. `test`
+  2. `agg`
+
+`test` is used to perform the sgRNA-level differential abundance tests and then aggregate the results to the gene-level.
+`test` by default will perform a gene-level aggregation as well, but can be skipped with the `--skip-agg` flag.
+
+`agg` is used to just perform the gene-level aggregation on a precalculated differential abundance matrix.
+Take a look at the `results.sgrna.tsv` file to see the expected file format required. Column names can
+be provided as well - details can be found by running `crispr_screen agg --help`
+
 ## Arguments
 
 ### Required
@@ -20,7 +33,7 @@ These arguments are optional and may change the configuration of the analysis.
 For further details on them please run:
 
 ```bash
-crispr_screen --help
+crispr_screen test --help
 ```
 
 | Argument | Description |
