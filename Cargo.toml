@@ -1,6 +1,6 @@
 [package]
 name = "crispr_screen"
-version = "0.1.23"
+version = "0.2.1"
 edition = "2021"
 description = "A fast and configurable differential expression analysis tool for CRISPR screens"
 license = "MIT"
@@ -28,4 +28,3 @@ noisy_float = "0.2.0"
 rayon = "1.5.3"
 statrs = "0.16.0"
 thiserror = "1.0.38"
-
