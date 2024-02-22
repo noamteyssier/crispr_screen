@@ -1,12 +1,12 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
-
+use crate::aggregation::GeneAggregation;
 use anyhow::{bail, Result};
 use csv::ReaderBuilder;
 use ndarray::{Array1, Array2, Axis};
 use std::collections::HashMap;
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 type Record = HashMap<String, String>;
 
@@ -172,10 +172,31 @@ impl SimpleFrame {
             bail!("Column not found")
         }
     }
+
+    pub fn validate_ntc(&self, config: &GeneAggregation) -> Result<()> {
+        match config {
+            GeneAggregation::Inc {
+                token,
+                fdr: _,
+                group_size: _,
+                n_draws: _,
+                use_product: _,
+            } => {
+                if self.get_sgrna_names().iter().any(|x| x.contains(token)) {
+                    Ok(())
+                } else {
+                    bail!("Non-Targeting Token ({token}) not found in any sgrna names - please use RRA or update the provided token.")
+                }
+            }
+            _ => Ok(()),
+        }
+    }
 }
 
 #[cfg(test)]
 mod testing {
+    use crate::aggregation::GeneAggregation;
+
     use super::SimpleFrame;
     use ndarray::s;
     use ndarray_rand::rand::random;

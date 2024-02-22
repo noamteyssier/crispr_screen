@@ -23,6 +23,7 @@ pub fn mageck(
     let gene_names = frame.get_gene_names();
     let n_controls = labels_controls.len();
 
+    frame.validate_ntc(config.aggregation())?;
     logger.start_mageck();
     logger.num_sgrnas(sgrna_names);
     logger.num_genes(gene_names);
