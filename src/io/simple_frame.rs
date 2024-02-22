@@ -472,4 +472,32 @@ mod testing {
         );
         assert!(dm.is_ok());
     }
+
+    #[test]
+    fn test_ntc_token_validation() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+
+        // Expected to be missing
+        let config = GeneAggregation::Inc {
+            token: "non-targeting",
+            fdr: 0.05,
+            group_size: 3,
+            n_draws: 100,
+            use_product: false,
+        };
+        let result = frame.validate_ntc(&config);
+        assert!(result.is_err());
+
+        // Expected to be found
+        let config = GeneAggregation::Inc {
+            token: "sgrna_2",
+            fdr: 0.05,
+            group_size: 3,
+            n_draws: 100,
+            use_product: false,
+        };
+        let result = frame.validate_ntc(&config);
+        assert!(result.is_ok());
+    }
 }
