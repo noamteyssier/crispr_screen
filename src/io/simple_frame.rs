@@ -58,14 +58,14 @@ impl SimpleFrame {
 
     fn build_meta_hashmap(headers: &[String]) -> HashMap<String, Vec<String>> {
         headers.iter().take(2).fold(HashMap::new(), |mut map, s| {
-            map.entry(s.clone()).or_insert(Vec::new());
+            map.entry(s.clone()).or_default();
             map
         })
     }
 
     fn build_data_hashmap(headers: &[String]) -> HashMap<String, Vec<f64>> {
         headers.iter().skip(2).fold(HashMap::new(), |mut map, s| {
-            map.entry(s.clone()).or_insert(Vec::new());
+            map.entry(s.clone()).or_default();
             map
         })
     }
@@ -85,19 +85,16 @@ impl SimpleFrame {
             let record: Record = result?;
             for (idx, h) in headers.iter().enumerate() {
                 if idx < 2 {
-                    meta_hash
-                        .get_mut(h)
-                        .unwrap()
-                        .push(record.get(h).expect("Malformed Record").clone());
+                    let value = record
+                        .get(h)
+                        .unwrap_or_else(|| panic!("Malformed Record, missing header: {h}"));
+                    meta_hash.get_mut(h).unwrap().push(value.to_string());
                 } else {
-                    data_hash.get_mut(h).unwrap().push(
-                        record
-                            .get(h)
-                            .expect("Malformed Record")
-                            .parse::<f64>()
-                            .expect("Unable to parse record to float")
-                            .to_owned(),
-                    );
+                    let value = match record.get(h) {
+                        Some(x) => x.parse::<f64>().unwrap_or(0.0),
+                        None => bail!("Malformed Record, missing header: {h}"),
+                    };
+                    data_hash.get_mut(h).unwrap().push(value);
                 }
             }
         }
@@ -239,6 +236,76 @@ mod testing {
         s
     }
 
+    fn malformed_cells_empty() -> String {
+        let mut s = String::with_capacity(1000);
+        let headers = ["sgrna", "gene", "low", "high"];
+        let num_rows = 10;
+
+        // add headers
+        headers.iter().enumerate().for_each(|(idx, x)| {
+            if idx > 0 {
+                s.push_str(&format!("\t{x}"))
+            } else {
+                s.push_str(x)
+            }
+        });
+        s.push('\n');
+
+        // add data
+        (0..num_rows).for_each(|row_id| {
+            headers.iter().enumerate().for_each(|(idx, _)| {
+                if idx == 0 {
+                    s.push_str(&format!("sgrna_{row_id}"));
+                } else {
+                    let n = random::<f64>();
+                    if n > 0.1 {
+                        s.push_str(&format!("\t{}", n))
+                    } else {
+                        s.push('\t')
+                    }
+                }
+            });
+            s.push('\n');
+        });
+
+        s
+    }
+
+    fn malformed_cells_string() -> String {
+        let mut s = String::with_capacity(1000);
+        let headers = ["sgrna", "gene", "low", "high"];
+        let num_rows = 10;
+
+        // add headers
+        headers.iter().enumerate().for_each(|(idx, x)| {
+            if idx > 0 {
+                s.push_str(&format!("\t{x}"))
+            } else {
+                s.push_str(x)
+            }
+        });
+        s.push('\n');
+
+        // add data
+        (0..num_rows).for_each(|row_id| {
+            headers.iter().enumerate().for_each(|(idx, _)| {
+                if idx == 0 {
+                    s.push_str(&format!("sgrna_{row_id}"));
+                } else {
+                    let n = random::<f64>();
+                    if n > 0.1 {
+                        s.push_str(&format!("\t{}", n))
+                    } else {
+                        s.push_str("\tNaN")
+                    }
+                }
+            });
+            s.push('\n');
+        });
+
+        s
+    }
+
     #[test]
     fn test_simple_frame() {
         let datastream = example_dataset();
@@ -355,5 +422,33 @@ mod testing {
                 "sgrna_7", "sgrna_8", "sgrna_9"
             ]
         );
+    }
+
+    #[test]
+    fn test_malformed_cells_empty() {
+        let datastream = malformed_cells_empty();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        assert_eq!(frame.headers, vec!["sgrna", "gene", "low", "high"]);
+        let dm = frame.data_matrix(
+            &vec!["low", "high"]
+                .into_iter()
+                .map(|x| x.to_owned())
+                .collect::<Vec<String>>(),
+        );
+        assert!(dm.is_ok());
+    }
+
+    #[test]
+    fn test_malformed_cells_string() {
+        let datastream = malformed_cells_string();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        assert_eq!(frame.headers, vec!["sgrna", "gene", "low", "high"]);
+        let dm = frame.data_matrix(
+            &vec!["low", "high"]
+                .into_iter()
+                .map(|x| x.to_owned())
+                .collect::<Vec<String>>(),
+        );
+        assert!(dm.is_ok());
     }
 }
