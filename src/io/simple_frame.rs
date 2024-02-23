@@ -2,7 +2,8 @@ use crate::aggregation::GeneAggregation;
 use anyhow::{bail, Result};
 use csv::ReaderBuilder;
 use ndarray::{Array1, Array2, Axis};
-use std::collections::HashMap;
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -191,6 +192,43 @@ impl SimpleFrame {
             _ => Ok(()),
         }
     }
+
+    pub fn headers(&self) -> &[String] {
+        &self.headers
+    }
+
+    pub fn match_headers(&self, re: &Regex) -> Vec<String> {
+        self.headers
+            .iter()
+            .filter(|x| match re.captures(x) {
+                Some(c) => &c.get(0).unwrap().as_str() == x,
+                None => false,
+            })
+            .map(|x| x.to_string())
+            .collect()
+    }
+
+    pub fn match_headers_from_regex_set(&self, re: &[Regex]) -> Result<Vec<String>> {
+        let mut set: Vec<String> = re
+            .iter()
+            .flat_map(|x| self.match_headers(x))
+            .fold(HashSet::new(), |mut set, x| {
+                set.insert(x);
+                set
+            })
+            .into_iter()
+            .collect();
+        set.sort_unstable();
+        if set.is_empty() {
+            let mut s = String::new();
+            s.push_str("No matching headers found for the following regex set:\n");
+            re.iter().for_each(|x| {
+                s.push_str(&format!("{x}\n"));
+            });
+            bail!(s)
+        }
+        Ok(set)
+    }
 }
 
 #[cfg(test)]
@@ -200,6 +238,7 @@ mod testing {
     use super::SimpleFrame;
     use ndarray::s;
     use ndarray_rand::rand::random;
+    use regex::Regex;
 
     fn example_dataset() -> String {
         let mut s = String::with_capacity(1000);
@@ -499,5 +538,41 @@ mod testing {
         };
         let result = frame.validate_ntc(&config);
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_regex_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low.+").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set).unwrap();
+        assert_eq!(result, vec!["low_1", "low_2"]);
+    }
+
+    #[test]
+    fn test_regex_sample_names_incomplete_regex() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_regex_missing_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("missing").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_regex_multi_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low.+").unwrap(), Regex::new("high.+").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set).unwrap();
+        assert_eq!(result, vec!["high_1", "high_2", "low_1", "low_2"]);
     }
 }

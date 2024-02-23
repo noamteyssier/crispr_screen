@@ -3,6 +3,7 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs, SgrnaColumns};
 use io::SimpleFrame;
+use regex::Regex;
 use run_aggregation::run_aggregation;
 use std::path::Path;
 
@@ -85,15 +86,23 @@ fn test(
         misc.seed,
         &prefix,
     );
-
-    let labels_controls = input_args.controls;
-    let labels_treatments = input_args.treatments;
     let frame = SimpleFrame::from_filepath(&path)?;
+
+    let mut regex_controls = vec![];
+    let mut regex_treatments = vec![];
+    for label in input_args.controls {
+        let regex = Regex::new(&label)?;
+        regex_controls.push(regex);
+    }
+    for label in input_args.treatments {
+        let regex = Regex::new(&label)?;
+        regex_treatments.push(regex);
+    }
 
     let mageck_results = mageck(
         &frame,
-        &labels_controls,
-        &labels_treatments,
+        &regex_controls,
+        &regex_treatments,
         &config,
         &logger,
         skip_agg,
