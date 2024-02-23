@@ -200,7 +200,10 @@ impl SimpleFrame {
     pub fn match_headers(&self, re: &Regex) -> Vec<String> {
         self.headers
             .iter()
-            .filter(|x| re.is_match(x))
+            .filter(|x| match re.captures(x) {
+                Some(c) => &c.get(0).unwrap().as_str() == x,
+                None => false,
+            })
             .map(|x| x.to_string())
             .collect()
     }
