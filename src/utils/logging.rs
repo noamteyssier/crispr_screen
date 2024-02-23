@@ -39,6 +39,13 @@ impl Logger {
         }
     }
 
+    pub fn group_names(&self, controls: &[String], treatments: &[String]) {
+        if self.verbose {
+            Self::write_to_stderr("Control Group              : ", controls);
+            Self::write_to_stderr("Treatment Group            : ", treatments);
+        }
+    }
+
     pub fn num_genes(&self, x: &[String]) {
         if self.verbose {
             let unique_genes = x.iter().cloned().collect::<HashSet<String>>();

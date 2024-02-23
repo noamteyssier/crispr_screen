@@ -2,7 +2,8 @@ use crate::aggregation::GeneAggregation;
 use anyhow::{bail, Result};
 use csv::ReaderBuilder;
 use ndarray::{Array1, Array2, Axis};
-use std::collections::HashMap;
+use regex::Regex;
+use std::collections::{HashMap, HashSet};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -190,6 +191,40 @@ impl SimpleFrame {
             }
             _ => Ok(()),
         }
+    }
+
+    pub fn headers(&self) -> &[String] {
+        &self.headers
+    }
+
+    pub fn match_headers(&self, re: &Regex) -> Vec<String> {
+        self.headers
+            .iter()
+            .filter(|x| re.is_match(x))
+            .map(|x| x.to_string())
+            .collect()
+    }
+
+    pub fn match_headers_from_regex_set(&self, re: &[Regex]) -> Result<Vec<String>> {
+        let mut set: Vec<String> = re
+            .iter()
+            .flat_map(|x| self.match_headers(x))
+            .fold(HashSet::new(), |mut set, x| {
+                set.insert(x);
+                set
+            })
+            .into_iter()
+            .collect();
+        set.sort_unstable();
+        if set.is_empty() {
+            let mut s = String::new();
+            s.push_str("No matching headers found for the following regex set:\n");
+            re.iter().for_each(|x| {
+                s.push_str(&format!("{x}\n"));
+            });
+            bail!(s)
+        }
+        Ok(set)
     }
 }
 

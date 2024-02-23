@@ -7,24 +7,28 @@ use crate::{
     utils::{config::Configuration, logging::Logger},
 };
 use anyhow::Result;
+use regex::Regex;
 
 /// Performs the `MAGeCK` Differential Expression and Gene Aggregation Algorithm
 pub fn mageck(
     frame: &SimpleFrame,
-    labels_controls: &[String],
-    labels_treatments: &[String],
+    regex_controls: &[Regex],
+    regex_treatments: &[Regex],
     config: &Configuration,
     logger: &Logger,
     skip_agg: bool,
 ) -> Result<()> {
-    let labels = [labels_controls, labels_treatments].concat();
+    let control_labels = frame.match_headers_from_regex_set(regex_controls)?;
+    let treatment_labels = frame.match_headers_from_regex_set(regex_treatments)?;
+    let n_controls = control_labels.len();
+    let labels = [control_labels.clone(), treatment_labels.clone()].concat();
     let count_matrix = frame.data_matrix(&labels)?;
     let sgrna_names = frame.get_sgrna_names();
     let gene_names = frame.get_gene_names();
-    let n_controls = labels_controls.len();
 
     frame.validate_ntc(config.aggregation())?;
     logger.start_mageck();
+    logger.group_names(&control_labels, &treatment_labels);
     logger.num_sgrnas(sgrna_names);
     logger.num_genes(gene_names);
     logger.norm_method(config.normalization());
