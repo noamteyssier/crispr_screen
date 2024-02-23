@@ -238,6 +238,7 @@ mod testing {
     use super::SimpleFrame;
     use ndarray::s;
     use ndarray_rand::rand::random;
+    use regex::Regex;
 
     fn example_dataset() -> String {
         let mut s = String::with_capacity(1000);
@@ -537,5 +538,41 @@ mod testing {
         };
         let result = frame.validate_ntc(&config);
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_regex_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low.+").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set).unwrap();
+        assert_eq!(result, vec!["low_1", "low_2"]);
+    }
+
+    #[test]
+    fn test_regex_sample_names_incomplete_regex() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_regex_missing_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("missing").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_regex_multi_sample_names() {
+        let datastream = example_dataset();
+        let frame = SimpleFrame::from_string(&datastream).unwrap();
+        let regex_set = vec![Regex::new("low.+").unwrap(), Regex::new("high.+").unwrap()];
+        let result = frame.match_headers_from_regex_set(&regex_set).unwrap();
+        assert_eq!(result, vec!["high_1", "high_2", "low_1", "low_2"]);
     }
 }
