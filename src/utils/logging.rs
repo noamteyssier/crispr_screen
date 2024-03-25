@@ -224,6 +224,8 @@ mod testing {
             n_draws: 100,
         });
         logger.correction(Procedure::Bonferroni);
+        logger.filtering(10.0);
+        logger.num_filtered(1);
         logger.start_mean_variance();
         logger.num_outliers(1);
         logger.num_zeros(1);
@@ -255,6 +257,8 @@ mod testing {
             n_draws: 100,
         });
         logger.correction(Procedure::Bonferroni);
+        logger.filtering(10.0);
+        logger.num_filtered(1);
         logger.start_mean_variance();
         logger.num_outliers(1);
         logger.num_zeros(1);
