@@ -83,6 +83,7 @@ fn test(
         agg,
         correction,
         diff_args.model_choice,
+        diff_args.min_base_mean,
         misc.seed,
         &prefix,
     );

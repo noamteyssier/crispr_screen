@@ -4,7 +4,7 @@ use crate::{
     io::{GeneFrame, HitList, Screenviz, SgrnaFrame, SimpleFrame},
     model::model_mean_variance,
     norm::normalize_counts,
-    utils::{config::Configuration, logging::Logger},
+    utils::{config::Configuration, filter::filter_low_counts, logging::Logger},
 };
 use anyhow::Result;
 use regex::Regex;
@@ -38,15 +38,28 @@ pub fn mageck(
     // Normalize
     let normed_matrix = normalize_counts(&count_matrix, config.normalization(), logger);
 
+    // Filter Low Counts
+    let (filt_matrix, filt_sgrna_names, filt_gene_names) = filter_low_counts(
+        &normed_matrix,
+        sgrna_names,
+        gene_names,
+        config.min_base_mean(),
+        logger,
+    );
+
     // Mean-Variance Modeling
-    let adj_var = model_mean_variance(&normed_matrix, n_controls, config.model_choice(), logger);
+    let adj_var = model_mean_variance(&filt_matrix, n_controls, config.model_choice(), logger);
 
     // sgRNA Ranking (Enrichment)
-    let sgrna_results =
-        enrichment_testing(&normed_matrix, &adj_var, n_controls, config.correction());
+    let sgrna_results = enrichment_testing(&filt_matrix, &adj_var, n_controls, config.correction());
 
     // Build sgRNA DataFrame
-    let sgrna_frame = SgrnaFrame::new(sgrna_names, gene_names, &adj_var, &sgrna_results);
+    let sgrna_frame = SgrnaFrame::new(
+        &filt_sgrna_names,
+        &filt_gene_names,
+        &adj_var,
+        &sgrna_results,
+    );
     sgrna_frame.write(config.prefix())?;
 
     if skip_agg {
@@ -56,7 +69,7 @@ pub fn mageck(
         let aggregation_results = compute_aggregation(
             config.aggregation(),
             &sgrna_results,
-            gene_names,
+            &filt_gene_names,
             logger,
             config.correction(),
             config.seed(),

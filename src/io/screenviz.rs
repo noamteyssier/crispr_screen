@@ -162,6 +162,7 @@ mod testing {
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let base_mean = 0.0;
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -169,6 +170,7 @@ mod testing {
             aggregation,
             correction,
             model_choice,
+            base_mean,
             seed,
             prefix,
         )
@@ -185,6 +187,7 @@ mod testing {
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let base_mean = 0.0;
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -192,6 +195,7 @@ mod testing {
             aggregation,
             correction,
             model_choice,
+            base_mean,
             seed,
             prefix,
         )
@@ -208,6 +212,7 @@ mod testing {
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let base_mean = 0.0;
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -215,6 +220,7 @@ mod testing {
             aggregation,
             correction,
             model_choice,
+            base_mean,
             seed,
             prefix,
         )

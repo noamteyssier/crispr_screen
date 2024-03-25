@@ -7,6 +7,7 @@ pub struct Configuration<'a> {
     aggregation: GeneAggregation<'a>,
     correction: Procedure,
     model_choice: ModelChoice,
+    min_base_mean: f64,
     seed: u64,
     prefix: &'a str,
 }
@@ -16,6 +17,7 @@ impl<'a> Configuration<'a> {
         aggregation: GeneAggregation<'a>,
         correction: Procedure,
         model_choice: ModelChoice,
+        min_base_mean: f64,
         seed: u64,
         prefix: &'a str,
     ) -> Self {
@@ -24,6 +26,7 @@ impl<'a> Configuration<'a> {
             aggregation,
             correction,
             model_choice,
+            min_base_mean,
             seed,
             prefix,
         }
@@ -39,6 +42,7 @@ impl<'a> Configuration<'a> {
             aggregation,
             correction,
             model_choice: ModelChoice::default(),
+            min_base_mean: 0.0,
             seed,
             prefix,
         }
@@ -54,6 +58,9 @@ impl<'a> Configuration<'a> {
     }
     pub fn model_choice(&self) -> &ModelChoice {
         &self.model_choice
+    }
+    pub fn min_base_mean(&self) -> f64 {
+        self.min_base_mean
     }
     pub fn seed(&self) -> u64 {
         self.seed
@@ -82,6 +89,7 @@ mod testing {
         };
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
+        let base_mean = 0.0;
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -89,6 +97,7 @@ mod testing {
             aggregation,
             correction,
             model_choice,
+            base_mean,
             seed,
             prefix,
         )

@@ -71,6 +71,19 @@ impl Logger {
         }
     }
 
+    pub fn filtering(&self, minimum: f64) {
+        if self.verbose {
+            eprintln!("\n{}", "Filtering Low Count sgRNAs".bold().underline());
+            Self::write_to_stderr("Minimum Base Mean          : ", minimum);
+        }
+    }
+
+    pub fn num_filtered(&self, num_filtered: usize) {
+        if self.verbose {
+            Self::write_to_stderr("Number of Filtered sgRNAs  : ", num_filtered);
+        }
+    }
+
     pub fn start_mean_variance(&self) {
         if self.verbose {
             eprintln!("\n{}", "Modeling Mean Variance".bold().underline());
