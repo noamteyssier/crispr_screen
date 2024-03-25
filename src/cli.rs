@@ -38,6 +38,10 @@ pub struct DiffAbundanceArgs {
     /// Least squares model choice
     #[arg(short, long, default_value = "wols")]
     pub model_choice: ModelChoice,
+
+    /// Minimum Base Mean to consider for differential abundance
+    #[arg(short = 'M', long, default_value = "1")]
+    pub min_base_mean: f64,
 }
 
 #[derive(Parser, Debug)]

@@ -1,5 +1,6 @@
 pub mod agg;
 pub mod config;
+pub mod filter;
 pub mod logging;
 pub mod math;
 use clap::ValueEnum;
