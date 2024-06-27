@@ -64,13 +64,14 @@ fn run_rra(
     adjust_alpha: bool,
     npermutations: usize,
     correction: Procedure,
+    seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
     let (alpha_low, alpha_high) = set_alpha_threshold(pvalue_low, pvalue_high, alpha, adjust_alpha);
     logger.report_rra_alpha(alpha_low, alpha_high);
 
     // Calculates the RRA score for the depleted pvalues
-    let alpha_rra_low = AlphaRRA::new(gene_names, alpha_low, npermutations, correction);
+    let alpha_rra_low = AlphaRRA::new(gene_names, alpha_low, npermutations, correction, seed);
     let permutation_sizes_low = alpha_rra_low
         .permutation_vectors()
         .keys()
@@ -82,7 +83,7 @@ fn run_rra(
         .expect("Error in RRA fit for depleted pvalues");
 
     // Calculates the RRA score for the enriched pvalues
-    let alpha_rra_high = AlphaRRA::new(gene_names, alpha_high, npermutations, correction);
+    let alpha_rra_high = AlphaRRA::new(gene_names, alpha_high, npermutations, correction, seed + 1);
     let permutation_sizes_high = alpha_rra_high
         .permutation_vectors()
         .keys()
@@ -233,6 +234,7 @@ pub fn compute_aggregation(
             *adjust_alpha,
             *npermutations,
             correction,
+            seed,
             logger,
         ),
         GeneAggregation::Inc {
