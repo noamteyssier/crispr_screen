@@ -54,6 +54,12 @@ pub struct RraArgs {
     #[arg(short, long, default_value = "0.25")]
     pub alpha: f64,
 
+    /// N-Top threshold for hRRA - only the top N sgRNAs will be considered per gene for RRA
+    ///
+    /// This will override alpha-RRA and use Heuristic RRA instead.
+    #[arg(long, conflicts_with = "alpha")]
+    pub n_top: Option<usize>,
+
     /// Do not adjust alpha threshold for RRA.
     #[arg(long)]
     pub no_adjust_alpha: bool,

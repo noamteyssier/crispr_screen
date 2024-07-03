@@ -51,6 +51,7 @@ fn test(
     let agg = match agg {
         GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
             alpha: rra.alpha,
+            n_top: rra.n_top,
             npermutations: rra.permutations,
             adjust_alpha: !rra.no_adjust_alpha,
             fdr: misc.fdr,
@@ -146,6 +147,7 @@ fn aggregate(
     let agg = match agg {
         GeneAggregationSelection::RRA => GeneAggregation::AlpaRRA {
             alpha: rra.alpha,
+            n_top: rra.n_top,
             npermutations: rra.permutations,
             adjust_alpha: !rra.no_adjust_alpha,
             fdr: misc.fdr,

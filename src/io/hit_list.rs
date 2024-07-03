@@ -53,6 +53,7 @@ impl MethodEnum {
             }
             GeneAggregation::AlpaRRA {
                 alpha: _,
+                n_top: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr,

@@ -222,6 +222,7 @@ pub fn compute_aggregation(
     let agg_result = match agg {
         GeneAggregation::AlpaRRA {
             alpha,
+            n_top,
             npermutations,
             adjust_alpha,
             fdr: _,

@@ -22,6 +22,7 @@ pub enum GeneAggregationSelection {
 pub enum GeneAggregation<'a> {
     AlpaRRA {
         alpha: f64,
+        n_top: Option<usize>,
         npermutations: usize,
         adjust_alpha: bool,
         fdr: f64,
@@ -91,13 +92,14 @@ mod testing {
     fn test_enum_gene_aggregation_rra() {
         let agg = GeneAggregation::AlpaRRA {
             alpha: 0.5,
+            n_top: None,
             npermutations: 100,
             adjust_alpha: true,
             fdr: 0.05,
         };
         assert_eq!(
             format!("{:?}", agg),
-            "AlpaRRA { alpha: 0.5, npermutations: 100, adjust_alpha: true, fdr: 0.05 }"
+            "AlpaRRA { alpha: 0.5, n_top: None, npermutations: 100, adjust_alpha: true, fdr: 0.05 }"
         );
     }
 

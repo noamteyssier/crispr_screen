@@ -42,6 +42,7 @@ impl Screenviz {
         let method = match config.aggregation() {
             GeneAggregation::AlpaRRA {
                 alpha: _,
+                n_top: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr: _,
@@ -66,6 +67,7 @@ impl Screenviz {
         let z = match config.aggregation() {
             GeneAggregation::AlpaRRA {
                 alpha: _,
+                n_top: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr: _,
@@ -88,6 +90,7 @@ impl Screenviz {
         let (threshold, threshold_low, threshold_high) = match config.aggregation() {
             GeneAggregation::AlpaRRA {
                 alpha: _,
+                n_top: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr,
@@ -156,6 +159,7 @@ mod testing {
         let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::AlpaRRA {
             alpha: 0.05,
+            n_top: None,
             npermutations: 1000,
             adjust_alpha: true,
             fdr: 0.05,
