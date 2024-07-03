@@ -7,7 +7,7 @@ use crate::{
     utils::{agg::aggregate_fold_changes, logging::Logger},
 };
 use adjustp::Procedure;
-use alpha_rra::AlphaRRA;
+use alpha_rra::{AlphaRRA, HeuristicRRA};
 use intc::{fdr::Direction, Inc};
 use ndarray::Array1;
 
@@ -53,9 +53,51 @@ impl InternalAggregationResult {
     }
 }
 
-/// Runs the RRA gene aggregation procedure
 #[allow(clippy::too_many_arguments)]
 fn run_rra(
+    pvalue_low: &Array1<f64>,
+    pvalue_high: &Array1<f64>,
+    logfc: &Array1<f64>,
+    gene_names: &[String],
+    alpha: f64,
+    n_top: Option<usize>,
+    adjust_alpha: bool,
+    npermutations: usize,
+    correction: Procedure,
+    seed: u64,
+    logger: &Logger,
+) -> InternalAggregationResult {
+    if let Some(n_top) = n_top {
+        run_hrra(
+            pvalue_low,
+            pvalue_high,
+            logfc,
+            gene_names,
+            n_top,
+            npermutations,
+            correction,
+            seed,
+            logger,
+        )
+    } else {
+        run_arra(
+            pvalue_low,
+            pvalue_high,
+            logfc,
+            gene_names,
+            alpha,
+            adjust_alpha,
+            npermutations,
+            correction,
+            seed,
+            logger,
+        )
+    }
+}
+
+/// Runs the RRA gene aggregation procedure
+#[allow(clippy::too_many_arguments)]
+fn run_arra(
     pvalue_low: &Array1<f64>,
     pvalue_high: &Array1<f64>,
     logfc: &Array1<f64>,
@@ -84,6 +126,65 @@ fn run_rra(
 
     // Calculates the RRA score for the enriched pvalues
     let alpha_rra_high = AlphaRRA::new(gene_names, alpha_high, npermutations, correction, seed + 1);
+    let permutation_sizes_high = alpha_rra_high
+        .permutation_vectors()
+        .keys()
+        .copied()
+        .collect::<Vec<usize>>();
+    logger.permutation_sizes(&permutation_sizes_high);
+    let result_high = alpha_rra_high
+        .run(pvalue_high)
+        .expect("Error in RRA fit for enriched pvalues");
+
+    let gene_fc_hashmap = aggregate_fold_changes(gene_names, logfc);
+    let gene_fc = result_low
+        .names()
+        .iter()
+        .map(|gene| gene_fc_hashmap.get(gene).unwrap_or(&0.0))
+        .copied()
+        .collect();
+
+    InternalAggregationResult::new(
+        result_low.names().to_vec(),
+        gene_fc,
+        result_low.scores().to_owned(),
+        result_low.pvalues().to_owned(),
+        result_low.adj_pvalues().to_owned(),
+        result_high.scores().to_owned(),
+        result_high.pvalues().to_owned(),
+        result_high.adj_pvalues().to_owned(),
+        None,
+        None,
+    )
+}
+
+/// Runs the RRA gene aggregation procedure
+#[allow(clippy::too_many_arguments)]
+fn run_hrra(
+    pvalue_low: &Array1<f64>,
+    pvalue_high: &Array1<f64>,
+    logfc: &Array1<f64>,
+    gene_names: &[String],
+    n_top: usize,
+    npermutations: usize,
+    correction: Procedure,
+    seed: u64,
+    logger: &Logger,
+) -> InternalAggregationResult {
+    // Calculates the RRA score for the depleted pvalues
+    let alpha_rra_low = HeuristicRRA::new(gene_names, n_top, npermutations, correction, seed);
+    let permutation_sizes_low = alpha_rra_low
+        .permutation_vectors()
+        .keys()
+        .copied()
+        .collect::<Vec<usize>>();
+    logger.permutation_sizes(&permutation_sizes_low);
+    let result_low = alpha_rra_low
+        .run(pvalue_low)
+        .expect("Error in RRA fit for depleted pvalues");
+
+    // Calculates the RRA score for the enriched pvalues
+    let alpha_rra_high = HeuristicRRA::new(gene_names, n_top, npermutations, correction, seed + 1);
     let permutation_sizes_high = alpha_rra_high
         .permutation_vectors()
         .keys()
@@ -232,6 +333,7 @@ pub fn compute_aggregation(
             &passing_sgrna_logfc,
             &passing_gene_names,
             *alpha,
+            *n_top,
             *adjust_alpha,
             *npermutations,
             correction,
