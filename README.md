@@ -3,6 +3,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.md)
 ![actions status](https://github.com/noamteyssier/crispr_screen/workflows/Rust/badge.svg)
 [![codecov](https://codecov.io/gh/noamteyssier/crispr_screen/branch/main/graph/badge.svg?token=9ALCE60W2T)](https://codecov.io/gh/noamteyssier/crispr_screen)
+[![DOI](https://zenodo.org/badge/521454266.svg)](https://zenodo.org/doi/10.5281/zenodo.12774208)
 
 This tool is recreation of the MAGeCK Differential Expression algorithm described
 in the original paper with options included.
