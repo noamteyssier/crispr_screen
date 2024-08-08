@@ -1,5 +1,6 @@
 use adjustp::Procedure;
 use colored::Colorize;
+use geopagg::WeightConfig;
 use hashbrown::HashSet;
 use std::fmt::Debug;
 
@@ -151,6 +152,14 @@ impl Logger {
             Self::write_to_stderr("FDR                        : ", fdr);
             Self::write_to_stderr("Group Size                 : ", group_size);
             Self::write_to_stderr("Number of Draws            : ", n_draws);
+        }
+    }
+
+    pub fn report_geopagg_params(&self, ntc_token: &str, fdr: f64, weight_config: WeightConfig) {
+        if self.verbose {
+            Self::write_to_stderr("NTC Token                  : ", ntc_token);
+            Self::write_to_stderr("FDR                        : ", fdr);
+            Self::write_to_stderr("Weight Configuration       : ", weight_config);
         }
     }
 

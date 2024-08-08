@@ -8,6 +8,7 @@ use crate::{
 };
 use adjustp::Procedure;
 use alpha_rra::AlphaRRA;
+use geopagg::{GeoPAGG, TransformConfig, WeightConfig};
 use intc::{fdr::Direction, Inc};
 use ndarray::Array1;
 
@@ -192,6 +193,55 @@ fn run_inc(
     )
 }
 
+fn run_geopagg(
+    pvalue_low: &Array1<f64>,
+    pvalue_high: &Array1<f64>,
+    logfc: &Array1<f64>,
+    gene_names: &[String],
+    token: &str,
+    weight_config: WeightConfig,
+    fdr: f64,
+    seed: u64,
+    logger: &Logger,
+) -> InternalAggregationResult {
+    logger.report_geopagg_params(token, fdr, weight_config);
+
+    let geo_low = GeoPAGG::new(
+        pvalue_low.as_slice().unwrap(),
+        logfc.as_slice().unwrap(),
+        gene_names,
+        Some(token),
+        weight_config,
+        TransformConfig::Fdr,
+        seed as usize,
+    );
+    let geo_high = GeoPAGG::new(
+        pvalue_high.as_slice().unwrap(),
+        logfc.as_slice().unwrap(),
+        gene_names,
+        Some(token),
+        weight_config,
+        TransformConfig::Fdr,
+        seed as usize,
+    );
+
+    let geo_low_results = geo_low.run();
+    let geo_high_results = geo_high.run();
+
+    InternalAggregationResult::new(
+        geo_low_results.genes.to_vec(),
+        Array1::from(geo_low_results.logfcs),
+        Array1::from(geo_low_results.empirical_fdr),
+        Array1::from(geo_low_results.wgms),
+        Array1::from(geo_low_results.adjusted_empirical_fdr),
+        Array1::from(geo_high_results.empirical_fdr),
+        Array1::from(geo_high_results.wgms),
+        Array1::from(geo_high_results.adjusted_empirical_fdr),
+        Some(fdr),
+        Some(fdr),
+    )
+}
+
 /// Computes gene aggregation using the provided method and associated configurations.
 pub fn compute_aggregation(
     agg: &GeneAggregation,
@@ -254,6 +304,21 @@ pub fn compute_aggregation(
             *n_draws,
             num_genes,
             *use_product,
+            seed,
+            logger,
+        ),
+        GeneAggregation::GeoPAGG {
+            token,
+            weight_config,
+            fdr,
+        } => run_geopagg(
+            &passing_sgrna_pvalues_low,
+            &passing_sgrna_pvalues_high,
+            &passing_sgrna_logfc,
+            &passing_gene_names,
+            token,
+            *weight_config,
+            *fdr,
             seed,
             logger,
         ),
