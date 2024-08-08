@@ -28,6 +28,9 @@ pub enum MethodEnum {
 
     /// Threshold set by fdr
     RRA { fdr: f64 },
+
+    /// Threshold set by GeoPAGG
+    GeoPAGG { fdr: f64 },
 }
 impl MethodEnum {
     pub fn new(result: &AggregationResult, config: &Configuration) -> Self {
@@ -57,6 +60,11 @@ impl MethodEnum {
                 adjust_alpha: _,
                 fdr,
             } => Self::RRA { fdr: *fdr },
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr,
+            } => Self::GeoPAGG { fdr: *fdr },
         }
     }
 }
@@ -103,6 +111,9 @@ impl HitList {
     fn generate_mask(method: MethodEnum, result: &AggregationResult) -> Vec<usize> {
         match method {
             MethodEnum::RRA { fdr } => Self::index_threshold(result.fdr(), fdr, Direction::Less),
+            MethodEnum::GeoPAGG { fdr } => {
+                Self::index_threshold(result.fdr(), fdr, Direction::Less)
+            }
             MethodEnum::IncProduct {
                 threshold_low,
                 threshold_high,

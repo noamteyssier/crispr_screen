@@ -1,5 +1,7 @@
 use crate::{
-    aggregation::GeneAggregationSelection, model::ModelChoice, norm::Normalization,
+    aggregation::{GeneAggregationSelection, GeoPAGGWeightConfigEnum},
+    model::ModelChoice,
+    norm::Normalization,
     utils::Adjustment,
 };
 use clap::{Parser, Subcommand};
@@ -61,10 +63,6 @@ pub struct RraArgs {
 
 #[derive(Parser, Debug)]
 pub struct IncArgs {
-    /// Non-targeting control token
-    #[arg(long, default_value = "non-targeting")]
-    pub ntc_token: String,
-
     /// sgRNA group size of pseudogenes to create for INC
     #[arg(short = 'G', long, default_value = "5")]
     pub inc_group_size: usize,
@@ -79,10 +77,25 @@ pub struct IncArgs {
 }
 
 #[derive(Parser, Debug)]
+pub struct GeopaggArgs {
+    /// Weight configuration for GeoPAGG
+    #[arg(long, default_value = "drop-first")]
+    pub weight_config: GeoPAGGWeightConfigEnum,
+
+    /// Drop-First weight configuration alpha parameter (only used if weight_config is drop-first)
+    #[arg(long, default_value = "0.5")]
+    pub df_alpha: f64,
+}
+
+#[derive(Parser, Debug)]
 pub struct MiscArgs {
     /// fdr-threshold to use in inc + rra when thresholding
     #[arg(short = 'f', long, default_value = "0.1")]
     pub fdr: f64,
+
+    /// Non-targeting control token
+    #[arg(long, default_value = "non-targeting")]
+    pub ntc_token: String,
 
     /// Do not write logging information
     #[arg(short, long)]
@@ -161,6 +174,10 @@ pub enum Commands {
         #[clap(flatten)]
         inc: IncArgs,
 
+        /// GeoPAGG arguments
+        #[clap(flatten)]
+        geopagg: GeopaggArgs,
+
         /// Misc arguments
         #[clap(flatten)]
         misc: MiscArgs,
@@ -195,6 +212,10 @@ pub enum Commands {
         /// INC arguments
         #[clap(flatten)]
         inc: IncArgs,
+
+        /// GeoPAGG arguments
+        #[clap(flatten)]
+        geopagg: GeopaggArgs,
 
         /// Misc arguments
         #[clap(flatten)]

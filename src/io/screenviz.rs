@@ -15,6 +15,7 @@ enum Method {
     AlphaRRA,
     IncProd,
     IncPvalue,
+    GeoPAGG,
 }
 impl Display for Method {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -22,6 +23,7 @@ impl Display for Method {
             Method::AlphaRRA => write!(f, "rra"),
             Method::IncProd => write!(f, "inc-product"),
             Method::IncPvalue => write!(f, "inc-pvalue"),
+            Method::GeoPAGG => write!(f, "geopagg"),
         }
     }
 }
@@ -59,6 +61,11 @@ impl Screenviz {
                     Method::IncPvalue
                 }
             }
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr: _,
+            } => Method::GeoPAGG,
         };
         let gene = "gene".to_string();
         let x = "log_fold_change".to_string();
@@ -83,25 +90,38 @@ impl Screenviz {
                     "pvalue".to_string()
                 }
             }
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr: _,
+            } => "fdr".to_string(),
         };
 
-        let (threshold, threshold_low, threshold_high) = match config.aggregation() {
+        let (threshold, threshold_low, threshold_high, ntc_token) = match config.aggregation() {
             GeneAggregation::AlpaRRA {
                 alpha: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr,
-            } => (Some(*fdr), None, None),
+            } => (Some(*fdr), None, None, None),
             GeneAggregation::Inc {
                 token: _,
                 fdr: _,
                 group_size: _,
                 n_draws: _,
                 use_product: _,
-            } => (None, results.threshold_low(), results.threshold_high()),
+            } => (
+                None,
+                results.threshold_low(),
+                results.threshold_high(),
+                Some(String::from("pseudogene")),
+            ),
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr,
+            } => (Some(*fdr), None, None, Some(String::from("amalgam"))),
         };
-
-        let ntc_token = threshold_low.map(|_| "pseudogene".to_string());
 
         Self {
             method,
@@ -126,6 +146,15 @@ impl Screenviz {
                 writeln!(writer, "y: {}", self.y)?;
                 writeln!(writer, "z: {}", self.z)?;
                 writeln!(writer, "threshold: {}", self.threshold.unwrap())?;
+            }
+            Method::GeoPAGG => {
+                writeln!(writer, "method: {}", self.method)?;
+                writeln!(writer, "gene: {}", self.gene)?;
+                writeln!(writer, "x: {}", self.x)?;
+                writeln!(writer, "y: {}", self.y)?;
+                writeln!(writer, "z: {}", self.z)?;
+                writeln!(writer, "threshold: {}", self.threshold.unwrap())?;
+                writeln!(writer, "ntc_token: {}", self.ntc_token.as_ref().unwrap())?;
             }
             _ => {
                 writeln!(writer, "method: {}", self.method)?;

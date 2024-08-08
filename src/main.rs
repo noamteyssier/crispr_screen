@@ -1,7 +1,11 @@
 use adjustp::Procedure;
 use anyhow::Result;
 use clap::Parser;
-use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs, SgrnaColumns};
+use cli::{
+    Cli, Commands, DiffAbundanceArgs, GeopaggArgs, IncArgs, InputArgs, MiscArgs, RraArgs,
+    SgrnaColumns,
+};
+use geopagg::WeightConfig;
 use io::SimpleFrame;
 use regex::Regex;
 use run_aggregation::run_aggregation;
@@ -17,7 +21,7 @@ pub mod norm;
 pub mod run_aggregation;
 pub mod utils;
 
-use aggregation::{GeneAggregation, GeneAggregationSelection};
+use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
@@ -29,6 +33,7 @@ fn test(
     agg: GeneAggregationSelection,
     rra: RraArgs,
     inc: IncArgs,
+    geopagg: GeopaggArgs,
     misc: MiscArgs,
     skip_agg: bool,
 ) -> Result<()> {
@@ -56,11 +61,24 @@ fn test(
             fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
-            token: &inc.ntc_token,
+            token: &misc.ntc_token,
             group_size: inc.inc_group_size,
             use_product: inc.inc_product,
             n_draws: inc.n_draws,
             fdr: misc.fdr,
+        },
+        GeneAggregationSelection::GeoPAGG => GeneAggregation::GeoPAGG {
+            token: &misc.ntc_token,
+            fdr: misc.fdr,
+            weight_config: {
+                match geopagg.weight_config {
+                    GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                        alpha: geopagg.df_alpha,
+                    },
+                    GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                    GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                }
+            },
         },
     };
 
@@ -125,6 +143,7 @@ fn aggregate(
     agg: GeneAggregationSelection,
     rra: RraArgs,
     inc: IncArgs,
+    geopagg: GeopaggArgs,
     misc: MiscArgs,
 ) -> Result<()> {
     // validate input path
@@ -151,11 +170,24 @@ fn aggregate(
             fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
-            token: &inc.ntc_token,
+            token: &misc.ntc_token,
             group_size: inc.inc_group_size,
             use_product: inc.inc_product,
             n_draws: inc.n_draws,
             fdr: misc.fdr,
+        },
+        GeneAggregationSelection::GeoPAGG => GeneAggregation::GeoPAGG {
+            token: &misc.ntc_token,
+            fdr: misc.fdr,
+            weight_config: {
+                match geopagg.weight_config {
+                    GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                        alpha: geopagg.df_alpha,
+                    },
+                    GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                    GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                }
+            },
         },
     };
 
@@ -189,9 +221,12 @@ fn main() -> Result<()> {
             agg,
             rra,
             inc,
+            geopagg,
             misc,
             skip_agg,
-        } => test(input, prefix, diff_args, agg, rra, inc, misc, skip_agg),
+        } => test(
+            input, prefix, diff_args, agg, rra, inc, geopagg, misc, skip_agg,
+        ),
         Commands::Agg {
             input,
             prefix,
@@ -199,7 +234,8 @@ fn main() -> Result<()> {
             agg,
             rra,
             inc,
+            geopagg,
             misc,
-        } => aggregate(input, prefix, columns, agg, rra, inc, misc),
+        } => aggregate(input, prefix, columns, agg, rra, inc, geopagg, misc),
     }
 }

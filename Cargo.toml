@@ -27,3 +27,7 @@ rayon = "1.8.1"
 regex = "1.10.3"
 statrs = "0.17.1"
 thiserror = "1.0.56"
+geopagg = "0.1.2"
+
+[profile.release]
+lto = true
