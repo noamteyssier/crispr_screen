@@ -204,7 +204,7 @@ fn run_geopagg(
     seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    logger.report_geopagg_params(token, fdr, weight_config);
+    logger.report_geopagg_params(token, fdr, weight_config, seed as usize);
 
     let geo_low = GeoPAGG::new(
         pvalue_low.as_slice().unwrap(),

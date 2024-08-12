@@ -183,11 +183,18 @@ impl Logger {
         }
     }
 
-    pub fn report_geopagg_params(&self, ntc_token: &str, fdr: f64, weight_config: WeightConfig) {
+    pub fn report_geopagg_params(
+        &self,
+        ntc_token: &str,
+        fdr: f64,
+        weight_config: WeightConfig,
+        seed: usize,
+    ) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
             Self::write_to_stderr("FDR                        : ", fdr);
             Self::write_to_stderr("Weight Configuration       : ", weight_config);
+            Self::write_to_stderr("Seed                       : ", seed);
         }
     }
 
