@@ -29,6 +29,7 @@ statrs = "0.17.1"
 thiserror = "1.0.56"
 geopagg = "0.1.2"
 polars = { version = "0.41.3", features = ["lazy", "ndarray"] }
+getset = "0.1.2"
 
 [profile.release]
 lto = true
