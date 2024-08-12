@@ -15,6 +15,7 @@ pub struct Cli {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Input Arguments")]
 pub struct InputArgs {
     /// Filepath of the input count matrix
     #[arg(short, long)]
@@ -30,6 +31,7 @@ pub struct InputArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Differential Abundance Arguments")]
 pub struct DiffAbundanceArgs {
     /// Count normalization configuration
     ///
@@ -52,6 +54,7 @@ pub struct DiffAbundanceArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "alpha-RRA Arguments")]
 pub struct RraArgs {
     /// Number of permutations to perform in aRRA
     #[arg(short, long, default_value = "100")]
@@ -67,6 +70,7 @@ pub struct RraArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "INC Arguments")]
 pub struct IncArgs {
     /// sgRNA group size of pseudogenes to create for INC
     #[arg(short = 'G', long, default_value = "5")]
@@ -82,6 +86,7 @@ pub struct IncArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "GeoPAGG Arguments")]
 pub struct GeopaggArgs {
     /// Weight configuration for GeoPAGG
     #[arg(long, default_value = "drop-first")]
@@ -93,6 +98,7 @@ pub struct GeopaggArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Miscellaneous Arguments")]
 pub struct MiscArgs {
     /// fdr-threshold to use in inc + rra when thresholding
     #[arg(short = 'f', long, default_value = "0.1")]
@@ -120,6 +126,7 @@ pub struct MiscArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "sgRNA Column Name Arguments")]
 pub struct SgrnaColumns {
     /// Column name for the low-side p-value
     #[arg(long, default_value = "pvalue_low")]
@@ -147,6 +154,7 @@ pub struct SgrnaColumns {
 }
 
 #[derive(Subcommand, Debug)]
+#[clap(next_help_heading = "Subcommands")]
 pub enum Commands {
     /// Perform a differential abundance analysis
     Test {
