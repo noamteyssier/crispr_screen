@@ -71,15 +71,15 @@ fn select_treatments(array: &Array2<f64>, n_controls: usize) -> Array2<f64> {
 
 /// Maps the enrichment test function over the provided arrays
 fn map_enrichment(
-    treatment_means: &Array1<f64>,
+    treatment_arr: &Array1<f64>,
     param_r: &Array1<f64>,
     param_p: &Array1<f64>,
     survival: bool,
 ) -> Array1<f64> {
-    Zip::from(treatment_means)
+    Zip::from(treatment_arr)
         .and(param_r)
         .and(param_p)
-        .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, survival))
+        .map_collect(|val, r, p| enrichment_test(*val, *r, *p, survival))
 }
 
 fn map_enrichment_2d(
