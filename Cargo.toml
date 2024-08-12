@@ -1,6 +1,6 @@
 [package]
 name = "crispr_screen"
-version = "0.2.8"
+version = "0.3.1"
 edition = "2021"
 description = "A fast and configurable differential expression analysis tool for CRISPR screens"
 license = "MIT"
@@ -28,6 +28,7 @@ regex = "1.10.3"
 statrs = "0.17.1"
 thiserror = "1.0.56"
 geopagg = "0.1.2"
+polars = { version = "0.41.3", features = ["lazy", "ndarray"] }
 
 [profile.release]
 lto = true

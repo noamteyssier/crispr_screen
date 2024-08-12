@@ -1,11 +1,9 @@
 mod gene_frame;
-mod hit_list;
 mod screenviz;
 mod sgrna_frame;
-mod simple_frame;
+mod utils;
 
-pub use gene_frame::GeneFrame;
-pub use hit_list::HitList;
+pub use gene_frame::{write_gene_frame, write_hit_list};
 pub use screenviz::Screenviz;
-pub use sgrna_frame::SgrnaFrame;
-pub use simple_frame::SimpleFrame;
+pub use sgrna_frame::write_sgrna_dataframe;
+pub use utils::{get_string_column, load_dataframe, match_headers_from_regex_set, validate_ntc};
