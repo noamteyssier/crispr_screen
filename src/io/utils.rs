@@ -90,5 +90,6 @@ pub fn get_string_column(dataframe: &DataFrame, idx: usize) -> Vec<String> {
         .unwrap()
         .iter()
         .map(|x| x.to_string())
+        .map(|x| x.replacen('"', "", 2)) // strips quotes
         .collect()
 }
