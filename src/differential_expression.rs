@@ -1,15 +1,13 @@
 use crate::{
     aggregation::compute_aggregation,
     enrich::enrichment_testing,
-    io::{write_gene_frame, write_hit_list, write_sgrna_dataframe, Screenviz},
+    io::{
+        get_string_column, match_headers_from_regex_set, validate_ntc, write_gene_frame,
+        write_hit_list, write_sgrna_dataframe, Screenviz,
+    },
     model::model_mean_variance,
     norm::normalize_counts,
-    utils::{
-        config::Configuration,
-        filter::filter_low_counts,
-        io::{get_string_column, match_headers_from_regex_set, validate_ntc},
-        logging::Logger,
-    },
+    utils::{config::Configuration, filter::filter_low_counts, logging::Logger},
 };
 use anyhow::Result;
 use polars::prelude::*;

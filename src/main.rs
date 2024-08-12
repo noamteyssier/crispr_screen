@@ -22,7 +22,8 @@ pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
-use utils::{config::Configuration, io::load_dataframe, logging::Logger, Adjustment};
+use io::load_dataframe;
+use utils::{config::Configuration, logging::Logger, Adjustment};
 
 #[allow(clippy::too_many_arguments)]
 fn test(

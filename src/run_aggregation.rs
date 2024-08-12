@@ -9,8 +9,8 @@ use crate::{
     aggregation::compute_aggregation,
     cli::SgrnaColumns,
     enrich::EnrichmentResult,
-    io::{write_gene_frame, write_hit_list, Screenviz},
-    utils::{config::Configuration, io::get_string_column, logging::Logger},
+    io::{get_string_column, write_gene_frame, write_hit_list, Screenviz},
+    utils::{config::Configuration, logging::Logger},
 };
 
 pub fn run_aggregation(
