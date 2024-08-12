@@ -34,22 +34,22 @@ pub fn run_aggregation(
         sgrna_matrix.slice(s![.., 1]).to_owned(),
         sgrna_matrix.slice(s![.., 2]).to_owned(),
         sgrna_matrix.slice(s![.., 3]).to_owned(),
-        config.correction(),
+        *config.correction(),
     );
 
     logger.start_mageck();
     logger.num_sgrnas(&sgrna_names);
     logger.num_genes(&gene_names);
     logger.aggregation_method(config.aggregation());
-    logger.correction(config.correction());
+    logger.correction(*config.correction());
 
     let aggregation_results = compute_aggregation(
         config.aggregation(),
         &enrichment_result,
         &gene_names,
         logger,
-        config.correction(),
-        config.seed(),
+        *config.correction(),
+        *config.seed(),
     );
 
     // Write outputs

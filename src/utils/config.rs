@@ -1,13 +1,18 @@
-use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+use crate::{
+    aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+};
 use adjustp::Procedure;
+use getset::Getters;
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
+#[getset(get = "pub")]
 pub struct Configuration<'a> {
     normalization: Normalization,
     aggregation: GeneAggregation<'a>,
     correction: Procedure,
     model_choice: ModelChoice,
     min_base_mean: f64,
+    strategy: TestStrategy,
     seed: u64,
     prefix: &'a str,
 }
@@ -18,6 +23,7 @@ impl<'a> Configuration<'a> {
         correction: Procedure,
         model_choice: ModelChoice,
         min_base_mean: f64,
+        strategy: TestStrategy,
         seed: u64,
         prefix: &'a str,
     ) -> Self {
@@ -27,6 +33,7 @@ impl<'a> Configuration<'a> {
             correction,
             model_choice,
             min_base_mean,
+            strategy,
             seed,
             prefix,
         }
@@ -43,30 +50,10 @@ impl<'a> Configuration<'a> {
             correction,
             model_choice: ModelChoice::default(),
             min_base_mean: 0.0,
+            strategy: TestStrategy::default(),
             seed,
             prefix,
         }
-    }
-    pub fn normalization(&self) -> &Normalization {
-        &self.normalization
-    }
-    pub fn aggregation(&self) -> &GeneAggregation {
-        &self.aggregation
-    }
-    pub fn correction(&self) -> Procedure {
-        self.correction
-    }
-    pub fn model_choice(&self) -> &ModelChoice {
-        &self.model_choice
-    }
-    pub fn min_base_mean(&self) -> f64 {
-        self.min_base_mean
-    }
-    pub fn seed(&self) -> u64 {
-        self.seed
-    }
-    pub fn prefix(&self) -> &str {
-        self.prefix
     }
 }
 

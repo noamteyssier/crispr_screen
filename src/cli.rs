@@ -1,5 +1,6 @@
 use crate::{
     aggregation::{GeneAggregationSelection, GeoPAGGWeightConfigEnum},
+    enrich::TestStrategy,
     model::ModelChoice,
     norm::Normalization,
     utils::Adjustment,
@@ -44,6 +45,10 @@ pub struct DiffAbundanceArgs {
     /// Minimum Base Mean to consider for differential abundance
     #[arg(short = 'M', long, default_value = "10")]
     pub min_base_mean: f64,
+
+    /// Sample testing strategy
+    #[arg(short = 'S', long, default_value = "cm")]
+    pub strategy: TestStrategy,
 }
 
 #[derive(Parser, Debug)]
