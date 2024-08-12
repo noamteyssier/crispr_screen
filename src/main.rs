@@ -6,7 +6,6 @@ use cli::{
     SgrnaColumns,
 };
 use geopagg::WeightConfig;
-use io::SimpleFrame;
 use regex::Regex;
 use run_aggregation::run_aggregation;
 use std::path::Path;
@@ -23,7 +22,7 @@ pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
-use utils::{config::Configuration, logging::Logger, Adjustment};
+use utils::{config::Configuration, io::load_dataframe, logging::Logger, Adjustment};
 
 #[allow(clippy::too_many_arguments)]
 fn test(
@@ -105,7 +104,7 @@ fn test(
         misc.seed,
         &prefix,
     );
-    let frame = SimpleFrame::from_filepath(&path)?;
+    let frame = load_dataframe(path.clone().into())?;
 
     let mut regex_controls = vec![];
     let mut regex_treatments = vec![];
@@ -206,7 +205,7 @@ fn aggregate(
     };
 
     let config = Configuration::new_agg(agg, correction, misc.seed, &prefix);
-    let frame = SimpleFrame::from_filepath(&path)?;
+    let frame = load_dataframe(path.into())?;
 
     run_aggregation(&frame, columns, &config, &logger)
 }

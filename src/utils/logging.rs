@@ -4,7 +4,7 @@ use geopagg::WeightConfig;
 use hashbrown::HashSet;
 use std::fmt::Debug;
 
-use crate::{aggregation::GeneAggregation, io::HitList, model::ModelChoice, norm::Normalization};
+use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
 
 #[derive(Default)]
 pub struct Logger {
@@ -199,12 +199,12 @@ impl Logger {
         }
     }
 
-    pub fn hit_list(&self, hit_list: &HitList) {
+    pub fn hit_list(&self, num_total: usize, num_enrichments: usize, num_depletions: usize) {
         if self.verbose {
             eprintln!("\n{}", "Hits".bold().underline());
-            Self::write_to_stderr("Number of Hits             : ", hit_list.num_total());
-            Self::write_to_stderr("Number Upregulated Hits    : ", hit_list.num_enrichments());
-            Self::write_to_stderr("Number Downregulated Hits  : ", hit_list.num_depletions());
+            Self::write_to_stderr("Number of Hits             : ", num_total);
+            Self::write_to_stderr("Number Upregulated Hits    : ", num_enrichments);
+            Self::write_to_stderr("Number Downregulated Hits  : ", num_depletions);
         }
     }
 }
