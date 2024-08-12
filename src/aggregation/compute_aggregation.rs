@@ -69,7 +69,7 @@ fn run_rra(
     logger: &Logger,
 ) -> InternalAggregationResult {
     let (alpha_low, alpha_high) = set_alpha_threshold(pvalue_low, pvalue_high, alpha, adjust_alpha);
-    logger.report_rra_alpha(alpha_low, alpha_high);
+    logger.report_rra_params(alpha_low, alpha_high, seed as usize);
 
     // Calculates the RRA score for the depleted pvalues
     let alpha_rra_low = AlphaRRA::new(gene_names, alpha_low, npermutations, correction, seed);
@@ -133,7 +133,7 @@ fn run_inc(
     seed: u64,
     logger: &Logger,
 ) -> InternalAggregationResult {
-    logger.report_inc_params(token, num_genes, fdr, group_size, n_draws);
+    logger.report_inc_params(token, num_genes, fdr, group_size, n_draws, seed as usize);
 
     let (dir_low, dir_high) = if use_product {
         (Some(Direction::Less), Some(Direction::Greater))

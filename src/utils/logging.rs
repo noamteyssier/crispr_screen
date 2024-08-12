@@ -151,10 +151,11 @@ impl Logger {
         }
     }
 
-    pub fn report_rra_alpha(&self, alpha_low: f64, alpha_high: f64) {
+    pub fn report_rra_params(&self, alpha_low: f64, alpha_high: f64, seed: usize) {
         if self.verbose {
             Self::write_to_stderr("Alpha threshold low        : ", alpha_low);
             Self::write_to_stderr("Alpha threshold high       : ", alpha_high);
+            Self::write_to_stderr("Seed                       : ", seed);
         }
     }
 
@@ -173,6 +174,7 @@ impl Logger {
         fdr: f64,
         group_size: usize,
         n_draws: usize,
+        seed: usize,
     ) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
@@ -180,6 +182,7 @@ impl Logger {
             Self::write_to_stderr("FDR                        : ", fdr);
             Self::write_to_stderr("Group Size                 : ", group_size);
             Self::write_to_stderr("Number of Draws            : ", n_draws);
+            Self::write_to_stderr("Seed                       : ", seed);
         }
     }
 
