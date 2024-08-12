@@ -2,9 +2,12 @@ use adjustp::Procedure;
 use colored::Colorize;
 use geopagg::WeightConfig;
 use hashbrown::HashSet;
+use ndarray::Array1;
 use std::fmt::Debug;
 
-use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+use crate::{
+    aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+};
 
 #[derive(Default)]
 pub struct Logger {
@@ -114,6 +117,31 @@ impl Logger {
             Self::write_to_stderr("Linear Model Type          : ", model_choice);
             Self::write_to_stderr("Fit Parameter; K           : ", kappa);
             Self::write_to_stderr("Fit Parameter; B           : ", beta);
+        }
+    }
+
+    pub fn start_differential_abundance(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}",
+                "Performing Differential Abundance".bold().underline()
+            );
+        }
+    }
+
+    pub fn sample_aggregation_strategy(&self, strategy: TestStrategy) {
+        if self.verbose {
+            Self::write_to_stderr("Sample Aggregation Strategy: ", strategy);
+        }
+    }
+
+    pub fn sample_weights(&self, survival: bool, weights: &Array1<f64>) {
+        if self.verbose {
+            if survival {
+                Self::write_to_stderr("Sample Weights High        : ", weights.to_vec());
+            } else {
+                Self::write_to_stderr("Sample Weights Low         : ", weights.to_vec());
+            }
         }
     }
 

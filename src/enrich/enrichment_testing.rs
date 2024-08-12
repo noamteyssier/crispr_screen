@@ -1,6 +1,7 @@
 use super::{EnrichmentResult, TestStrategy};
 use crate::{
     norm::median,
+    utils::logging::Logger,
     utils::math::{negative_log_sum, normalize, weighted_geometric_mean},
 };
 use adjustp::Procedure;
@@ -87,6 +88,7 @@ fn map_enrichment_2d(
     param_r: &Array1<f64>,
     survival: bool,
     weighted: bool,
+    logger: &Logger,
 ) -> Array1<f64> {
     // Map the enrichment test function over each sample independently
     let arrays = normed_matrix
@@ -105,6 +107,7 @@ fn map_enrichment_2d(
     } else {
         Array1::ones(stack.len_of(Axis(1)))
     };
+    logger.sample_weights(survival, &weights);
 
     // Perform a weighted geometric mean of the p-values
     // weighted by the magnitude of the negative log p-values
@@ -121,6 +124,7 @@ pub fn geometric_enrichment_testing(
     n_controls: usize,
     correction: Procedure,
     weighted: bool,
+    logger: &Logger,
 ) -> EnrichmentResult {
     let treatment_2d = select_treatments(normed_matrix, n_controls);
     let control_means = row_median(&select_controls(normed_matrix, n_controls));
@@ -131,8 +135,10 @@ pub fn geometric_enrichment_testing(
     let param_r = calculate_r(&adj_control_means, adj_var);
     let param_p = calculate_p(&adj_control_means, adj_var);
 
-    let low_geom_mean = map_enrichment_2d(&treatment_2d, &param_p, &param_r, false, weighted);
-    let high_geom_mean = map_enrichment_2d(&treatment_2d, &param_p, &param_r, true, weighted);
+    let low_geom_mean =
+        map_enrichment_2d(&treatment_2d, &param_p, &param_r, false, weighted, logger);
+    let high_geom_mean =
+        map_enrichment_2d(&treatment_2d, &param_p, &param_r, true, weighted, logger);
 
     EnrichmentResult::new(
         low_geom_mean,
@@ -178,14 +184,27 @@ pub fn enrichment_testing(
     n_controls: usize,
     correction: Procedure,
     strategy: TestStrategy,
+    logger: &Logger,
 ) -> EnrichmentResult {
+    logger.start_differential_abundance();
+    logger.sample_aggregation_strategy(strategy);
     match strategy {
-        TestStrategy::SampleWeightedGeometricMean => {
-            geometric_enrichment_testing(normed_matrix, adj_var, n_controls, correction, true)
-        }
-        TestStrategy::SampleGeometricMean => {
-            geometric_enrichment_testing(normed_matrix, adj_var, n_controls, correction, false)
-        }
+        TestStrategy::SampleWeightedGeometricMean => geometric_enrichment_testing(
+            normed_matrix,
+            adj_var,
+            n_controls,
+            correction,
+            true,
+            logger,
+        ),
+        TestStrategy::SampleGeometricMean => geometric_enrichment_testing(
+            normed_matrix,
+            adj_var,
+            n_controls,
+            correction,
+            false,
+            logger,
+        ),
         TestStrategy::CountMedian => {
             median_enrichment_testing(normed_matrix, adj_var, n_controls, correction)
         }
