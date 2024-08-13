@@ -25,17 +25,17 @@ pub fn negative_log_sum(m: &Array2<f64>, axis: Axis) -> Array1<f64> {
 pub fn weighted_geometric_mean(m: &Array2<f64>, weights: &Array1<f64>) -> Array1<f64> {
     assert_eq!(m.len_of(Axis(1)), weights.len());
     let mut weighted_sum = Array1::zeros(m.len_of(Axis(0)));
+    let w_sum = weights.sum();
     for (i, row) in m.axis_iter(Axis(0)).enumerate() {
-        for (j, val) in row.iter().enumerate() {
-            weighted_sum[i] += val.ln() * weights[j];
-        }
+        weighted_sum[i] = ((row.mapv(|x| x.ln()) * weights).sum() / w_sum).exp();
     }
-    weighted_sum.mapv(|x: f64| x.exp())
+    weighted_sum
 }
 
 #[cfg(test)]
 mod testing {
-    use super::zscore_transform;
+    use super::*;
+    use ndarray::array;
     use ndarray::Array1;
     use ndarray_rand::{rand_distr::Normal, RandomExt};
 
@@ -46,5 +46,23 @@ mod testing {
 
         assert!(z.mean() < Some(1e-6));
         assert!(z.std(0.) - 1. < 1e-6);
+    }
+
+    #[test]
+    fn test_geometric_mean_weighted() {
+        let x = array![[18., 1327., 1024., 1001., 1116.]];
+        let w: Array1<f64> = array![0.1, 0.2, 0.3, 0.4, 0.5];
+        let gmean = weighted_geometric_mean(&x, &w);
+        let expected: Array1<f64> = array![828.1927675627339];
+        assert_eq!(gmean, expected);
+    }
+
+    #[test]
+    fn test_geometric_mean_unweighted() {
+        let x = array![[18., 1327., 1024., 1001., 1116.]];
+        let w: Array1<f64> = array![1.0, 1.0, 1.0, 1.0, 1.0];
+        let gmean = weighted_geometric_mean(&x, &w);
+        let expected: Array1<f64> = array![486.7526575476501];
+        assert_eq!(gmean, expected);
     }
 }
