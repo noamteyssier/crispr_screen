@@ -61,7 +61,9 @@ impl<'a> Configuration<'a> {
 mod testing {
     use adjustp::Procedure;
 
-    use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+    use crate::{
+        aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+    };
 
     use super::Configuration;
 
@@ -77,6 +79,7 @@ mod testing {
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
+        let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -85,6 +88,7 @@ mod testing {
             correction,
             model_choice,
             base_mean,
+            strategy,
             seed,
             prefix,
         )
@@ -120,7 +124,7 @@ mod testing {
     #[test]
     fn test_correction() {
         let config = build_config();
-        assert_eq!(config.correction(), Procedure::BenjaminiHochberg);
+        assert_eq!(*config.correction(), Procedure::BenjaminiHochberg);
     }
 
     #[test]
@@ -132,6 +136,6 @@ mod testing {
     #[test]
     fn test_prefix() {
         let config = build_config();
-        assert_eq!(config.prefix(), "results");
+        assert_eq!(*config.prefix(), "results");
     }
 }

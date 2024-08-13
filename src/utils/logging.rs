@@ -279,9 +279,9 @@ mod testing {
         logger.num_varied(1);
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
-        logger.report_rra_alpha(1.0, 1.0);
+        logger.report_rra_params(1.0, 1.0, 42);
         logger.permutation_sizes(&[1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100, 42);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);
@@ -312,9 +312,9 @@ mod testing {
         logger.num_varied(1);
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
-        logger.report_rra_alpha(1.0, 1.0);
+        logger.report_rra_params(1.0, 1.0, 42);
         logger.permutation_sizes(&[1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100, 42);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);

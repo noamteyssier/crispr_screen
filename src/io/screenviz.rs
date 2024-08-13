@@ -177,7 +177,7 @@ mod testing {
     use adjustp::Procedure;
     use ndarray::Array1;
 
-    use crate::{model::ModelChoice, norm::Normalization};
+    use crate::{enrich::TestStrategy, model::ModelChoice, norm::Normalization};
 
     use super::*;
 
@@ -192,6 +192,7 @@ mod testing {
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
+        let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -200,6 +201,7 @@ mod testing {
             correction,
             model_choice,
             base_mean,
+            strategy,
             seed,
             prefix,
         )
@@ -217,6 +219,7 @@ mod testing {
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
+        let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -225,6 +228,7 @@ mod testing {
             correction,
             model_choice,
             base_mean,
+            strategy,
             seed,
             prefix,
         )
@@ -242,6 +246,7 @@ mod testing {
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
+        let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -250,6 +255,7 @@ mod testing {
             correction,
             model_choice,
             base_mean,
+            strategy,
             seed,
             prefix,
         )
