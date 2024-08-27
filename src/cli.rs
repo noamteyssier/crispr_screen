@@ -45,7 +45,7 @@ pub struct DiffAbundanceArgs {
     pub model_choice: ModelChoice,
 
     /// Minimum Base Mean to consider for differential abundance
-    #[arg(short = 'M', long, default_value = "10")]
+    #[arg(short = 'M', long, default_value = "100")]
     pub min_base_mean: f64,
 
     /// Sample testing strategy
