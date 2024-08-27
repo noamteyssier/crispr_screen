@@ -1,13 +1,18 @@
-use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+use crate::{
+    aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+};
 use adjustp::Procedure;
+use getset::Getters;
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
+#[getset(get = "pub")]
 pub struct Configuration<'a> {
     normalization: Normalization,
     aggregation: GeneAggregation<'a>,
     correction: Procedure,
     model_choice: ModelChoice,
     min_base_mean: f64,
+    strategy: TestStrategy,
     seed: u64,
     prefix: &'a str,
 }
@@ -18,6 +23,7 @@ impl<'a> Configuration<'a> {
         correction: Procedure,
         model_choice: ModelChoice,
         min_base_mean: f64,
+        strategy: TestStrategy,
         seed: u64,
         prefix: &'a str,
     ) -> Self {
@@ -27,6 +33,7 @@ impl<'a> Configuration<'a> {
             correction,
             model_choice,
             min_base_mean,
+            strategy,
             seed,
             prefix,
         }
@@ -43,30 +50,10 @@ impl<'a> Configuration<'a> {
             correction,
             model_choice: ModelChoice::default(),
             min_base_mean: 0.0,
+            strategy: TestStrategy::default(),
             seed,
             prefix,
         }
-    }
-    pub fn normalization(&self) -> &Normalization {
-        &self.normalization
-    }
-    pub fn aggregation(&self) -> &GeneAggregation {
-        &self.aggregation
-    }
-    pub fn correction(&self) -> Procedure {
-        self.correction
-    }
-    pub fn model_choice(&self) -> &ModelChoice {
-        &self.model_choice
-    }
-    pub fn min_base_mean(&self) -> f64 {
-        self.min_base_mean
-    }
-    pub fn seed(&self) -> u64 {
-        self.seed
-    }
-    pub fn prefix(&self) -> &str {
-        self.prefix
     }
 }
 
@@ -74,7 +61,9 @@ impl<'a> Configuration<'a> {
 mod testing {
     use adjustp::Procedure;
 
-    use crate::{aggregation::GeneAggregation, model::ModelChoice, norm::Normalization};
+    use crate::{
+        aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+    };
 
     use super::Configuration;
 
@@ -90,6 +79,7 @@ mod testing {
         let correction = Procedure::BenjaminiHochberg;
         let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
+        let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
         Configuration::new(
@@ -98,6 +88,7 @@ mod testing {
             correction,
             model_choice,
             base_mean,
+            strategy,
             seed,
             prefix,
         )
@@ -133,7 +124,7 @@ mod testing {
     #[test]
     fn test_correction() {
         let config = build_config();
-        assert_eq!(config.correction(), Procedure::BenjaminiHochberg);
+        assert_eq!(*config.correction(), Procedure::BenjaminiHochberg);
     }
 
     #[test]
@@ -145,6 +136,6 @@ mod testing {
     #[test]
     fn test_prefix() {
         let config = build_config();
-        assert_eq!(config.prefix(), "results");
+        assert_eq!(*config.prefix(), "results");
     }
 }

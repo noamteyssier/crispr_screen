@@ -12,3 +12,6 @@ Cargo.lock
 # Ignore testing tables
 *.tab
 *.tsv
+
+# Ignore generated yaml
+*.screenviz.yaml

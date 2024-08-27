@@ -40,7 +40,7 @@ pub fn mageck(
     logger.num_genes(&gene_names);
     logger.norm_method(config.normalization());
     logger.aggregation_method(config.aggregation());
-    logger.correction(config.correction());
+    logger.correction(*config.correction());
 
     let normed_matrix = normalize_counts(&count_matrix, config.normalization(), logger);
 
@@ -49,7 +49,7 @@ pub fn mageck(
         &normed_matrix,
         &sgrna_names,
         &gene_names,
-        config.min_base_mean(),
+        *config.min_base_mean(),
         logger,
     );
 
@@ -57,7 +57,14 @@ pub fn mageck(
     let adj_var = model_mean_variance(&filt_matrix, n_controls, config.model_choice(), logger);
 
     // sgRNA Ranking (Enrichment)
-    let sgrna_results = enrichment_testing(&filt_matrix, &adj_var, n_controls, config.correction());
+    let sgrna_results = enrichment_testing(
+        &filt_matrix,
+        &adj_var,
+        n_controls,
+        *config.correction(),
+        *config.strategy(),
+        &logger,
+    );
 
     // Write sgRNA DataFrame
     write_sgrna_dataframe(
@@ -77,8 +84,8 @@ pub fn mageck(
             &sgrna_results,
             &filt_gene_names,
             logger,
-            config.correction(),
-            config.seed(),
+            *config.correction(),
+            *config.seed(),
         );
 
         // Build Gene DataFrame

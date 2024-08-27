@@ -102,6 +102,7 @@ fn test(
         correction,
         diff_args.model_choice,
         diff_args.min_base_mean,
+        diff_args.strategy,
         misc.seed,
         &prefix,
     );
