@@ -95,6 +95,10 @@ pub struct GeopaggArgs {
     /// Drop-First weight configuration alpha parameter (only used if weight_config is drop-first)
     #[arg(long, default_value = "0.5")]
     pub df_alpha: f64,
+
+    /// Use all sgRNAs when making amalgam genes
+    #[arg(long)]
+    pub use_all: bool,
 }
 
 #[derive(Parser, Debug)]

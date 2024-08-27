@@ -67,19 +67,26 @@ fn test(
             n_draws: inc.n_draws,
             fdr: misc.fdr,
         },
-        GeneAggregationSelection::GeoPAGG => GeneAggregation::GeoPAGG {
-            token: &misc.ntc_token,
-            fdr: misc.fdr,
-            weight_config: {
-                match geopagg.weight_config {
-                    GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
-                        alpha: geopagg.df_alpha,
-                    },
-                    GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
-                    GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
-                }
-            },
-        },
+        GeneAggregationSelection::GeoPAGG => {
+            let token = if misc.ntc_token.is_empty() | geopagg.use_all {
+                None
+            } else {
+                Some(misc.ntc_token.as_str())
+            };
+            GeneAggregation::GeoPAGG {
+                token,
+                fdr: misc.fdr,
+                weight_config: {
+                    match geopagg.weight_config {
+                        GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                            alpha: geopagg.df_alpha,
+                        },
+                        GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                        GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                    }
+                },
+            }
+        }
     };
 
     // create logger based on quiet option
@@ -177,19 +184,26 @@ fn aggregate(
             n_draws: inc.n_draws,
             fdr: misc.fdr,
         },
-        GeneAggregationSelection::GeoPAGG => GeneAggregation::GeoPAGG {
-            token: &misc.ntc_token,
-            fdr: misc.fdr,
-            weight_config: {
-                match geopagg.weight_config {
-                    GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
-                        alpha: geopagg.df_alpha,
-                    },
-                    GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
-                    GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
-                }
-            },
-        },
+        GeneAggregationSelection::GeoPAGG => {
+            let token = if misc.ntc_token.is_empty() | geopagg.use_all {
+                None
+            } else {
+                Some(misc.ntc_token.as_str())
+            };
+            GeneAggregation::GeoPAGG {
+                token,
+                fdr: misc.fdr,
+                weight_config: {
+                    match geopagg.weight_config {
+                        GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                            alpha: geopagg.df_alpha,
+                        },
+                        GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                        GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                    }
+                },
+            }
+        }
     };
 
     // create logger based on quiet option

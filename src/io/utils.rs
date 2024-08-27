@@ -74,10 +74,14 @@ pub fn validate_ntc(sgrna_names: &[String], config: &GeneAggregation) -> Result<
             weight_config: _,
             fdr: _,
         } => {
-            if sgrna_names.iter().any(|x| x.contains(token)) {
-                Ok(())
+            if let Some(token) = token {
+                if sgrna_names.iter().any(|x| x.contains(token)) {
+                    Ok(())
+                } else {
+                    bail!("Non-Targeting Token ({token}) not found in any sgrna names - please use RRA or update the provided token.")
+                }
             } else {
-                bail!("Non-Targeting Token ({token}) not found in any sgrna names - please use RRA or update the provided token.")
+                Ok(())
             }
         }
         _ => Ok(()),
