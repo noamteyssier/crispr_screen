@@ -39,7 +39,7 @@ pub enum GeneAggregation<'a> {
         use_product: bool,
     },
     GeoPAGG {
-        token: &'a str,
+        token: Option<&'a str>,
         weight_config: WeightConfig,
         fdr: f64,
     },
