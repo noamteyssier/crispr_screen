@@ -2,59 +2,27 @@ use crate::{
     aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
 };
 use adjustp::Procedure;
+use bon::builder;
 use getset::Getters;
 
 #[derive(Debug, Getters)]
 #[getset(get = "pub")]
+#[builder]
 pub struct Configuration<'a> {
+    #[builder(default)]
     normalization: Normalization,
     aggregation: GeneAggregation<'a>,
+    #[builder(default = Procedure::BenjaminiHochberg)]
     correction: Procedure,
+    #[builder(default)]
     model_choice: ModelChoice,
+    #[builder(default)]
     min_base_mean: f64,
+    #[builder(default)]
     strategy: TestStrategy,
+    #[builder(default)]
     seed: u64,
     prefix: &'a str,
-}
-impl<'a> Configuration<'a> {
-    pub fn new(
-        normalization: Normalization,
-        aggregation: GeneAggregation<'a>,
-        correction: Procedure,
-        model_choice: ModelChoice,
-        min_base_mean: f64,
-        strategy: TestStrategy,
-        seed: u64,
-        prefix: &'a str,
-    ) -> Self {
-        Self {
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            min_base_mean,
-            strategy,
-            seed,
-            prefix,
-        }
-    }
-    pub fn new_agg(
-        aggregation: GeneAggregation<'a>,
-        correction: Procedure,
-        seed: u64,
-        prefix: &'a str,
-    ) -> Self {
-        Self {
-            normalization: Normalization::default(),
-            aggregation,
-            correction,
-            model_choice: ModelChoice::default(),
-            min_base_mean: 0.0,
-            strategy: TestStrategy::default(),
-            seed,
-            prefix,
-        }
-    }
 }
 
 #[cfg(test)]
@@ -82,16 +50,16 @@ mod testing {
         let strategy = TestStrategy::default();
         let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            strategy,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .normalization(normalization)
+            .aggregation(aggregation)
+            .correction(correction)
+            .model_choice(model_choice)
+            .min_base_mean(base_mean)
+            .strategy(strategy)
+            .seed(seed)
+            .prefix(prefix)
+            .build()
     }
 
     #[test]

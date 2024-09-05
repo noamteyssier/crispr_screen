@@ -104,16 +104,16 @@ fn test(
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new(
-        diff_args.norm,
-        agg,
-        correction,
-        diff_args.model_choice,
-        diff_args.min_base_mean,
-        diff_args.strategy,
-        misc.seed,
-        &prefix,
-    );
+    let config = Configuration::builder()
+        .normalization(diff_args.norm)
+        .aggregation(agg)
+        .correction(correction)
+        .model_choice(diff_args.model_choice)
+        .min_base_mean(diff_args.min_base_mean)
+        .strategy(diff_args.strategy)
+        .seed(misc.seed)
+        .prefix(&prefix)
+        .build();
     let frame = load_dataframe(path.clone().into())?;
 
     let mut regex_controls = vec![];
@@ -222,7 +222,12 @@ fn aggregate(
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new_agg(agg, correction, misc.seed, &prefix);
+    let config = Configuration::builder()
+        .aggregation(agg)
+        .correction(correction)
+        .seed(misc.seed)
+        .prefix(&prefix)
+        .build();
     let frame = load_dataframe(path.into())?;
 
     run_aggregation(&frame, columns, &config, &logger)

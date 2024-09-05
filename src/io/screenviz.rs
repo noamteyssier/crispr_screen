@@ -182,33 +182,22 @@ mod testing {
     use super::*;
 
     fn build_config_rra<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::AlpaRRA {
             alpha: 0.05,
             npermutations: 1000,
             adjust_alpha: true,
             fdr: 0.05,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
-        let strategy = TestStrategy::default();
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            strategy,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .min_base_mean(base_mean)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_config_prod<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::Inc {
             token: "non-targeting",
             fdr: 0.05,
@@ -216,26 +205,14 @@ mod testing {
             use_product: true,
             n_draws: 100,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
-        let base_mean = 0.0;
-        let strategy = TestStrategy::default();
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            strategy,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_config_pvalue<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::Inc {
             token: "non-targeting",
             fdr: 0.05,
@@ -243,22 +220,11 @@ mod testing {
             use_product: false,
             n_draws: 100,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
-        let base_mean = 0.0;
-        let strategy = TestStrategy::default();
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            strategy,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_results_rra() -> AggregationResult {
