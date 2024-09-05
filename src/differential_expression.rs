@@ -45,13 +45,14 @@ pub fn mageck(
     let normed_matrix = normalize_counts(&count_matrix, config.normalization(), logger);
 
     // Filter Low Counts
-    let (filt_matrix, filt_sgrna_names, filt_gene_names) = filter_low_counts(
-        &normed_matrix,
-        &sgrna_names,
-        &gene_names,
-        *config.min_base_mean(),
-        logger,
-    );
+    let (filt_matrix, filt_sgrna_names, filt_gene_names) = filter_low_counts()
+        .norm_matrix(&normed_matrix)
+        .sgrna_names(&sgrna_names)
+        .gene_names(&gene_names)
+        .min_base(*config.min_base_mean())
+        .n_controls(n_controls)
+        .logger(logger)
+        .call();
 
     // Mean-Variance Modeling
     let adj_var = model_mean_variance(&filt_matrix, n_controls, config.model_choice(), logger);
