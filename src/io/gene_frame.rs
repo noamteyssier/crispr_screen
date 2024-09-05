@@ -80,6 +80,7 @@ pub fn write_hit_list(
             weight_config: _,
             fdr,
             use_product: _,
+            zscore_threshold: _,
         } => {
             let mask = df.column("fdr")?.lt(*fdr)?;
             df.filter(&mask)

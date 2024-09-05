@@ -43,6 +43,7 @@ pub enum GeneAggregation<'a> {
         weight_config: WeightConfig,
         fdr: f64,
         use_product: bool,
+        zscore_threshold: Option<f64>,
     },
 }
 

@@ -103,6 +103,10 @@ pub struct GeopaggArgs {
     /// Calculate Empirical FDR using product-score instead of the aggregated p-values
     #[arg(long)]
     pub use_product: bool,
+
+    /// Set a z-score threshold for non-targeting control distribution before making amalgam genes
+    #[arg(long)]
+    pub zscore_threshold: Option<f64>,
 }
 
 #[derive(Parser, Debug)]

@@ -66,6 +66,7 @@ impl Screenviz {
                 weight_config: _,
                 fdr: _,
                 use_product: _,
+                zscore_threshold: _,
             } => Method::GeoPAGG,
         };
         let gene = "gene".to_string();
@@ -96,6 +97,7 @@ impl Screenviz {
                 weight_config: _,
                 fdr: _,
                 use_product: _,
+                zscore_threshold: _,
             } => "fdr".to_string(),
         };
 
@@ -123,6 +125,7 @@ impl Screenviz {
                 weight_config: _,
                 fdr,
                 use_product: _,
+                zscore_threshold: _,
             } => (Some(*fdr), None, None, Some(String::from("amalgam"))),
         };
 
