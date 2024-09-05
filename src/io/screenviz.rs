@@ -174,12 +174,8 @@ impl Screenviz {
 
 #[cfg(test)]
 mod testing {
-    use adjustp::Procedure;
-    use ndarray::Array1;
-
-    use crate::{enrich::TestStrategy, model::ModelChoice, norm::Normalization};
-
     use super::*;
+    use ndarray::Array1;
 
     fn build_config_rra<'a>() -> Configuration<'a> {
         let aggregation = GeneAggregation::AlpaRRA {
