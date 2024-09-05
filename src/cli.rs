@@ -121,7 +121,7 @@ pub struct MiscArgs {
     pub quiet: bool,
 
     /// Multiple hypothesis correction method
-    #[arg(short = 'f', long, default_value = "bh")]
+    #[arg(short = 'C', long, default_value = "bh")]
     pub correction: Adjustment,
 
     /// Set the seed of the run
@@ -246,4 +246,33 @@ pub enum Commands {
         #[clap(flatten)]
         columns: SgrnaColumns,
     },
+}
+
+#[cfg(test)]
+mod testing {
+    use anyhow::Result;
+    use assert_cmd::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn test_cli_overlaps() -> Result<()> {
+        // ensures the debug binary is built
+        let mut cmd = Command::new("cargo");
+        cmd.arg("build").assert().success();
+
+        let mut cmd = Command::cargo_bin("crispr_screen")?;
+        cmd.arg("test").arg("--help").assert().success();
+        Ok(())
+    }
+
+    #[test]
+    fn agg_cli_overlaps() -> Result<()> {
+        // ensures the debug binary is built
+        let mut cmd = Command::new("cargo");
+        cmd.arg("build").assert().success();
+
+        let mut cmd = Command::cargo_bin("crispr_screen")?;
+        cmd.arg("agg").arg("--help").assert().success();
+        Ok(())
+    }
 }
