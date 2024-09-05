@@ -87,6 +87,7 @@ fn test(
                     }
                 },
                 use_product: geopagg.use_product,
+                zscore_threshold: geopagg.zscore_threshold,
             }
         }
     };
@@ -206,6 +207,7 @@ fn aggregate(
                     }
                 },
                 use_product: geopagg.use_product,
+                zscore_threshold: geopagg.zscore_threshold,
             }
         }
     };

@@ -179,6 +179,7 @@ impl<'a> RunAggregation<'a> {
         weight_config: WeightConfig,
         fdr: f64,
         use_product: bool,
+        zscore_threshold: Option<f64>,
     ) -> InternalAggregationResult {
         self.logger
             .report_geopagg_params(token, fdr, weight_config, self.seed as usize);
@@ -193,6 +194,7 @@ impl<'a> RunAggregation<'a> {
             .seed(self.seed as usize)
             .use_product(use_product)
             .ascending(true)
+            .maybe_zscore_threshold(zscore_threshold)
             .build();
 
         let geo_high = GeoPAGG::builder()
@@ -205,6 +207,7 @@ impl<'a> RunAggregation<'a> {
             .seed(self.seed as usize)
             .use_product(use_product)
             .ascending(false)
+            .maybe_zscore_threshold(zscore_threshold)
             .build();
 
         let geo_low_results = geo_low.run();
@@ -339,12 +342,14 @@ pub fn compute_aggregation(
             weight_config,
             fdr,
             use_product,
+            zscore_threshold,
         } => runner
             .run_geopagg()
             .maybe_token(*token)
             .fdr(*fdr)
             .weight_config(*weight_config)
             .use_product(*use_product)
+            .maybe_zscore_threshold(*zscore_threshold)
             .call(),
     };
 

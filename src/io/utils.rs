@@ -74,6 +74,7 @@ pub fn validate_ntc(sgrna_names: &[String], config: &GeneAggregation) -> Result<
             weight_config: _,
             fdr: _,
             use_product: _,
+            zscore_threshold: _,
         } => {
             if let Some(token) = token {
                 if sgrna_names.iter().any(|x| x.contains(token)) {
