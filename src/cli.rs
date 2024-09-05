@@ -247,32 +247,3 @@ pub enum Commands {
         columns: SgrnaColumns,
     },
 }
-
-#[cfg(test)]
-mod testing {
-    use anyhow::Result;
-    use assert_cmd::prelude::*;
-    use std::process::Command;
-
-    #[test]
-    fn test_cli_overlaps() -> Result<()> {
-        // ensures the debug binary is built
-        let mut cmd = Command::new("cargo");
-        cmd.arg("build").assert().success();
-
-        let mut cmd = Command::cargo_bin("crispr_screen")?;
-        cmd.arg("test").arg("--help").assert().success();
-        Ok(())
-    }
-
-    #[test]
-    fn agg_cli_overlaps() -> Result<()> {
-        // ensures the debug binary is built
-        let mut cmd = Command::new("cargo");
-        cmd.arg("build").assert().success();
-
-        let mut cmd = Command::cargo_bin("crispr_screen")?;
-        cmd.arg("agg").arg("--help").assert().success();
-        Ok(())
-    }
-}

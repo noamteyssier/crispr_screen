@@ -16,17 +16,14 @@ alpha-rra = "0.2.0"
 anyhow = "1.0.79"
 clap = { version = "4.4.18", features = ["derive"] }
 colored = "2.1.0"
-csv = "1.3.0"
 hashbrown = "0.14.3"
 intc = "0.3.3"
 ndarray = "0.15.6"
 ndarray-rand = "0.14.0"
 ndarray-stats = "0.5.1"
-noisy_float = "0.2.0"
 rayon = "1.8.1"
 regex = "1.10.3"
 statrs = "0.17.1"
-thiserror = "1.0.56"
 geopagg = "0.2.2"
 polars = { version = "0.42.0", default-features = false, features = [
     "ndarray",
@@ -34,9 +31,6 @@ polars = { version = "0.42.0", default-features = false, features = [
 ] }
 getset = "0.1.2"
 bon = "2.1.1"
-
-[dev-dependencies]
-assert_cmd = "2.0.16"
 
 [profile.release]
 lto = true
