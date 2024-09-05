@@ -121,7 +121,7 @@ pub struct MiscArgs {
     pub quiet: bool,
 
     /// Multiple hypothesis correction method
-    #[arg(short = 'f', long, default_value = "bh")]
+    #[arg(short = 'C', long, default_value = "bh")]
     pub correction: Adjustment,
 
     /// Set the seed of the run
