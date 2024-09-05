@@ -178,6 +178,7 @@ impl<'a> RunAggregation<'a> {
         token: Option<&str>,
         weight_config: WeightConfig,
         fdr: f64,
+        use_product: bool,
     ) -> InternalAggregationResult {
         self.logger
             .report_geopagg_params(token, fdr, weight_config, self.seed as usize);
@@ -190,6 +191,8 @@ impl<'a> RunAggregation<'a> {
             .weight_config(weight_config)
             .transform_config(TransformConfig::Fdr)
             .seed(self.seed as usize)
+            .use_product(use_product)
+            .ascending(true)
             .build();
 
         let geo_high = GeoPAGG::builder()
@@ -200,6 +203,8 @@ impl<'a> RunAggregation<'a> {
             .weight_config(weight_config)
             .transform_config(TransformConfig::Fdr)
             .seed(self.seed as usize)
+            .use_product(use_product)
+            .ascending(false)
             .build();
 
         let geo_low_results = geo_low.run();
@@ -333,11 +338,13 @@ pub fn compute_aggregation(
             token,
             weight_config,
             fdr,
+            use_product,
         } => runner
             .run_geopagg()
             .maybe_token(*token)
             .fdr(*fdr)
             .weight_config(*weight_config)
+            .use_product(*use_product)
             .call(),
     };
 

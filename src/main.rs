@@ -86,6 +86,7 @@ fn test(
                         GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
                     }
                 },
+                use_product: geopagg.use_product,
             }
         }
     };
@@ -204,6 +205,7 @@ fn aggregate(
                         GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
                     }
                 },
+                use_product: geopagg.use_product,
             }
         }
     };

@@ -65,6 +65,7 @@ impl Screenviz {
                 token: _,
                 weight_config: _,
                 fdr: _,
+                use_product: _,
             } => Method::GeoPAGG,
         };
         let gene = "gene".to_string();
@@ -94,6 +95,7 @@ impl Screenviz {
                 token: _,
                 weight_config: _,
                 fdr: _,
+                use_product: _,
             } => "fdr".to_string(),
         };
 
@@ -120,6 +122,7 @@ impl Screenviz {
                 token: _,
                 weight_config: _,
                 fdr,
+                use_product: _,
             } => (Some(*fdr), None, None, Some(String::from("amalgam"))),
         };
 

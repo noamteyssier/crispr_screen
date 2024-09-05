@@ -42,6 +42,7 @@ pub enum GeneAggregation<'a> {
         token: Option<&'a str>,
         weight_config: WeightConfig,
         fdr: f64,
+        use_product: bool,
     },
 }
 

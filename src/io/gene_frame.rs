@@ -79,6 +79,7 @@ pub fn write_hit_list(
             token: _,
             weight_config: _,
             fdr,
+            use_product: _,
         } => {
             let mask = df.column("fdr")?.lt(*fdr)?;
             df.filter(&mask)

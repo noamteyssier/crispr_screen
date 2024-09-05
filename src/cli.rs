@@ -99,6 +99,10 @@ pub struct GeopaggArgs {
     /// Use all sgRNAs when making amalgam genes
     #[arg(long)]
     pub use_all: bool,
+
+    /// Calculate Empirical FDR using product-score instead of the aggregated p-values
+    #[arg(long)]
+    pub use_product: bool,
 }
 
 #[derive(Parser, Debug)]
