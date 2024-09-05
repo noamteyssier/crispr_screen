@@ -182,24 +182,25 @@ impl<'a> RunAggregation<'a> {
         self.logger
             .report_geopagg_params(token, fdr, weight_config, self.seed as usize);
 
-        let geo_low = GeoPAGG::new(
-            self.pvalue_low.as_slice().unwrap(),
-            self.logfc.as_slice().unwrap(),
-            self.gene_names,
-            token,
-            weight_config,
-            TransformConfig::Fdr,
-            self.seed as usize,
-        );
-        let geo_high = GeoPAGG::new(
-            self.pvalue_high.as_slice().unwrap(),
-            self.logfc.as_slice().unwrap(),
-            self.gene_names,
-            token,
-            weight_config,
-            TransformConfig::Fdr,
-            self.seed as usize,
-        );
+        let geo_low = GeoPAGG::builder()
+            .pvalues(self.pvalue_low.as_slice().unwrap())
+            .logfc(self.logfc.as_slice().unwrap())
+            .genes(self.gene_names)
+            .maybe_token(token)
+            .weight_config(weight_config)
+            .transform_config(TransformConfig::Fdr)
+            .seed(self.seed as usize)
+            .build();
+
+        let geo_high = GeoPAGG::builder()
+            .pvalues(self.pvalue_high.as_slice().unwrap())
+            .logfc(self.logfc.as_slice().unwrap())
+            .genes(self.gene_names)
+            .maybe_token(token)
+            .weight_config(weight_config)
+            .transform_config(TransformConfig::Fdr)
+            .seed(self.seed as usize)
+            .build();
 
         let geo_low_results = geo_low.run();
         let geo_high_results = geo_high.run();
