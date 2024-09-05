@@ -232,20 +232,16 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = None;
-        let threshold_high = None;
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .build()
     }
 
     fn build_results_incprod() -> AggregationResult {
@@ -257,20 +253,20 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = Some(-0.5);
-        let threshold_high = Some(0.5);
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        let threshold_low = -0.5;
+        let threshold_high = 0.5;
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .threshold_low(threshold_low)
+            .threshold_high(threshold_high)
+            .build()
     }
 
     fn build_results_incpvalue() -> AggregationResult {
@@ -282,20 +278,20 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = Some(0.005);
-        let threshold_high = Some(0.004);
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        let threshold_low = 0.005;
+        let threshold_high = 0.004;
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .threshold_low(threshold_low)
+            .threshold_high(threshold_high)
+            .build()
     }
 
     #[test]

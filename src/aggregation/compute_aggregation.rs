@@ -346,16 +346,16 @@ pub fn compute_aggregation(
         .map(|x| x.exp2())
         .collect::<Array1<f64>>();
 
-    AggregationResult::new(
-        agg_result.genes,
-        fold_change,
-        agg_result.pvalues_low,
-        agg_result.pvalues_high,
-        agg_result.correction_low,
-        agg_result.correction_high,
-        agg_result.scores_low,
-        agg_result.scores_high,
-        agg_result.threshold_low,
-        agg_result.threshold_high,
-    )
+    AggregationResult::builder()
+        .genes(agg_result.genes)
+        .gene_fc(fold_change)
+        .pvalues_low(agg_result.pvalues_low)
+        .pvalues_high(agg_result.pvalues_high)
+        .fdr_low(agg_result.correction_low)
+        .fdr_high(agg_result.correction_high)
+        .aggregation_score_low(agg_result.scores_low)
+        .aggregation_score_high(agg_result.scores_high)
+        .maybe_threshold_low(agg_result.threshold_low)
+        .maybe_threshold_high(agg_result.threshold_high)
+        .build()
 }

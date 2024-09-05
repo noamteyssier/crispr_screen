@@ -1,3 +1,4 @@
+use bon::bon;
 use ndarray::{Array1, Zip};
 
 pub struct AggregationResult {
@@ -16,8 +17,9 @@ pub struct AggregationResult {
     threshold_low: Option<f64>,
     threshold_high: Option<f64>,
 }
+#[bon]
 impl AggregationResult {
-    #[allow(clippy::too_many_arguments)]
+    #[builder]
     pub fn new(
         genes: Vec<String>,
         gene_fc: Array1<f64>,
@@ -149,20 +151,17 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = None;
-        let threshold_high = None;
-        let result = AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        );
+        let result = AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .build();
+
         assert_eq!(
             result.genes(),
             &vec!["gene1".to_string(), "gene2".to_string()]
