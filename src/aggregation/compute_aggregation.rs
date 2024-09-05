@@ -81,18 +81,16 @@ impl<'a> RunAggregation<'a> {
             .copied()
             .collect();
 
-        InternalAggregationResult::new(
-            result_low.names().to_vec(),
-            gene_fc,
-            result_low.scores().to_owned(),
-            result_low.pvalues().to_owned(),
-            result_low.adj_pvalues().to_owned(),
-            result_high.scores().to_owned(),
-            result_high.pvalues().to_owned(),
-            result_high.adj_pvalues().to_owned(),
-            None,
-            None,
-        )
+        InternalAggregationResult::builder()
+            .genes(result_low.names().to_vec())
+            .logfc(gene_fc)
+            .scores_low(result_low.scores().to_owned())
+            .pvalues_low(result_low.pvalues().to_owned())
+            .correction_low(result_low.adj_pvalues().to_owned())
+            .scores_high(result_high.scores().to_owned())
+            .pvalues_high(result_high.pvalues().to_owned())
+            .correction_high(result_high.adj_pvalues().to_owned())
+            .build()
     }
 
     #[builder]
@@ -160,18 +158,18 @@ impl<'a> RunAggregation<'a> {
 
         self.logger.report_inc_ntc_std(result_low.null_stddev());
 
-        InternalAggregationResult::new(
-            result_low.genes().to_vec(),
-            result_low.logfc().to_owned(),
-            result_low.u_scores().to_owned(),
-            result_low.u_pvalues().to_owned(),
-            result_low.fdr().to_owned(),
-            result_high.u_scores().to_owned(),
-            result_high.u_pvalues().to_owned(),
-            result_high.fdr().to_owned(),
-            Some(result_low.threshold()),
-            Some(result_high.threshold()),
-        )
+        InternalAggregationResult::builder()
+            .genes(result_low.genes().to_vec())
+            .logfc(result_low.logfc().to_owned())
+            .scores_low(result_low.u_scores().to_owned())
+            .pvalues_low(result_low.u_pvalues().to_owned())
+            .correction_low(result_low.fdr().to_owned())
+            .scores_high(result_high.u_scores().to_owned())
+            .pvalues_high(result_high.u_pvalues().to_owned())
+            .correction_high(result_high.fdr().to_owned())
+            .threshold_low(result_low.threshold())
+            .threshold_high(result_high.threshold())
+            .build()
     }
 
     #[builder]
@@ -206,18 +204,18 @@ impl<'a> RunAggregation<'a> {
         let geo_low_results = geo_low.run();
         let geo_high_results = geo_high.run();
 
-        InternalAggregationResult::new(
-            geo_low_results.genes.to_vec(),
-            Array1::from(geo_low_results.logfcs),
-            Array1::from(geo_low_results.empirical_fdr),
-            Array1::from(geo_low_results.wgms),
-            Array1::from(geo_low_results.adjusted_empirical_fdr),
-            Array1::from(geo_high_results.empirical_fdr),
-            Array1::from(geo_high_results.wgms),
-            Array1::from(geo_high_results.adjusted_empirical_fdr),
-            Some(fdr),
-            Some(fdr),
-        )
+        InternalAggregationResult::builder()
+            .genes(geo_low_results.genes.to_vec())
+            .logfc(Array1::from(geo_low_results.logfcs))
+            .scores_low(Array1::from(geo_low_results.empirical_fdr))
+            .pvalues_low(Array1::from(geo_low_results.wgms))
+            .correction_low(Array1::from(geo_low_results.adjusted_empirical_fdr))
+            .scores_high(Array1::from(geo_high_results.empirical_fdr))
+            .pvalues_high(Array1::from(geo_high_results.wgms))
+            .correction_high(Array1::from(geo_high_results.adjusted_empirical_fdr))
+            .threshold_low(fdr)
+            .threshold_high(fdr)
+            .build()
     }
 }
 
@@ -234,8 +232,9 @@ struct InternalAggregationResult {
     threshold_low: Option<f64>,
     threshold_high: Option<f64>,
 }
+#[bon]
 impl InternalAggregationResult {
-    #[allow(clippy::too_many_arguments)]
+    #[builder]
     pub fn new(
         genes: Vec<String>,
         logfc: Array1<f64>,
