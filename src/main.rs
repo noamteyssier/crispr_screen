@@ -1,5 +1,6 @@
 use adjustp::Procedure;
 use anyhow::Result;
+use bon::builder;
 use clap::Parser;
 use cli::{
     Cli, Commands, DiffAbundanceArgs, GeopaggArgs, IncArgs, InputArgs, MiscArgs, RraArgs,
@@ -25,7 +26,7 @@ use differential_expression::mageck;
 use io::load_dataframe;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
-#[allow(clippy::too_many_arguments)]
+#[builder]
 fn test(
     input_args: InputArgs,
     prefix: String,
@@ -144,6 +145,7 @@ fn test(
     }
 }
 
+#[builder]
 fn aggregate(
     input: String,
     prefix: String,
@@ -239,9 +241,17 @@ fn main() -> Result<()> {
             geopagg,
             misc,
             skip_agg,
-        } => test(
-            input, prefix, diff_args, agg, rra, inc, geopagg, misc, skip_agg,
-        ),
+        } => test()
+            .input_args(input)
+            .prefix(prefix)
+            .diff_args(diff_args)
+            .agg(agg)
+            .rra(rra)
+            .inc(inc)
+            .geopagg(geopagg)
+            .misc(misc)
+            .skip_agg(skip_agg)
+            .call(),
         Commands::Agg {
             input,
             prefix,
@@ -251,6 +261,15 @@ fn main() -> Result<()> {
             inc,
             geopagg,
             misc,
-        } => aggregate(input, prefix, columns, agg, rra, inc, geopagg, misc),
+        } => aggregate()
+            .input(input)
+            .prefix(prefix)
+            .columns(columns)
+            .agg(agg)
+            .rra(rra)
+            .inc(inc)
+            .geopagg(geopagg)
+            .misc(misc)
+            .call(),
     }
 }
