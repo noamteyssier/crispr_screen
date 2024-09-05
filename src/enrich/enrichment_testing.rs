@@ -1,7 +1,11 @@
-use super::EnrichmentResult;
-use crate::norm::median;
+use super::{EnrichmentResult, TestStrategy};
+use crate::{
+    norm::median,
+    utils::logging::Logger,
+    utils::math::{negative_log_sum, normalize, weighted_geometric_mean},
+};
 use adjustp::Procedure;
-use ndarray::{s, Array1, Array2, Axis, Zip};
+use ndarray::{s, stack, Array1, Array2, Axis, Zip};
 use statrs::function::beta;
 
 /// Calculates the negative binomial cumulative distribution if measuring depletion otherwise
@@ -67,19 +71,85 @@ fn select_treatments(array: &Array2<f64>, n_controls: usize) -> Array2<f64> {
 
 /// Maps the enrichment test function over the provided arrays
 fn map_enrichment(
-    treatment_means: &Array1<f64>,
+    treatment_arr: &Array1<f64>,
     param_r: &Array1<f64>,
     param_p: &Array1<f64>,
     survival: bool,
 ) -> Array1<f64> {
-    Zip::from(treatment_means)
+    Zip::from(treatment_arr)
         .and(param_r)
         .and(param_p)
-        .map_collect(|t_mean, r, p| enrichment_test(*t_mean, *r, *p, survival))
+        .map_collect(|val, r, p| enrichment_test(*val, *r, *p, survival))
 }
 
-/// Performs enrichment testing using a negative binomial distribution
-pub fn enrichment_testing(
+fn map_enrichment_2d(
+    normed_matrix: &Array2<f64>,
+    param_p: &Array1<f64>,
+    param_r: &Array1<f64>,
+    survival: bool,
+    weighted: bool,
+    logger: &Logger,
+) -> Array1<f64> {
+    // Map the enrichment test function over each sample independently
+    let arrays = normed_matrix
+        .axis_iter(Axis(1))
+        .map(|col| map_enrichment(&col.to_owned(), param_r, param_p, survival))
+        .collect::<Vec<_>>();
+
+    // Stack the results
+    let array_views = arrays.iter().map(|x| x.view()).collect::<Vec<_>>();
+    let stack = stack(Axis(1), &array_views).unwrap();
+
+    // Calculate the weight of each sample as the sum of the negative log p-values
+    // across all treatments
+    let weights = if weighted {
+        normalize(&negative_log_sum(&stack, Axis(0)))
+    } else {
+        Array1::ones(stack.len_of(Axis(1)))
+    };
+    logger.sample_weights(survival, &weights);
+
+    // Perform a weighted geometric mean of the p-values
+    // weighted by the magnitude of the negative log p-values
+    // across all treatments
+    weighted_geometric_mean(&stack, &weights)
+}
+
+/// Performs enrichment testing on each sample independently then aggregates the results.
+/// Aggregation is performed by first calculating the sum of log p-values for each sample
+/// as each samples weight, then performing a weighted geometric mean of the p-values.
+pub fn geometric_enrichment_testing(
+    normed_matrix: &Array2<f64>,
+    adj_var: &Array1<f64>,
+    n_controls: usize,
+    correction: Procedure,
+    weighted: bool,
+    logger: &Logger,
+) -> EnrichmentResult {
+    let treatment_2d = select_treatments(normed_matrix, n_controls);
+    let control_means = row_median(&select_controls(normed_matrix, n_controls));
+    let treatment_means = row_median(&treatment_2d);
+    let min_control_mean = get_nonzero_minimum(&control_means);
+    let adj_control_means = set_zero_to_minimum(&control_means, min_control_mean);
+
+    let param_r = calculate_r(&adj_control_means, adj_var);
+    let param_p = calculate_p(&adj_control_means, adj_var);
+
+    let low_geom_mean =
+        map_enrichment_2d(&treatment_2d, &param_p, &param_r, false, weighted, logger);
+    let high_geom_mean =
+        map_enrichment_2d(&treatment_2d, &param_p, &param_r, true, weighted, logger);
+
+    EnrichmentResult::new(
+        low_geom_mean,
+        high_geom_mean,
+        control_means,
+        treatment_means,
+        correction,
+    )
+}
+
+pub fn median_enrichment_testing(
     normed_matrix: &Array2<f64>,
     adj_var: &Array1<f64>,
     n_controls: usize,
@@ -102,6 +172,43 @@ pub fn enrichment_testing(
     let high = map_enrichment(&treatment_means, &param_r, &param_p, true);
 
     EnrichmentResult::new(low, high, control_means, treatment_means, correction)
+}
+
+/// Performs enrichment testing using a negative binomial distribution
+///
+/// Samples are first split into control and treatment groups, then the median of each sgRNA
+/// is calculated for each group.
+pub fn enrichment_testing(
+    normed_matrix: &Array2<f64>,
+    adj_var: &Array1<f64>,
+    n_controls: usize,
+    correction: Procedure,
+    strategy: TestStrategy,
+    logger: &Logger,
+) -> EnrichmentResult {
+    logger.start_differential_abundance();
+    logger.sample_aggregation_strategy(strategy);
+    match strategy {
+        TestStrategy::SampleWeightedGeometricMean => geometric_enrichment_testing(
+            normed_matrix,
+            adj_var,
+            n_controls,
+            correction,
+            true,
+            logger,
+        ),
+        TestStrategy::SampleGeometricMean => geometric_enrichment_testing(
+            normed_matrix,
+            adj_var,
+            n_controls,
+            correction,
+            false,
+            logger,
+        ),
+        TestStrategy::CountMedian => {
+            median_enrichment_testing(normed_matrix, adj_var, n_controls, correction)
+        }
+    }
 }
 
 #[cfg(test)]

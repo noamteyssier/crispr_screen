@@ -1,5 +1,8 @@
 use crate::{
-    aggregation::GeneAggregationSelection, model::ModelChoice, norm::Normalization,
+    aggregation::{GeneAggregationSelection, GeoPAGGWeightConfigEnum},
+    enrich::TestStrategy,
+    model::ModelChoice,
+    norm::Normalization,
     utils::Adjustment,
 };
 use clap::{Parser, Subcommand};
@@ -12,6 +15,7 @@ pub struct Cli {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Input Arguments")]
 pub struct InputArgs {
     /// Filepath of the input count matrix
     #[arg(short, long)]
@@ -27,6 +31,7 @@ pub struct InputArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Differential Abundance Arguments")]
 pub struct DiffAbundanceArgs {
     /// Count normalization configuration
     ///
@@ -40,11 +45,16 @@ pub struct DiffAbundanceArgs {
     pub model_choice: ModelChoice,
 
     /// Minimum Base Mean to consider for differential abundance
-    #[arg(short = 'M', long, default_value = "10")]
+    #[arg(short = 'M', long, default_value = "100")]
     pub min_base_mean: f64,
+
+    /// Sample testing strategy
+    #[arg(short = 'S', long, default_value = "cm")]
+    pub strategy: TestStrategy,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "alpha-RRA Arguments")]
 pub struct RraArgs {
     /// Number of permutations to perform in aRRA
     #[arg(short, long, default_value = "100")]
@@ -60,11 +70,8 @@ pub struct RraArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "INC Arguments")]
 pub struct IncArgs {
-    /// Non-targeting control token
-    #[arg(long, default_value = "non-targeting")]
-    pub ntc_token: String,
-
     /// sgRNA group size of pseudogenes to create for INC
     #[arg(short = 'G', long, default_value = "5")]
     pub inc_group_size: usize,
@@ -79,17 +86,42 @@ pub struct IncArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "GeoPAGG Arguments")]
+pub struct GeopaggArgs {
+    /// Weight configuration for GeoPAGG
+    #[arg(long, default_value = "drop-first")]
+    pub weight_config: GeoPAGGWeightConfigEnum,
+
+    /// Drop-First weight configuration alpha parameter (only used if weight_config is drop-first)
+    #[arg(long, default_value = "0.5")]
+    pub df_alpha: f64,
+
+    /// Use all sgRNAs when making amalgam genes
+    #[arg(long)]
+    pub use_all: bool,
+
+    /// Calculate Empirical FDR using product-score instead of the aggregated p-values
+    #[arg(long)]
+    pub use_product: bool,
+}
+
+#[derive(Parser, Debug)]
+#[clap(next_help_heading = "Miscellaneous Arguments")]
 pub struct MiscArgs {
     /// fdr-threshold to use in inc + rra when thresholding
     #[arg(short = 'f', long, default_value = "0.1")]
     pub fdr: f64,
+
+    /// Non-targeting control token
+    #[arg(long, default_value = "non-targeting")]
+    pub ntc_token: String,
 
     /// Do not write logging information
     #[arg(short, long)]
     pub quiet: bool,
 
     /// Multiple hypothesis correction method
-    #[arg(short = 'f', long, default_value = "bh")]
+    #[arg(short = 'C', long, default_value = "bh")]
     pub correction: Adjustment,
 
     /// Set the seed of the run
@@ -102,6 +134,7 @@ pub struct MiscArgs {
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "sgRNA Column Name Arguments")]
 pub struct SgrnaColumns {
     /// Column name for the low-side p-value
     #[arg(long, default_value = "pvalue_low")]
@@ -129,6 +162,7 @@ pub struct SgrnaColumns {
 }
 
 #[derive(Subcommand, Debug)]
+#[clap(next_help_heading = "Subcommands")]
 pub enum Commands {
     /// Perform a differential abundance analysis
     Test {
@@ -160,6 +194,10 @@ pub enum Commands {
         /// INC arguments
         #[clap(flatten)]
         inc: IncArgs,
+
+        /// GeoPAGG arguments
+        #[clap(flatten)]
+        geopagg: GeopaggArgs,
 
         /// Misc arguments
         #[clap(flatten)]
@@ -195,6 +233,10 @@ pub enum Commands {
         /// INC arguments
         #[clap(flatten)]
         inc: IncArgs,
+
+        /// GeoPAGG arguments
+        #[clap(flatten)]
+        geopagg: GeopaggArgs,
 
         /// Misc arguments
         #[clap(flatten)]

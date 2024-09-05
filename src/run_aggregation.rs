@@ -1,56 +1,62 @@
 use anyhow::Result;
+use ndarray::s;
+use polars::{
+    frame::DataFrame,
+    prelude::{Float64Type, IndexOrder},
+};
 
 use crate::{
     aggregation::compute_aggregation,
     cli::SgrnaColumns,
     enrich::EnrichmentResult,
-    io::{GeneFrame, HitList, Screenviz, SimpleFrame},
+    io::{get_string_column, write_gene_frame, write_hit_list, Screenviz},
     utils::{config::Configuration, logging::Logger},
 };
 
 pub fn run_aggregation(
-    frame: &SimpleFrame,
+    frame: &DataFrame,
     columns: SgrnaColumns,
     config: &Configuration,
     logger: &Logger,
 ) -> Result<()> {
-    let pvalues_low = frame.get_f64_column(&columns.pvalue_low)?;
-    let pvalues_high = frame.get_f64_column(&columns.pvalue_high)?;
-    let control_means = frame.get_f64_column(&columns.control_mean)?;
-    let treatment_means = frame.get_f64_column(&columns.treatment_mean)?;
-    let sgrna_names = frame.get_string_column(&columns.sgrna)?;
-    let gene_names = frame.get_string_column(&columns.gene)?;
+    let sgrna_names = get_string_column(frame, 0);
+    let gene_names = get_string_column(frame, 1);
+    let sgrna_matrix = frame
+        .select([
+            columns.pvalue_low,
+            columns.pvalue_high,
+            columns.control_mean,
+            columns.treatment_mean,
+        ])?
+        .to_ndarray::<Float64Type>(IndexOrder::Fortran)?;
     let enrichment_result = EnrichmentResult::new(
-        pvalues_low,
-        pvalues_high,
-        control_means,
-        treatment_means,
-        config.correction(),
+        sgrna_matrix.slice(s![.., 0]).to_owned(),
+        sgrna_matrix.slice(s![.., 1]).to_owned(),
+        sgrna_matrix.slice(s![.., 2]).to_owned(),
+        sgrna_matrix.slice(s![.., 3]).to_owned(),
+        *config.correction(),
     );
 
     logger.start_mageck();
     logger.num_sgrnas(&sgrna_names);
     logger.num_genes(&gene_names);
     logger.aggregation_method(config.aggregation());
-    logger.correction(config.correction());
+    logger.correction(*config.correction());
 
     let aggregation_results = compute_aggregation(
         config.aggregation(),
         &enrichment_result,
         &gene_names,
         logger,
-        config.correction(),
-        config.seed(),
+        *config.correction(),
+        *config.seed(),
     );
 
-    // Build Gene DataFrame
-    let gene_frame = GeneFrame::new(&aggregation_results);
-    gene_frame.write(config.prefix())?;
+    // Write outputs
+    write_gene_frame(&aggregation_results, config.prefix())?;
 
     // Write hit list
-    let hit_list = HitList::new(&aggregation_results, config);
-    logger.hit_list(&hit_list);
-    hit_list.write(config.prefix())?;
+    write_hit_list(&aggregation_results, config, logger)?;
 
     // Write screenviz config
     let screenviz = Screenviz::new(&aggregation_results, config);

@@ -1,8 +1,12 @@
 use adjustp::Procedure;
 use anyhow::Result;
+use bon::builder;
 use clap::Parser;
-use cli::{Cli, Commands, DiffAbundanceArgs, IncArgs, InputArgs, MiscArgs, RraArgs, SgrnaColumns};
-use io::SimpleFrame;
+use cli::{
+    Cli, Commands, DiffAbundanceArgs, GeopaggArgs, IncArgs, InputArgs, MiscArgs, RraArgs,
+    SgrnaColumns,
+};
+use geopagg::WeightConfig;
 use regex::Regex;
 use run_aggregation::run_aggregation;
 use std::path::Path;
@@ -17,11 +21,12 @@ pub mod norm;
 pub mod run_aggregation;
 pub mod utils;
 
-use aggregation::{GeneAggregation, GeneAggregationSelection};
+use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
+use io::load_dataframe;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
-#[allow(clippy::too_many_arguments)]
+#[builder]
 fn test(
     input_args: InputArgs,
     prefix: String,
@@ -29,6 +34,7 @@ fn test(
     agg: GeneAggregationSelection,
     rra: RraArgs,
     inc: IncArgs,
+    geopagg: GeopaggArgs,
     misc: MiscArgs,
     skip_agg: bool,
 ) -> Result<()> {
@@ -56,12 +62,33 @@ fn test(
             fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
-            token: &inc.ntc_token,
+            token: &misc.ntc_token,
             group_size: inc.inc_group_size,
             use_product: inc.inc_product,
             n_draws: inc.n_draws,
             fdr: misc.fdr,
         },
+        GeneAggregationSelection::GeoPAGG => {
+            let token = if misc.ntc_token.is_empty() | geopagg.use_all {
+                None
+            } else {
+                Some(misc.ntc_token.as_str())
+            };
+            GeneAggregation::GeoPAGG {
+                token,
+                fdr: misc.fdr,
+                weight_config: {
+                    match geopagg.weight_config {
+                        GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                            alpha: geopagg.df_alpha,
+                        },
+                        GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                        GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                    }
+                },
+                use_product: geopagg.use_product,
+            }
+        }
     };
 
     // create logger based on quiet option
@@ -78,16 +105,17 @@ fn test(
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new(
-        diff_args.norm,
-        agg,
-        correction,
-        diff_args.model_choice,
-        diff_args.min_base_mean,
-        misc.seed,
-        &prefix,
-    );
-    let frame = SimpleFrame::from_filepath(&path)?;
+    let config = Configuration::builder()
+        .normalization(diff_args.norm)
+        .aggregation(agg)
+        .correction(correction)
+        .model_choice(diff_args.model_choice)
+        .min_base_mean(diff_args.min_base_mean)
+        .strategy(diff_args.strategy)
+        .seed(misc.seed)
+        .prefix(&prefix)
+        .build();
+    let frame = load_dataframe(path.clone().into())?;
 
     let mut regex_controls = vec![];
     let mut regex_treatments = vec![];
@@ -118,6 +146,7 @@ fn test(
     }
 }
 
+#[builder]
 fn aggregate(
     input: String,
     prefix: String,
@@ -125,6 +154,7 @@ fn aggregate(
     agg: GeneAggregationSelection,
     rra: RraArgs,
     inc: IncArgs,
+    geopagg: GeopaggArgs,
     misc: MiscArgs,
 ) -> Result<()> {
     // validate input path
@@ -151,12 +181,33 @@ fn aggregate(
             fdr: misc.fdr,
         },
         GeneAggregationSelection::Inc => GeneAggregation::Inc {
-            token: &inc.ntc_token,
+            token: &misc.ntc_token,
             group_size: inc.inc_group_size,
             use_product: inc.inc_product,
             n_draws: inc.n_draws,
             fdr: misc.fdr,
         },
+        GeneAggregationSelection::GeoPAGG => {
+            let token = if misc.ntc_token.is_empty() | geopagg.use_all {
+                None
+            } else {
+                Some(misc.ntc_token.as_str())
+            };
+            GeneAggregation::GeoPAGG {
+                token,
+                fdr: misc.fdr,
+                weight_config: {
+                    match geopagg.weight_config {
+                        GeoPAGGWeightConfigEnum::DropFirst => WeightConfig::DropFirst {
+                            alpha: geopagg.df_alpha,
+                        },
+                        GeoPAGGWeightConfigEnum::RankOrder => WeightConfig::RankOrder,
+                        GeoPAGGWeightConfigEnum::Balanced => WeightConfig::Balanced,
+                    }
+                },
+                use_product: geopagg.use_product,
+            }
+        }
     };
 
     // create logger based on quiet option
@@ -173,8 +224,13 @@ fn aggregate(
         Adjustment::By => Procedure::BenjaminiYekutieli,
     };
 
-    let config = Configuration::new_agg(agg, correction, misc.seed, &prefix);
-    let frame = SimpleFrame::from_filepath(&path)?;
+    let config = Configuration::builder()
+        .aggregation(agg)
+        .correction(correction)
+        .seed(misc.seed)
+        .prefix(&prefix)
+        .build();
+    let frame = load_dataframe(path.into())?;
 
     run_aggregation(&frame, columns, &config, &logger)
 }
@@ -189,9 +245,20 @@ fn main() -> Result<()> {
             agg,
             rra,
             inc,
+            geopagg,
             misc,
             skip_agg,
-        } => test(input, prefix, diff_args, agg, rra, inc, misc, skip_agg),
+        } => test()
+            .input_args(input)
+            .prefix(prefix)
+            .diff_args(diff_args)
+            .agg(agg)
+            .rra(rra)
+            .inc(inc)
+            .geopagg(geopagg)
+            .misc(misc)
+            .skip_agg(skip_agg)
+            .call(),
         Commands::Agg {
             input,
             prefix,
@@ -199,7 +266,17 @@ fn main() -> Result<()> {
             agg,
             rra,
             inc,
+            geopagg,
             misc,
-        } => aggregate(input, prefix, columns, agg, rra, inc, misc),
+        } => aggregate()
+            .input(input)
+            .prefix(prefix)
+            .columns(columns)
+            .agg(agg)
+            .rra(rra)
+            .inc(inc)
+            .geopagg(geopagg)
+            .misc(misc)
+            .call(),
     }
 }

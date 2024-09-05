@@ -15,6 +15,7 @@ enum Method {
     AlphaRRA,
     IncProd,
     IncPvalue,
+    GeoPAGG,
 }
 impl Display for Method {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -22,6 +23,7 @@ impl Display for Method {
             Method::AlphaRRA => write!(f, "rra"),
             Method::IncProd => write!(f, "inc-product"),
             Method::IncPvalue => write!(f, "inc-pvalue"),
+            Method::GeoPAGG => write!(f, "geopagg"),
         }
     }
 }
@@ -59,6 +61,12 @@ impl Screenviz {
                     Method::IncPvalue
                 }
             }
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr: _,
+                use_product: _,
+            } => Method::GeoPAGG,
         };
         let gene = "gene".to_string();
         let x = "log_fold_change".to_string();
@@ -83,25 +91,40 @@ impl Screenviz {
                     "pvalue".to_string()
                 }
             }
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr: _,
+                use_product: _,
+            } => "fdr".to_string(),
         };
 
-        let (threshold, threshold_low, threshold_high) = match config.aggregation() {
+        let (threshold, threshold_low, threshold_high, ntc_token) = match config.aggregation() {
             GeneAggregation::AlpaRRA {
                 alpha: _,
                 npermutations: _,
                 adjust_alpha: _,
                 fdr,
-            } => (Some(*fdr), None, None),
+            } => (Some(*fdr), None, None, None),
             GeneAggregation::Inc {
                 token: _,
                 fdr: _,
                 group_size: _,
                 n_draws: _,
                 use_product: _,
-            } => (None, results.threshold_low(), results.threshold_high()),
+            } => (
+                None,
+                results.threshold_low(),
+                results.threshold_high(),
+                Some(String::from("pseudogene")),
+            ),
+            GeneAggregation::GeoPAGG {
+                token: _,
+                weight_config: _,
+                fdr,
+                use_product: _,
+            } => (Some(*fdr), None, None, Some(String::from("amalgam"))),
         };
-
-        let ntc_token = threshold_low.map(|_| "pseudogene".to_string());
 
         Self {
             method,
@@ -127,6 +150,15 @@ impl Screenviz {
                 writeln!(writer, "z: {}", self.z)?;
                 writeln!(writer, "threshold: {}", self.threshold.unwrap())?;
             }
+            Method::GeoPAGG => {
+                writeln!(writer, "method: {}", self.method)?;
+                writeln!(writer, "gene: {}", self.gene)?;
+                writeln!(writer, "x: {}", self.x)?;
+                writeln!(writer, "y: {}", self.y)?;
+                writeln!(writer, "z: {}", self.z)?;
+                writeln!(writer, "threshold: {}", self.threshold.unwrap())?;
+                writeln!(writer, "ntc_token: {}", self.ntc_token.as_ref().unwrap())?;
+            }
             _ => {
                 writeln!(writer, "method: {}", self.method)?;
                 writeln!(writer, "gene: {}", self.gene)?;
@@ -145,39 +177,26 @@ impl Screenviz {
 
 #[cfg(test)]
 mod testing {
-    use adjustp::Procedure;
+    use super::*;
     use ndarray::Array1;
 
-    use crate::{model::ModelChoice, norm::Normalization};
-
-    use super::*;
-
     fn build_config_rra<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::AlpaRRA {
             alpha: 0.05,
             npermutations: 1000,
             adjust_alpha: true,
             fdr: 0.05,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
         let base_mean = 0.0;
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .min_base_mean(base_mean)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_config_prod<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::Inc {
             token: "non-targeting",
             fdr: 0.05,
@@ -185,24 +204,14 @@ mod testing {
             use_product: true,
             n_draws: 100,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
-        let base_mean = 0.0;
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_config_pvalue<'a>() -> Configuration<'a> {
-        let normalization = Normalization::MedianRatio;
         let aggregation = GeneAggregation::Inc {
             token: "non-targeting",
             fdr: 0.05,
@@ -210,20 +219,11 @@ mod testing {
             use_product: false,
             n_draws: 100,
         };
-        let correction = Procedure::BenjaminiHochberg;
-        let model_choice = ModelChoice::Wols;
-        let base_mean = 0.0;
-        let seed = 0;
         let prefix = "results";
-        Configuration::new(
-            normalization,
-            aggregation,
-            correction,
-            model_choice,
-            base_mean,
-            seed,
-            prefix,
-        )
+        Configuration::builder()
+            .aggregation(aggregation)
+            .prefix(prefix)
+            .build()
     }
 
     fn build_results_rra() -> AggregationResult {
@@ -235,20 +235,16 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = None;
-        let threshold_high = None;
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .build()
     }
 
     fn build_results_incprod() -> AggregationResult {
@@ -260,20 +256,20 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = Some(-0.5);
-        let threshold_high = Some(0.5);
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        let threshold_low = -0.5;
+        let threshold_high = 0.5;
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .threshold_low(threshold_low)
+            .threshold_high(threshold_high)
+            .build()
     }
 
     fn build_results_incpvalue() -> AggregationResult {
@@ -285,20 +281,20 @@ mod testing {
         let fdr_high = Array1::from(vec![0.7, 0.2]);
         let aggregation_score_low = Array1::from(vec![0.5, 0.6]);
         let aggregation_score_high = Array1::from(vec![0.7, 0.8]);
-        let threshold_low = Some(0.005);
-        let threshold_high = Some(0.004);
-        AggregationResult::new(
-            genes,
-            gene_fc,
-            pvalues_low,
-            pvalues_high,
-            fdr_low,
-            fdr_high,
-            aggregation_score_low,
-            aggregation_score_high,
-            threshold_low,
-            threshold_high,
-        )
+        let threshold_low = 0.005;
+        let threshold_high = 0.004;
+        AggregationResult::builder()
+            .genes(genes)
+            .gene_fc(gene_fc)
+            .pvalues_low(pvalues_low)
+            .pvalues_high(pvalues_high)
+            .fdr_low(fdr_low)
+            .fdr_high(fdr_high)
+            .aggregation_score_low(aggregation_score_low)
+            .aggregation_score_high(aggregation_score_high)
+            .threshold_low(threshold_low)
+            .threshold_high(threshold_high)
+            .build()
     }
 
     #[test]

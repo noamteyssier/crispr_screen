@@ -1,9 +1,13 @@
 use adjustp::Procedure;
 use colored::Colorize;
+use geopagg::WeightConfig;
 use hashbrown::HashSet;
+use ndarray::Array1;
 use std::fmt::Debug;
 
-use crate::{aggregation::GeneAggregation, io::HitList, model::ModelChoice, norm::Normalization};
+use crate::{
+    aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
+};
 
 #[derive(Default)]
 pub struct Logger {
@@ -116,16 +120,42 @@ impl Logger {
         }
     }
 
+    pub fn start_differential_abundance(&self) {
+        if self.verbose {
+            eprintln!(
+                "\n{}",
+                "Performing Differential Abundance".bold().underline()
+            );
+        }
+    }
+
+    pub fn sample_aggregation_strategy(&self, strategy: TestStrategy) {
+        if self.verbose {
+            Self::write_to_stderr("Sample Aggregation Strategy: ", strategy);
+        }
+    }
+
+    pub fn sample_weights(&self, survival: bool, weights: &Array1<f64>) {
+        if self.verbose {
+            if survival {
+                Self::write_to_stderr("Sample Weights High        : ", weights.to_vec());
+            } else {
+                Self::write_to_stderr("Sample Weights Low         : ", weights.to_vec());
+            }
+        }
+    }
+
     pub fn start_gene_aggregation(&self) {
         if self.verbose {
             eprintln!("\n{}", "Performing Gene Aggregation".bold().underline());
         }
     }
 
-    pub fn report_rra_alpha(&self, alpha_low: f64, alpha_high: f64) {
+    pub fn report_rra_params(&self, alpha_low: f64, alpha_high: f64, seed: usize) {
         if self.verbose {
             Self::write_to_stderr("Alpha threshold low        : ", alpha_low);
             Self::write_to_stderr("Alpha threshold high       : ", alpha_high);
+            Self::write_to_stderr("Seed                       : ", seed);
         }
     }
 
@@ -144,6 +174,7 @@ impl Logger {
         fdr: f64,
         group_size: usize,
         n_draws: usize,
+        seed: usize,
     ) {
         if self.verbose {
             Self::write_to_stderr("NTC Token                  : ", ntc_token);
@@ -151,6 +182,24 @@ impl Logger {
             Self::write_to_stderr("FDR                        : ", fdr);
             Self::write_to_stderr("Group Size                 : ", group_size);
             Self::write_to_stderr("Number of Draws            : ", n_draws);
+            Self::write_to_stderr("Seed                       : ", seed);
+        }
+    }
+
+    pub fn report_geopagg_params(
+        &self,
+        ntc_token: Option<&str>,
+        fdr: f64,
+        weight_config: WeightConfig,
+        seed: usize,
+    ) {
+        if self.verbose {
+            if let Some(ntc_token) = ntc_token {
+                Self::write_to_stderr("NTC Token                  : ", ntc_token);
+            }
+            Self::write_to_stderr("FDR                        : ", fdr);
+            Self::write_to_stderr("Weight Configuration       : ", weight_config);
+            Self::write_to_stderr("Seed                       : ", seed);
         }
     }
 
@@ -190,12 +239,12 @@ impl Logger {
         }
     }
 
-    pub fn hit_list(&self, hit_list: &HitList) {
+    pub fn hit_list(&self, num_total: usize, num_enrichments: usize, num_depletions: usize) {
         if self.verbose {
             eprintln!("\n{}", "Hits".bold().underline());
-            Self::write_to_stderr("Number of Hits             : ", hit_list.num_total());
-            Self::write_to_stderr("Number Upregulated Hits    : ", hit_list.num_enrichments());
-            Self::write_to_stderr("Number Downregulated Hits  : ", hit_list.num_depletions());
+            Self::write_to_stderr("Number of Hits             : ", num_total);
+            Self::write_to_stderr("Number Upregulated Hits    : ", num_enrichments);
+            Self::write_to_stderr("Number Downregulated Hits  : ", num_depletions);
         }
     }
 }
@@ -232,9 +281,9 @@ mod testing {
         logger.num_varied(1);
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
-        logger.report_rra_alpha(1.0, 1.0);
+        logger.report_rra_params(1.0, 1.0, 42);
         logger.permutation_sizes(&[1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100, 42);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);
@@ -265,9 +314,9 @@ mod testing {
         logger.num_varied(1);
         logger.ols_parameters(&ModelChoice::Ols, 1.0, 1.0);
         logger.start_gene_aggregation();
-        logger.report_rra_alpha(1.0, 1.0);
+        logger.report_rra_params(1.0, 1.0, 42);
         logger.permutation_sizes(&[1, 2, 3]);
-        logger.report_inc_params("NTC", 1, 1.0, 1, 100);
+        logger.report_inc_params("NTC", 1, 1.0, 1, 100, 42);
         logger.report_inc_low_threshold(1.0, false);
         logger.report_inc_high_threshold(1.0, false);
         logger.report_inc_low_threshold(1.0, true);

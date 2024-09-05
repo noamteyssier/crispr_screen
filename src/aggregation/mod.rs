@@ -4,6 +4,7 @@ mod utils;
 
 use clap::ValueEnum;
 pub use compute_aggregation::compute_aggregation;
+use geopagg::WeightConfig;
 pub use results::AggregationResult;
 
 /// Enum describing aggregation procedure selection
@@ -15,6 +16,10 @@ pub enum GeneAggregationSelection {
 
     /// INC Method, i.e. Mann-Whitney U-Test
     Inc,
+
+    /// GeoPAGG Method
+    #[value(name = "geopagg")]
+    GeoPAGG,
 }
 
 /// Enum describing the different gene aggregation procedures and their associated configurations.
@@ -33,6 +38,20 @@ pub enum GeneAggregation<'a> {
         n_draws: usize,
         use_product: bool,
     },
+    GeoPAGG {
+        token: Option<&'a str>,
+        weight_config: WeightConfig,
+        fdr: f64,
+        use_product: bool,
+    },
+}
+
+#[derive(ValueEnum, Clone, Copy, Debug, Default)]
+pub enum GeoPAGGWeightConfigEnum {
+    #[default]
+    DropFirst,
+    RankOrder,
+    Balanced,
 }
 
 #[cfg(test)]
