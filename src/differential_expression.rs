@@ -63,7 +63,7 @@ pub fn mageck(
         n_controls,
         *config.correction(),
         *config.strategy(),
-        &logger,
+        logger,
     );
 
     // Write sgRNA DataFrame
