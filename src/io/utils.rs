@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use hashbrown::HashSet;
+use ndarray::Array2;
 use polars::{
     error::PolarsError,
     frame::DataFrame,
@@ -98,4 +99,15 @@ pub fn get_string_column(dataframe: &DataFrame, idx: usize) -> Vec<String> {
         .map(|x| x.to_string())
         .map(|x| x.replacen('"', "", 2)) // strips quotes
         .collect()
+}
+
+pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> Array2<f64> {
+    let mut array = Array2::zeros((dataframe.height(), labels.len()));
+    for (i, label) in labels.iter().enumerate() {
+        let col = dataframe.column(label).unwrap();
+        col.f64().unwrap().iter().enumerate().for_each(|(j, x)| {
+            array[[j, i]] = x.unwrap_or_default();
+        });
+    }
+    array
 }

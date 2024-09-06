@@ -1,15 +1,12 @@
 use anyhow::Result;
 use ndarray::s;
-use polars::{
-    frame::DataFrame,
-    prelude::{Float64Type, IndexOrder},
-};
+use polars::frame::DataFrame;
 
 use crate::{
     aggregation::compute_aggregation,
     cli::SgrnaColumns,
     enrich::EnrichmentResult,
-    io::{get_string_column, write_gene_frame, write_hit_list, Screenviz},
+    io::{get_string_column, to_ndarray, write_gene_frame, write_hit_list, Screenviz},
     utils::{config::Configuration, logging::Logger},
 };
 
@@ -21,14 +18,15 @@ pub fn run_aggregation(
 ) -> Result<()> {
     let sgrna_names = get_string_column(frame, 0);
     let gene_names = get_string_column(frame, 1);
-    let sgrna_matrix = frame
-        .select([
+    let sgrna_matrix = to_ndarray(
+        frame,
+        &[
             columns.pvalue_low,
             columns.pvalue_high,
             columns.control_mean,
             columns.treatment_mean,
-        ])?
-        .to_ndarray::<Float64Type>(IndexOrder::Fortran)?;
+        ],
+    );
     let enrichment_result = EnrichmentResult::new(
         sgrna_matrix.slice(s![.., 0]).to_owned(),
         sgrna_matrix.slice(s![.., 1]).to_owned(),
