@@ -26,7 +26,7 @@ pub fn run_aggregation(
             columns.control_mean,
             columns.treatment_mean,
         ],
-    );
+    )?;
     let enrichment_result = EnrichmentResult::new(
         sgrna_matrix.slice(s![.., 0]).to_owned(),
         sgrna_matrix.slice(s![.., 1]).to_owned(),

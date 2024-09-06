@@ -27,7 +27,7 @@ pub fn mageck(
     let n_controls = control_labels.len();
     let labels = [control_labels.clone(), treatment_labels.clone()].concat();
 
-    let count_matrix = to_ndarray(frame, &labels);
+    let count_matrix = to_ndarray(frame, &labels)?;
     let sgrna_names = get_string_column(frame, 0);
     let gene_names = get_string_column(frame, 1);
     validate_ntc(&sgrna_names, config.aggregation())?;

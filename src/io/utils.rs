@@ -1,12 +1,7 @@
 use anyhow::{bail, Result};
 use hashbrown::HashSet;
 use ndarray::Array2;
-use polars::{
-    error::PolarsError,
-    frame::DataFrame,
-    io::SerReader,
-    prelude::{CsvParseOptions, CsvReadOptions},
-};
+use polars::prelude::*;
 use regex::Regex;
 use std::path::PathBuf;
 
@@ -101,13 +96,30 @@ pub fn get_string_column(dataframe: &DataFrame, idx: usize) -> Vec<String> {
         .collect()
 }
 
-pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> Array2<f64> {
+/// Converts a DataFrame to an ndarray with f64 values.
+pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> PolarsResult<Array2<f64>> {
     let mut array = Array2::zeros((dataframe.height(), labels.len()));
     for (i, label) in labels.iter().enumerate() {
-        let col = dataframe.column(label).unwrap();
-        col.f64().unwrap().iter().enumerate().for_each(|(j, x)| {
-            array[[j, i]] = x.unwrap_or_default();
-        });
+        let col = dataframe.column(label)?;
+        match col.dtype() {
+            DataType::Float64 => {
+                let float_col = col.f64()?;
+                float_col.iter().enumerate().for_each(|(j, x)| {
+                    array[[j, i]] = x.unwrap_or(f64::NAN);
+                });
+            }
+            DataType::Int64 => {
+                let int_col = col.i64()?;
+                int_col.iter().enumerate().for_each(|(j, x)| {
+                    array[[j, i]] = x.map(|v| v as f64).unwrap_or(f64::NAN);
+                });
+            }
+            _ => {
+                return Err(PolarsError::ComputeError(
+                    format!("Column '{}' is neither f64 nor i64", label).into(),
+                ))
+            }
+        }
     }
-    array
+    Ok(array)
 }
