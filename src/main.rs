@@ -18,12 +18,14 @@ pub mod enrich;
 pub mod io;
 pub mod model;
 pub mod norm;
+pub mod resample;
 pub mod run_aggregation;
 pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
 use io::load_dataframe;
+use resample::resample;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
 #[builder]
@@ -279,6 +281,19 @@ fn main() -> Result<()> {
             .inc(inc)
             .geopagg(geopagg)
             .misc(misc)
+            .call(),
+        Commands::Resample {
+            input,
+            output,
+            n_resamples,
+            seed,
+            samples,
+        } => resample()
+            .input(input)
+            .output(output)
+            .n_resamples(n_resamples)
+            .seed(seed)
+            .samples(samples)
             .call(),
     }
 }
