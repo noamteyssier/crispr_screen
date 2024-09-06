@@ -5,3 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     versioning-strategy: "auto"
+    groups:
+      ndarray-packages:
+        patterns:
+          - "ndarray*"
