@@ -108,8 +108,20 @@ pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> PolarsResult<Arra
                     array[[j, i]] = x.unwrap_or(f64::NAN);
                 });
             }
+            DataType::Float32 => {
+                let float_col = col.f32()?;
+                float_col.iter().enumerate().for_each(|(j, x)| {
+                    array[[j, i]] = x.map(|v| v as f64).unwrap_or(f64::NAN);
+                });
+            }
             DataType::Int64 => {
                 let int_col = col.i64()?;
+                int_col.iter().enumerate().for_each(|(j, x)| {
+                    array[[j, i]] = x.map(|v| v as f64).unwrap_or(f64::NAN);
+                });
+            }
+            DataType::Int32 => {
+                let int_col = col.i32()?;
                 int_col.iter().enumerate().for_each(|(j, x)| {
                     array[[j, i]] = x.map(|v| v as f64).unwrap_or(f64::NAN);
                 });
@@ -122,4 +134,37 @@ pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> PolarsResult<Arra
         }
     }
     Ok(array)
+}
+
+#[cfg(test)]
+mod testing {
+    use super::*;
+    use anyhow::Result;
+
+    #[test]
+    fn mixed_type_dataframe_to_ndarray() -> Result<()> {
+        let frame = df!(
+            "a" => &[1i64, 2, 3, 4, 5],
+            "b" => &[1.0, 2.0, 3.0, 4.0, 5.0],
+            "c" => &[1, 2, 3, 4, 5],
+            "d" => &["a", "b", "c", "d", "e"]
+        )?;
+        let labels = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        let array = to_ndarray(&frame, &labels)?;
+        assert_eq!(array.shape(), &[5, 3]);
+        Ok(())
+    }
+
+    #[test]
+    fn unsupported_datatypes_dataframe_to_ndarray() -> Result<()> {
+        let frame = df!(
+            "a" => &[1, 2, 3, 4, 5],
+            "b" => &[1.0, 2.0, 3.0, 4.0, 5.0],
+            "c" => &["a", "b", "c", "d", "e"]
+        )?;
+        let labels = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        let array = to_ndarray(&frame, &labels);
+        assert!(array.is_err());
+        Ok(())
+    }
 }
