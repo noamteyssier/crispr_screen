@@ -14,6 +14,10 @@ pub struct Logger {
     verbose: bool,
 }
 impl Logger {
+    pub fn from_quiet(quiet: bool) -> Self {
+        Self { verbose: !quiet }
+    }
+
     pub fn new() -> Self {
         Self { verbose: true }
     }
@@ -37,7 +41,13 @@ impl Logger {
         }
     }
 
-    pub fn num_sgrnas(&self, x: &[String]) {
+    pub fn start_resampling(&self) {
+        if self.verbose {
+            eprintln!("\n{}", "Resampling Configuration".bold().underline());
+        }
+    }
+
+    pub fn num_sgrnas<T>(&self, x: &[T]) {
         if self.verbose {
             Self::write_to_stderr("Number of sgRNAs           : ", x.len());
         }
@@ -47,6 +57,12 @@ impl Logger {
         if self.verbose {
             Self::write_to_stderr("Control Group              : ", controls);
             Self::write_to_stderr("Treatment Group            : ", treatments);
+        }
+    }
+
+    pub fn sampled_names(&self, samples: &[String]) {
+        if self.verbose {
+            Self::write_to_stderr("Sampled Group              : ", samples);
         }
     }
 
@@ -245,6 +261,28 @@ impl Logger {
             Self::write_to_stderr("Number of Hits             : ", num_total);
             Self::write_to_stderr("Number Upregulated Hits    : ", num_enrichments);
             Self::write_to_stderr("Number Downregulated Hits  : ", num_depletions);
+        }
+    }
+
+    pub fn resampling_depth<T: Debug>(&self, depth: T) {
+        if self.verbose {
+            Self::write_to_stderr("Resampling Depth           : ", depth);
+        }
+    }
+
+    pub fn number_of_resamples(&self, n_resamples: usize) {
+        if self.verbose {
+            Self::write_to_stderr("Number of Resamples        : ", n_resamples);
+        }
+    }
+
+    pub fn describe_seed(&self, seed: Option<u64>) {
+        if self.verbose {
+            if let Some(seed) = seed {
+                Self::write_to_stderr("Seed                       : ", seed);
+            } else {
+                eprintln!("Seed: {}", "Random".bold());
+            }
         }
     }
 }

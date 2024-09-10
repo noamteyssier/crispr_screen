@@ -101,22 +101,30 @@ pub fn resample(
     depth_samples: Option<Vec<String>>,
     seed: Option<u64>,
     samples: Vec<String>,
+    quiet: bool,
 ) -> Result<()> {
+    let logger = Logger::from_quiet(quiet);
+    logger.start_resampling();
+
     let dataframe = load_dataframe(input.into())?;
 
     let sample_regex = build_regex_set(&samples)?;
     let sample_labels = match_headers_from_regex_set(&dataframe, &sample_regex)?;
-    let count_matrix = to_ndarray(&dataframe, &sample_labels)?;
+    logger.sampled_names(&sample_labels);
+    logger.number_of_resamples(n_resamples);
 
-    let logger = Logger::new_silent();
+    let count_matrix = to_ndarray(&dataframe, &sample_labels)?;
     let normed_matrix = normalize_counts(&count_matrix, &Normalization::default(), &logger);
     let sgrna_counts = normed_matrix
         .mean_axis(Axis(1))
         .expect("Could not generate mean of sgRNAs across normed samples");
+    logger.num_sgrnas(sgrna_counts.as_slice().expect("Could not create slice"));
 
     let total = calculate_depth(&dataframe, &sgrna_counts, depth, depth_samples)?;
+    logger.resampling_depth(total as usize);
 
     let mut rng = build_rng(seed);
+    logger.describe_seed(seed);
     let dirichlet = build_dirichlet(&sgrna_counts)?;
     let resamples = loop_resample(&dirichlet, total, &mut rng, n_resamples)?;
 

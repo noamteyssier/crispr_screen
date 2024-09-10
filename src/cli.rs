@@ -286,5 +286,9 @@ pub enum Commands {
         /// Sample names whose data should be resampled
         #[arg(short, long, num_args=1.., required = true)]
         samples: Vec<String>,
+
+        /// Quiet the logger
+        #[arg(short, long)]
+        quiet: bool,
     },
 }
