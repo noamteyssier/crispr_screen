@@ -1,5 +1,3 @@
-use std::{fs::File, io::BufWriter};
-
 use anyhow::Result;
 use bon::builder;
 use ndarray::prelude::*;
@@ -7,9 +5,10 @@ use ndarray_rand::rand::SeedableRng;
 use polars::prelude::*;
 use rand_chacha::ChaCha8Rng;
 use rand_distr::{Dirichlet, DirichletError, Distribution};
+use std::{fs::File, io::BufWriter};
 
 use crate::{
-    io::{load_dataframe, to_ndarray},
+    io::{build_regex_set, load_dataframe, match_headers_from_regex_set, to_ndarray},
     norm::{normalize_counts, Normalization},
     utils::{logging::Logger, math::get_multinomial},
 };
@@ -80,7 +79,10 @@ pub fn resample(
     samples: Vec<String>,
 ) -> Result<()> {
     let dataframe = load_dataframe(input.into())?;
-    let count_matrix = to_ndarray(&dataframe, &samples)?;
+
+    let sample_regex = build_regex_set(&samples)?;
+    let sample_labels = match_headers_from_regex_set(&dataframe, &sample_regex)?;
+    let count_matrix = to_ndarray(&dataframe, &sample_labels)?;
 
     let logger = Logger::new_silent();
     let normed_matrix = normalize_counts(&count_matrix, &Normalization::default(), &logger);

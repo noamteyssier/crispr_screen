@@ -15,6 +15,11 @@ pub fn load_dataframe(path: PathBuf) -> Result<DataFrame, PolarsError> {
         .finish()
 }
 
+/// Build a regex set from a list of strings
+pub fn build_regex_set(samples: &[String]) -> Result<Vec<Regex>, regex::Error> {
+    samples.iter().map(|x| Regex::new(x)).collect()
+}
+
 pub fn match_headers_from_regex_set(
     dataframe: &DataFrame,
     regexes: &[Regex],

@@ -7,7 +7,6 @@ use cli::{
     SgrnaColumns,
 };
 use geopagg::WeightConfig;
-use regex::Regex;
 use run_aggregation::run_aggregation;
 use std::path::Path;
 
@@ -24,7 +23,7 @@ pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
-use io::load_dataframe;
+use io::{build_regex_set, load_dataframe};
 use resample::resample;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
@@ -120,16 +119,8 @@ fn test(
         .build();
     let frame = load_dataframe(path.clone().into())?;
 
-    let mut regex_controls = vec![];
-    let mut regex_treatments = vec![];
-    for label in input_args.controls {
-        let regex = Regex::new(&label)?;
-        regex_controls.push(regex);
-    }
-    for label in input_args.treatments {
-        let regex = Regex::new(&label)?;
-        regex_treatments.push(regex);
-    }
+    let regex_controls = build_regex_set(&input_args.controls)?;
+    let regex_treatments = build_regex_set(&input_args.treatments)?;
 
     let mageck_results = mageck(
         &frame,
