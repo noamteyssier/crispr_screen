@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bon::builder;
 use ndarray::prelude::*;
 use ndarray_rand::rand::SeedableRng;
@@ -69,28 +69,62 @@ fn build_rng(seed: Option<u64>) -> ChaCha8Rng {
     }
 }
 
+fn calculate_depth(
+    dataframe: &DataFrame,
+    sgrna_counts: &Array1<f64>,
+    depth: Option<usize>,
+    depth_samples: Option<Vec<String>>,
+) -> Result<f64> {
+    if depth.is_some() & depth_samples.is_some() {
+        bail!("Cannot specify both depth and depth_samples at the same time")
+    }
+    if let Some(depth) = depth {
+        Ok(depth as f64)
+    } else if let Some(depth_samples) = depth_samples {
+        let sample_regex = build_regex_set(&depth_samples)?;
+        let sample_labels = match_headers_from_regex_set(dataframe, &sample_regex)?;
+        let count_matrix = to_ndarray(dataframe, &sample_labels)?;
+        let sample_sums = count_matrix.sum_axis(Axis(0));
+        let mean_depth = sample_sums.mean().expect("Could not calculate mean depth");
+        Ok(mean_depth)
+    } else {
+        Ok(sgrna_counts.iter().sum())
+    }
+}
+
 #[builder]
 pub fn resample(
     input: String,
     path: Option<String>,
     n_resamples: usize,
+    depth: Option<usize>,
+    depth_samples: Option<Vec<String>>,
     seed: Option<u64>,
     samples: Vec<String>,
+    quiet: bool,
 ) -> Result<()> {
+    let logger = Logger::from_quiet(quiet);
+    logger.start_resampling();
+
     let dataframe = load_dataframe(input.into())?;
 
     let sample_regex = build_regex_set(&samples)?;
     let sample_labels = match_headers_from_regex_set(&dataframe, &sample_regex)?;
-    let count_matrix = to_ndarray(&dataframe, &sample_labels)?;
+    logger.sampled_names(&sample_labels);
+    logger.number_of_resamples(n_resamples);
 
-    let logger = Logger::new_silent();
+    let count_matrix = to_ndarray(&dataframe, &sample_labels)?;
     let normed_matrix = normalize_counts(&count_matrix, &Normalization::default(), &logger);
     let sgrna_counts = normed_matrix
         .mean_axis(Axis(1))
         .expect("Could not generate mean of sgRNAs across normed samples");
-    let total = sgrna_counts.sum();
+    logger.num_sgrnas(sgrna_counts.as_slice().expect("Could not create slice"));
+
+    let total = calculate_depth(&dataframe, &sgrna_counts, depth, depth_samples)?;
+    logger.resampling_depth(total as usize);
 
     let mut rng = build_rng(seed);
+    logger.describe_seed(seed);
     let dirichlet = build_dirichlet(&sgrna_counts)?;
     let resamples = loop_resample(&dirichlet, total, &mut rng, n_resamples)?;
 
