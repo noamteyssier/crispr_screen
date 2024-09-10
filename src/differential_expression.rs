@@ -2,8 +2,8 @@ use crate::{
     aggregation::compute_aggregation,
     enrich::enrichment_testing,
     io::{
-        get_string_column, match_headers_from_regex_set, validate_ntc, write_gene_frame,
-        write_hit_list, write_sgrna_dataframe, Screenviz,
+        get_string_column, match_headers_from_regex_set, to_ndarray, validate_ntc,
+        write_gene_frame, write_hit_list, write_sgrna_dataframe, Screenviz,
     },
     model::model_mean_variance,
     norm::normalize_counts,
@@ -27,9 +27,7 @@ pub fn mageck(
     let n_controls = control_labels.len();
     let labels = [control_labels.clone(), treatment_labels.clone()].concat();
 
-    let count_matrix = frame
-        .select(&labels)?
-        .to_ndarray::<Float64Type>(IndexOrder::Fortran)?;
+    let count_matrix = to_ndarray(frame, &labels)?;
     let sgrna_names = get_string_column(frame, 0);
     let gene_names = get_string_column(frame, 1);
     validate_ntc(&sgrna_names, config.aggregation())?;
