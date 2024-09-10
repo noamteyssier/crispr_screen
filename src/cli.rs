@@ -267,6 +267,18 @@ pub enum Commands {
         #[arg(short, long)]
         n_resamples: usize,
 
+        /// Sequencing Depth to use for resampling
+        ///
+        /// [default: mean[original_depth]]
+        #[arg(short, long)]
+        depth: Option<usize>,
+
+        /// Samples to use for calculating mean depth
+        ///
+        /// Will use the mean depth across the samples provided
+        #[arg(short = 'S', long, num_args=1.., conflicts_with = "depth")]
+        depth_samples: Option<Vec<String>>,
+
         /// Seed to use for resampling
         #[arg(long, default_value = "42")]
         seed: u64,

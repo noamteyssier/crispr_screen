@@ -277,6 +277,8 @@ fn main() -> Result<()> {
             input,
             output,
             n_resamples,
+            depth,
+            depth_samples,
             seed,
             samples,
         } => resample()
@@ -284,6 +286,8 @@ fn main() -> Result<()> {
             .maybe_path(output)
             .n_resamples(n_resamples)
             .seed(seed)
+            .maybe_depth(depth)
+            .maybe_depth_samples(depth_samples)
             .samples(samples)
             .call(),
     }
