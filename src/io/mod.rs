@@ -8,5 +8,5 @@ pub use screenviz::Screenviz;
 pub use sgrna_frame::write_sgrna_dataframe;
 pub use utils::{
     build_regex_set, get_string_column, load_dataframe, match_headers_from_regex_set, to_ndarray,
-    validate_ntc,
+    validate_ntc, write_tsv,
 };

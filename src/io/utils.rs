@@ -4,6 +4,7 @@ use ndarray::Array2;
 use polars::prelude::*;
 use regex::Regex;
 use std::path::PathBuf;
+use std::{fs::File, io::Write};
 
 use crate::aggregation::GeneAggregation;
 
@@ -139,6 +140,31 @@ pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> PolarsResult<Arra
         }
     }
     Ok(array)
+}
+
+fn match_output(path: Option<String>) -> Result<Box<dyn Write>> {
+    match path {
+        Some(path) => {
+            let file = File::create(path)?;
+            Ok(Box::new(file))
+        }
+        None => {
+            let out = std::io::stdout();
+            Ok(Box::new(out.lock()))
+        }
+    }
+}
+
+/// Writes a dataframe to a file or stdout
+pub fn write_tsv(dataframe: &mut DataFrame, path: Option<String>) -> Result<()> {
+    let writer = match_output(path)?;
+    CsvWriter::new(writer)
+        .with_separator(b'\t')
+        .include_header(true)
+        .with_quote_style(QuoteStyle::Never)
+        .with_float_scientific(Some(true))
+        .finish(dataframe)?;
+    Ok(())
 }
 
 #[cfg(test)]

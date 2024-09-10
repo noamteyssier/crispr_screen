@@ -258,8 +258,10 @@ pub enum Commands {
         input: String,
 
         /// Filepath to write the resampled count matrix
+        ///
+        /// [default: stdout]
         #[arg(short, long)]
-        output: String,
+        output: Option<String>,
 
         /// Number of resamples to perform
         #[arg(short, long)]

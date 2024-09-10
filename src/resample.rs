@@ -5,10 +5,9 @@ use ndarray_rand::rand::SeedableRng;
 use polars::prelude::*;
 use rand_chacha::ChaCha8Rng;
 use rand_distr::{Dirichlet, DirichletError, Distribution};
-use std::{fs::File, io::BufWriter};
 
 use crate::{
-    io::{build_regex_set, load_dataframe, match_headers_from_regex_set, to_ndarray},
+    io::{build_regex_set, load_dataframe, match_headers_from_regex_set, to_ndarray, write_tsv},
     norm::{normalize_counts, Normalization},
     utils::{logging::Logger, math::get_multinomial},
 };
@@ -73,7 +72,7 @@ fn build_rng(seed: Option<u64>) -> ChaCha8Rng {
 #[builder]
 pub fn resample(
     input: String,
-    output: String,
+    path: Option<String>,
     n_resamples: usize,
     seed: Option<u64>,
     samples: Vec<String>,
@@ -96,13 +95,7 @@ pub fn resample(
     let resamples = loop_resample(&dirichlet, total, &mut rng, n_resamples)?;
 
     let mut full_data = dataframe.hstack(&resamples)?;
-    let writer = File::create(output).map(BufWriter::new)?;
-    CsvWriter::new(writer)
-        .with_separator(b'\t')
-        .include_header(true)
-        .with_quote_style(QuoteStyle::Never)
-        .with_float_scientific(Some(true))
-        .finish(&mut full_data)?;
+    write_tsv(&mut full_data, path)?;
 
     Ok(())
 }

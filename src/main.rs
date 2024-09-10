@@ -281,7 +281,7 @@ fn main() -> Result<()> {
             samples,
         } => resample()
             .input(input)
-            .output(output)
+            .maybe_path(output)
             .n_resamples(n_resamples)
             .seed(seed)
             .samples(samples)
