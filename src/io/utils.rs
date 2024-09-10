@@ -4,6 +4,7 @@ use ndarray::Array2;
 use polars::prelude::*;
 use regex::Regex;
 use std::path::PathBuf;
+use std::{fs::File, io::Write};
 
 use crate::aggregation::GeneAggregation;
 
@@ -13,6 +14,11 @@ pub fn load_dataframe(path: PathBuf) -> Result<DataFrame, PolarsError> {
         .with_parse_options(CsvParseOptions::default().with_separator(b'\t'))
         .try_into_reader_with_file_path(Some(path))?
         .finish()
+}
+
+/// Build a regex set from a list of strings
+pub fn build_regex_set(samples: &[String]) -> Result<Vec<Regex>, regex::Error> {
+    samples.iter().map(|x| Regex::new(x)).collect()
 }
 
 pub fn match_headers_from_regex_set(
@@ -134,6 +140,31 @@ pub fn to_ndarray(dataframe: &DataFrame, labels: &[String]) -> PolarsResult<Arra
         }
     }
     Ok(array)
+}
+
+fn match_output(path: Option<String>) -> Result<Box<dyn Write>> {
+    match path {
+        Some(path) => {
+            let file = File::create(path)?;
+            Ok(Box::new(file))
+        }
+        None => {
+            let out = std::io::stdout();
+            Ok(Box::new(out.lock()))
+        }
+    }
+}
+
+/// Writes a dataframe to a file or stdout
+pub fn write_tsv(dataframe: &mut DataFrame, path: Option<String>) -> Result<()> {
+    let writer = match_output(path)?;
+    CsvWriter::new(writer)
+        .with_separator(b'\t')
+        .include_header(true)
+        .with_quote_style(QuoteStyle::Never)
+        .with_float_scientific(Some(true))
+        .finish(dataframe)?;
+    Ok(())
 }
 
 #[cfg(test)]

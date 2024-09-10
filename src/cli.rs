@@ -250,4 +250,29 @@ pub enum Commands {
         #[clap(flatten)]
         columns: SgrnaColumns,
     },
+
+    /// Resample the input count matrix with various parameterizations
+    Resample {
+        /// Filepath of the input count matrix
+        #[clap(short, long)]
+        input: String,
+
+        /// Filepath to write the resampled count matrix
+        ///
+        /// [default: stdout]
+        #[arg(short, long)]
+        output: Option<String>,
+
+        /// Number of resamples to perform
+        #[arg(short, long)]
+        n_resamples: usize,
+
+        /// Seed to use for resampling
+        #[arg(long, default_value = "42")]
+        seed: u64,
+
+        /// Sample names whose data should be resampled
+        #[arg(short, long, num_args=1.., required = true)]
+        samples: Vec<String>,
+    },
 }

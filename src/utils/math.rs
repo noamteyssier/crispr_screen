@@ -1,4 +1,7 @@
+use anyhow::Result;
 use ndarray::{Array1, Array2, Axis};
+use rand::Rng;
+use rand_distr::{Binomial, Distribution};
 use std::ops::{Div, Sub};
 
 /// Z-Score Transforms the Provided Array
@@ -30,6 +33,38 @@ pub fn weighted_geometric_mean(m: &Array2<f64>, weights: &Array1<f64>) -> Array1
         weighted_sum[i] = ((row.mapv(|x| x.ln()) * weights).sum() / w_sum).exp();
     }
     weighted_sum
+}
+
+/// Use `rand_distr` to sample from a binomial distribution
+pub fn get_binomial<R: Rng>(probability: f64, n: u64, rng: &mut R) -> Result<u64> {
+    let result = Binomial::new(n, probability)?;
+    let sample = result.sample(rng);
+    Ok(sample)
+}
+
+/// Homespun implementation of multinomial distribution using `rand_distr` binomial distribution
+/// for use of BTPE algorithm.
+///
+/// See discussion: https://github.com/statrs-dev/statrs/issues/183#issuecomment-2270083559
+pub fn get_multinomial<R: Rng>(pix: &[f64], n: u64, rng: &mut R) -> Result<Vec<u64>> {
+    let mut remaining_p = 1.0;
+    let mut dn = n;
+    let mut mnix = vec![0; pix.len()];
+    let size_of_pvec = pix.len();
+
+    for i in 0..size_of_pvec - 1 {
+        let binomial = get_binomial(pix[i] / remaining_p, dn, rng)?;
+        mnix[i] = binomial;
+        dn -= binomial;
+        if dn == 0 {
+            break;
+        }
+        remaining_p -= pix[i];
+    }
+    if dn > 0 {
+        mnix[size_of_pvec - 1] = dn;
+    }
+    Ok(mnix)
 }
 
 #[cfg(test)]

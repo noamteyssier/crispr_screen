@@ -7,7 +7,6 @@ use cli::{
     SgrnaColumns,
 };
 use geopagg::WeightConfig;
-use regex::Regex;
 use run_aggregation::run_aggregation;
 use std::path::Path;
 
@@ -18,12 +17,14 @@ pub mod enrich;
 pub mod io;
 pub mod model;
 pub mod norm;
+pub mod resample;
 pub mod run_aggregation;
 pub mod utils;
 
 use aggregation::{GeneAggregation, GeneAggregationSelection, GeoPAGGWeightConfigEnum};
 use differential_expression::mageck;
-use io::load_dataframe;
+use io::{build_regex_set, load_dataframe};
+use resample::resample;
 use utils::{config::Configuration, logging::Logger, Adjustment};
 
 #[builder]
@@ -118,16 +119,8 @@ fn test(
         .build();
     let frame = load_dataframe(path.clone().into())?;
 
-    let mut regex_controls = vec![];
-    let mut regex_treatments = vec![];
-    for label in input_args.controls {
-        let regex = Regex::new(&label)?;
-        regex_controls.push(regex);
-    }
-    for label in input_args.treatments {
-        let regex = Regex::new(&label)?;
-        regex_treatments.push(regex);
-    }
+    let regex_controls = build_regex_set(&input_args.controls)?;
+    let regex_treatments = build_regex_set(&input_args.treatments)?;
 
     let mageck_results = mageck(
         &frame,
@@ -279,6 +272,19 @@ fn main() -> Result<()> {
             .inc(inc)
             .geopagg(geopagg)
             .misc(misc)
+            .call(),
+        Commands::Resample {
+            input,
+            output,
+            n_resamples,
+            seed,
+            samples,
+        } => resample()
+            .input(input)
+            .maybe_path(output)
+            .n_resamples(n_resamples)
+            .seed(seed)
+            .samples(samples)
             .call(),
     }
 }
