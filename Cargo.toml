@@ -25,7 +25,7 @@ rayon = "1.8.1"
 regex = "1.10.3"
 statrs = "0.17.1"
 geopagg = "0.2.4"
-polars = { version = "0.42.0", default-features = false, features = ["csv"] }
+polars = { version = "0.43.1", default-features = false, features = ["csv"] }
 getset = "0.1.2"
 bon = "2.1.1"
 rand_chacha = "0.3.1"
