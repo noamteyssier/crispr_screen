@@ -2,12 +2,11 @@ use crate::{
     aggregation::GeneAggregation, enrich::TestStrategy, model::ModelChoice, norm::Normalization,
 };
 use adjustp::Procedure;
-use bon::builder;
+use bon::{builder, Builder};
 use getset::Getters;
 
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, Builder)]
 #[getset(get = "pub")]
-#[builder]
 pub struct Configuration<'a> {
     #[builder(default)]
     normalization: Normalization,
