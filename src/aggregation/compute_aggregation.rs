@@ -8,12 +8,12 @@ use crate::{
 };
 use adjustp::Procedure;
 use alpha_rra::AlphaRRA;
-use bon::{bon, builder};
+use bon::{bon, Builder};
 use geopagg::{GeoPAGG, TransformConfig, WeightConfig};
 use intc::{fdr::Direction, Inc};
 use ndarray::Array1;
 
-#[builder]
+#[derive(Builder)]
 struct RunAggregation<'a> {
     pvalue_low: &'a Array1<f64>,
     pvalue_high: &'a Array1<f64>,

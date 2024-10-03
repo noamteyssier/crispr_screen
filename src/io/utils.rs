@@ -33,7 +33,7 @@ pub fn match_headers_from_regex_set(
             headers
                 .iter()
                 .filter(|x| match re.captures(x) {
-                    Some(c) => &c.get(0).unwrap().as_str() == *x,
+                    Some(c) => &c.get(0).unwrap().as_str() == **x,
                     None => false,
                 })
                 .map(|y| y.to_string())
