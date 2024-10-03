@@ -54,7 +54,8 @@ fn loop_resample(
     let mut resamples = vec![];
     for idx in 0..n_resamples {
         let resample = resample_counts(dirichlet, total, rng)?;
-        let series = Series::new(&format!("resample_{idx}"), resample);
+        let resample_name = format!("resample_{idx}");
+        let series = Series::new(resample_name.into(), resample);
         resamples.push(series);
     }
     Ok(resamples)
