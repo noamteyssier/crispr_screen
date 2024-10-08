@@ -1,6 +1,6 @@
 [package]
 name = "crispr_screen"
-version = "0.3.16"
+version = "0.3.17"
 edition = "2021"
 description = "A fast and configurable differential expression analysis tool for CRISPR screens"
 license = "MIT"
@@ -12,7 +12,7 @@ categories = ["command-line-utilities", "science"]
 
 [dependencies]
 adjustp = "0.1.6"
-alpha-rra = "0.3.2"
+alpha-rra = "0.3.3"
 anyhow = "1.0.89"
 clap = { version = "4.5.19", features = ["derive"] }
 colored = "2.1.0"
