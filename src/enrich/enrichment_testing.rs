@@ -54,6 +54,12 @@ fn set_zero_to_minimum(array: &Array1<f64>, minimum: f64) -> Array1<f64> {
     array.map(|x| if *x == 0. { minimum } else { *x })
 }
 
+/// Sets all values in an array equal to 0.0 to the minimum nonzero value in the array
+fn set_zero_to_minimum_nonzero(array: &Array1<f64>) -> Array1<f64> {
+    let minimum = get_nonzero_minimum(array);
+    set_zero_to_minimum(array, minimum)
+}
+
 /// Calculates the median of each row in an array
 fn row_median(array: &Array2<f64>) -> Array1<f64> {
     array.map_axis(Axis(1), |x| median(&x))
@@ -160,8 +166,7 @@ pub fn median_enrichment_testing(
     let treatment_means = row_median(&select_treatments(normed_matrix, n_controls));
 
     // Adjust the control means to ensure that all values are greater than 0.0
-    let min_control_mean = get_nonzero_minimum(&control_means);
-    let adj_control_means = set_zero_to_minimum(&control_means, min_control_mean);
+    let adj_control_means = set_zero_to_minimum_nonzero(&control_means);
 
     // Calculate the negative binomial parameters
     let param_r = calculate_r(&adj_control_means, adj_var);
@@ -170,6 +175,10 @@ pub fn median_enrichment_testing(
     // Perform the enrichment test
     let low = map_enrichment(&treatment_means, &param_r, &param_p, false);
     let high = map_enrichment(&treatment_means, &param_r, &param_p, true);
+
+    // Adjust p-values to set zeros to the minimum non-zero value
+    let low = set_zero_to_minimum_nonzero(&low);
+    let high = set_zero_to_minimum_nonzero(&high);
 
     EnrichmentResult::new(low, high, control_means, treatment_means, correction)
 }
