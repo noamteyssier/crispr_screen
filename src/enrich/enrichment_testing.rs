@@ -331,4 +331,12 @@ mod testing {
             .zip(result.iter())
             .for_each(|(e, r)| assert!((e - r).abs() < 1e-08));
     }
+
+    #[test]
+    fn test_set_zero_to_minimum_nonzero() {
+        let x = ndarray::arr1(&[1., 2., 3., 0., 0., 1.]);
+        let expected = ndarray::arr1(&[1., 2., 3., 1., 1., 1.]);
+        let result = super::set_zero_to_minimum_nonzero(&x);
+        assert_eq!(result, expected);
+    }
 }
