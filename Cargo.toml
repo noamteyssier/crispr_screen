@@ -23,7 +23,7 @@ ndarray-rand = "0.15.0"
 ndarray-stats = "0.6.0"
 rayon = "1.10.0"
 regex = "1.11.0"
-statrs = "0.17.1"
+statrs = "0.18.0"
 geopagg = "0.2.9"
 polars = { version = "0.43.1", default-features = false, features = ["csv"] }
 getset = "0.1.3"
