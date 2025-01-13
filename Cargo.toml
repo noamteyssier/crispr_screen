@@ -15,7 +15,7 @@ adjustp = "0.1.6"
 alpha-rra = "0.3.3"
 anyhow = "1.0.89"
 clap = { version = "4.5.19", features = ["derive"] }
-colored = "2.1.0"
+colored = "3.0.0"
 hashbrown = "0.15.0"
 intc = "0.3.6"
 ndarray = "0.16.1"
