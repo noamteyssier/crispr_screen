@@ -48,7 +48,7 @@ pub fn run_aggregation(
         logger,
         *config.correction(),
         *config.seed(),
-    );
+    )?;
 
     // Write outputs
     write_gene_frame(&aggregation_results, config.prefix())?;

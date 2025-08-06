@@ -8,9 +8,11 @@ use crate::{
 };
 use adjustp::Procedure;
 use alpha_rra::AlphaRRA;
+use anyhow::{Context, Result};
 use bon::{bon, Builder};
 use geopagg::{GeoPAGG, TransformConfig, WeightConfig};
 use intc::{fdr::Direction, Inc};
+use log::debug;
 use ndarray::Array1;
 
 #[derive(Builder)]
@@ -31,7 +33,7 @@ impl<'a> RunAggregation<'a> {
         adjust_alpha: bool,
         npermutations: usize,
         correction: Procedure,
-    ) -> InternalAggregationResult {
+    ) -> Result<InternalAggregationResult> {
         let (alpha_low, alpha_high) =
             set_alpha_threshold(self.pvalue_low, self.pvalue_high, alpha, adjust_alpha);
         self.logger
@@ -53,7 +55,7 @@ impl<'a> RunAggregation<'a> {
         self.logger.permutation_sizes(&permutation_sizes_low);
         let result_low = alpha_rra_low
             .run(self.pvalue_low)
-            .expect("Error in RRA fit for depleted pvalues");
+            .context("Error in RRA fit for depleted pvalues")?;
 
         // Calculates the RRA score for the enriched pvalues
         let alpha_rra_high = AlphaRRA::new(
@@ -71,7 +73,7 @@ impl<'a> RunAggregation<'a> {
         self.logger.permutation_sizes(&permutation_sizes_high);
         let result_high = alpha_rra_high
             .run(self.pvalue_high)
-            .expect("Error in RRA fit for enriched pvalues");
+            .context("Error in RRA fit for enriched pvalues")?;
 
         let gene_fc_hashmap = aggregate_fold_changes(self.gene_names, self.logfc);
         let gene_fc = result_low
@@ -81,7 +83,7 @@ impl<'a> RunAggregation<'a> {
             .copied()
             .collect();
 
-        InternalAggregationResult::builder()
+        Ok(InternalAggregationResult::builder()
             .genes(result_low.names().to_vec())
             .logfc(gene_fc)
             .scores_low(result_low.scores().to_owned())
@@ -90,7 +92,7 @@ impl<'a> RunAggregation<'a> {
             .scores_high(result_high.scores().to_owned())
             .pvalues_high(result_high.pvalues().to_owned())
             .correction_high(result_high.adj_pvalues().to_owned())
-            .build()
+            .build())
     }
 
     #[builder]
@@ -102,7 +104,7 @@ impl<'a> RunAggregation<'a> {
         n_draws: usize,
         num_genes: usize,
         use_product: bool,
-    ) -> InternalAggregationResult {
+    ) -> Result<InternalAggregationResult> {
         self.logger.report_inc_params(
             token,
             num_genes,
@@ -133,7 +135,7 @@ impl<'a> RunAggregation<'a> {
             Some(self.seed),
         )
         .fit()
-        .expect("Error calculating INC on low pvalues");
+        .context("Error calculating INC on low pvalues")?;
         self.logger
             .report_inc_low_threshold(result_low.threshold(), use_product);
 
@@ -152,13 +154,13 @@ impl<'a> RunAggregation<'a> {
             Some(self.seed),
         )
         .fit()
-        .expect("Error calculating INC on high pvalues");
+        .context("Error calculating INC on high pvalues")?;
         self.logger
             .report_inc_high_threshold(result_high.threshold(), use_product);
 
         self.logger.report_inc_ntc_std(result_low.null_stddev());
 
-        InternalAggregationResult::builder()
+        Ok(InternalAggregationResult::builder()
             .genes(result_low.genes().to_vec())
             .logfc(result_low.logfc().to_owned())
             .scores_low(result_low.u_scores().to_owned())
@@ -169,7 +171,7 @@ impl<'a> RunAggregation<'a> {
             .correction_high(result_high.fdr().to_owned())
             .threshold_low(result_low.threshold())
             .threshold_high(result_high.threshold())
-            .build()
+            .build())
     }
 
     #[builder]
@@ -180,10 +182,11 @@ impl<'a> RunAggregation<'a> {
         fdr: f64,
         use_product: bool,
         zscore_threshold: Option<f64>,
-    ) -> InternalAggregationResult {
+    ) -> Result<InternalAggregationResult> {
         self.logger
             .report_geopagg_params(token, fdr, weight_config, self.seed as usize);
 
+        debug!("Building geopagg for depletions");
         let geo_low = GeoPAGG::builder()
             .pvalues(self.pvalue_low.as_slice().unwrap())
             .logfc(self.logfc.as_slice().unwrap())
@@ -197,6 +200,7 @@ impl<'a> RunAggregation<'a> {
             .maybe_zscore_threshold(zscore_threshold)
             .build();
 
+        debug!("Building geopagg for enrichments");
         let geo_high = GeoPAGG::builder()
             .pvalues(self.pvalue_high.as_slice().unwrap())
             .logfc(self.logfc.as_slice().unwrap())
@@ -210,10 +214,13 @@ impl<'a> RunAggregation<'a> {
             .maybe_zscore_threshold(zscore_threshold)
             .build();
 
-        let geo_low_results = geo_low.run();
-        let geo_high_results = geo_high.run();
+        debug!("Running geopagg for depletions");
+        let geo_low_results = geo_low.run()?;
 
-        InternalAggregationResult::builder()
+        debug!("Running geopagg for enrichments");
+        let geo_high_results = geo_high.run()?;
+
+        Ok(InternalAggregationResult::builder()
             .genes(geo_low_results.genes.to_vec())
             .logfc(Array1::from(geo_low_results.logfcs))
             .scores_low(Array1::from(geo_low_results.empirical_fdr))
@@ -224,7 +231,7 @@ impl<'a> RunAggregation<'a> {
             .correction_high(Array1::from(geo_high_results.adjusted_empirical_fdr))
             .threshold_low(fdr)
             .threshold_high(fdr)
-            .build()
+            .build())
     }
 }
 
@@ -279,7 +286,7 @@ pub fn compute_aggregation(
     logger: &Logger,
     correction: Procedure,
     seed: u64,
-) -> AggregationResult {
+) -> Result<AggregationResult> {
     logger.start_gene_aggregation();
 
     let num_genes = num_unique(gene_names);
@@ -351,7 +358,7 @@ pub fn compute_aggregation(
             .use_product(*use_product)
             .maybe_zscore_threshold(*zscore_threshold)
             .call(),
-    };
+    }?;
 
     let fold_change = agg_result
         .logfc
@@ -359,7 +366,7 @@ pub fn compute_aggregation(
         .map(|x| x.exp2())
         .collect::<Array1<f64>>();
 
-    AggregationResult::builder()
+    Ok(AggregationResult::builder()
         .genes(agg_result.genes)
         .gene_fc(fold_change)
         .pvalues_low(agg_result.pvalues_low)
@@ -370,5 +377,5 @@ pub fn compute_aggregation(
         .aggregation_score_high(agg_result.scores_high)
         .maybe_threshold_low(agg_result.threshold_low)
         .maybe_threshold_high(agg_result.threshold_high)
-        .build()
+        .build())
 }

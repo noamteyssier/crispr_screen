@@ -85,7 +85,7 @@ pub fn mageck(
             logger,
             *config.correction(),
             *config.seed(),
-        );
+        )?;
 
         // Build Gene DataFrame
         write_gene_frame(&aggregation_results, config.prefix())?;
