@@ -7,8 +7,9 @@ use cli::{
     SgrnaColumns,
 };
 use geopagg::WeightConfig;
+use log::LevelFilter;
 use run_aggregation::run_aggregation;
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
 pub mod aggregation;
 pub mod cli;
@@ -232,6 +233,13 @@ fn aggregate(
 
 fn main() -> Result<()> {
     let args = Cli::parse();
+
+    env_logger::builder()
+        .format_timestamp_secs()
+        .filter_level(LevelFilter::Info)
+        .parse_env("CRISPR_SCREEN_LOG")
+        .init();
+
     match args.command {
         Commands::Test {
             input,
