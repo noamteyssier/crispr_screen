@@ -9,7 +9,7 @@ use cli::{
 use geopagg::WeightConfig;
 use log::LevelFilter;
 use run_aggregation::run_aggregation;
-use std::{path::Path, str::FromStr};
+use std::path::Path;
 
 pub mod aggregation;
 pub mod cli;
