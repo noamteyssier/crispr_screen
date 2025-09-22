@@ -87,7 +87,7 @@ impl Screenviz {
                 use_product,
             } => {
                 if *use_product {
-                    "phenotype_score".to_string()
+                    "gene_score".to_string()
                 } else {
                     "pvalue".to_string()
                 }
@@ -309,7 +309,7 @@ mod testing {
         assert_eq!(screenviz.gene, "gene");
         assert_eq!(screenviz.x, "log_fold_change");
         assert_eq!(screenviz.y, "pvalue");
-        assert_eq!(screenviz.z, "phenotype_score");
+        assert_eq!(screenviz.z, "gene_score");
         assert_eq!(screenviz.threshold, None);
         assert_eq!(screenviz.threshold_low, Some(-0.5));
         assert_eq!(screenviz.threshold_high, Some(0.5));

@@ -20,7 +20,7 @@ fn build_gene_frame(results: &AggregationResult) -> Result<DataFrame, PolarsErro
         "fdr_high" => results.fdr_high().to_vec(),
         "pvalue" => results.pvalue().to_vec(),
         "fdr" => results.fdr().to_vec(),
-        "phenotype_score" => results.phenotype_score().to_vec(),
+        "gene_score" => results.gene_score().to_vec(),
     )
 }
 
@@ -52,10 +52,10 @@ pub fn write_hit_list(
         } => {
             if *use_product {
                 let low_mask = df
-                    .column("phenotype_score")?
+                    .column("gene_score")?
                     .lt(results.threshold_low().unwrap())?;
                 let high_mask = df
-                    .column("phenotype_score")?
+                    .column("gene_score")?
                     .gt(results.threshold_high().unwrap())?;
                 let mask = low_mask | high_mask;
                 df.filter(&mask)

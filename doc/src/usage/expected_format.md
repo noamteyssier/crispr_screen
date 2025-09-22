@@ -74,7 +74,7 @@ table whose columns are of the following form:
 | **fdr_high** | The false discovery rate for an enrichment of the gene. |
 | **pvalue** | The minimum pvalue observed with either test. |
 | **fdr** | The minimum false discovery rate observed with either test. |
-| **phenotype_score** | The -log10 FDR multiplied by the log2 fold change of the gene. |
+| **gene_score** | The -log10 FDR multiplied by the log2 fold change of the gene. |
 
 > Note: If you ran `crispr_screen` with `INC`
 >
@@ -93,5 +93,5 @@ table whose columns are of the following form:
 | **gene** | The gene name provided in the second column of the `count_table`. |
 | **log2fc** | The log2 aggregated fold change of the treatment from the controls. |
 | **pvalue** | The minimum p-value observed in the aggregation test (minimum of both sides). |
-| **phenotype_score** | The product of the `log2fc` and the `-log10(pvalue)`. |
+| **gene_score** | The product of the `log2fc` and the `-log10(pvalue)`. |
 | **fdr** | The calculated false discovery rate (only shown if running $\alpha$-RRA). |

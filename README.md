@@ -25,6 +25,11 @@ command
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+```bash
+# If you already have rust installed make sure to update it
+rustup update
+```
+
 ### Installing CRISPR Screen
 
 ```bash

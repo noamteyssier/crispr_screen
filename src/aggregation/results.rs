@@ -13,7 +13,7 @@ pub struct AggregationResult {
     fdr_high: Array1<f64>,
     pvalue: Array1<f64>,
     fdr: Array1<f64>,
-    phenotype_score: Array1<f64>,
+    gene_score: Array1<f64>,
     threshold_low: Option<f64>,
     threshold_high: Option<f64>,
 }
@@ -35,7 +35,7 @@ impl AggregationResult {
         let pvalue = Self::select_pvalue(&pvalues_low, &pvalues_high);
         let fdr = Self::select_fdr(&fdr_low, &fdr_high);
         let gene_log2_fc = Self::calculate_log_fold_change(&gene_fc);
-        let phenotype_score = Self::calculate_phenotype_score(&pvalue, &gene_log2_fc);
+        let gene_score = Self::calculate_gene_score(&pvalue, &gene_log2_fc);
         Self {
             genes,
             gene_fc,
@@ -48,7 +48,7 @@ impl AggregationResult {
             fdr_high,
             pvalue,
             fdr,
-            phenotype_score,
+            gene_score,
             threshold_low,
             threshold_high,
         }
@@ -70,7 +70,7 @@ impl AggregationResult {
         gene_fc.mapv(f64::log2)
     }
 
-    fn calculate_phenotype_score(fdr: &Array1<f64>, gene_log2_fc: &Array1<f64>) -> Array1<f64> {
+    fn calculate_gene_score(fdr: &Array1<f64>, gene_log2_fc: &Array1<f64>) -> Array1<f64> {
         Zip::from(fdr)
             .and(gene_log2_fc)
             .map_collect(|fdr, gene_log2_fc| {
@@ -123,8 +123,8 @@ impl AggregationResult {
         &self.fdr
     }
 
-    pub fn phenotype_score(&self) -> &Array1<f64> {
-        &self.phenotype_score
+    pub fn gene_score(&self) -> &Array1<f64> {
+        &self.gene_score
     }
 
     pub fn threshold_low(&self) -> Option<f64> {
@@ -177,7 +177,7 @@ mod testing {
         assert_eq!(result.pvalue(), &Array1::from(vec![0.1, 0.2]));
         assert_eq!(result.fdr(), &Array1::from(vec![0.5, 0.2]));
         assert_eq!(
-            result.phenotype_score(),
+            result.gene_score(),
             &Array1::from(vec![0.0, 0.6989700043360187])
         );
     }
